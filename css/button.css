@@ -1,0 +1,45 @@
+.btn {
+    border: none;
+    border-radius: 5px;
+    outline: none;
+    padding: 5px 10px;
+    height: 30px;
+    cursor: pointer;
+}
+
+.btn:active {
+    transform: scale(0.99);
+}  
+
+.btn-default:hover {
+    box-shadow: 0 0 1px 1px gray;
+}
+
+.btn-trans {
+    background: none;
+    border: 1px solid snow;
+    color: snow;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-trans:hover {
+    background-color: snow;
+    color: black;
+}
+
+.btn-primary {
+    background-color: #0984e3;
+    color: snow;
+}
+
+.btn-primary:hover {
+    background-color: #0652DD;
+    /* Dutch MERCHANT MARINE BLUE */
+    box-shadow: 0 0 5px 0 #0652DD;
+    text-shadow: 0 0 1px whitesmoke;
+}
+
+.btn-primary:active {
+    box-shadow: 0 0 2px 1px #0652DD;
+    color: #ecf0f1;
+}

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TreeVisualizer - Nitromelon</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        * {
+            -webkit-touch-callout: none;
+            /*系统默认菜单被禁用*/
+            -webkit-user-select: none;
+            /*webkit浏览器*/
+            -khtml-user-select: none;
+            /*早期浏览器*/
+            -moz-user-select: none;
+            /*火狐*/
+            -ms-user-select: none;
+            /*IE10*/
+            user-select: none;
+        }
+
+        :root {
+            --normal-inner-h: 40px;
+            --normal-outer-h: 60px;
+            --normal-inner-w: 40px;
+            --normal-outer-w: 60px;
+            --normal-font-size: 25px;
+            --normal-numcolor: rgb(55, 66, 250);
+            --normal-bdcolor: rgb(55, 66, 250);
+            --normal-bgcolor: white;
+            --normal-edgecolor: black;
+            --normal-bdwidth: 3px;
+            --normal-edgewidth: 3px;
+        }
+
+        .tree {
+            position: absolute;
+            left: 50%;
+            top: 300px;
+            transform: translate(-50%, -50%);
+        }
+
+        .active-node {
+            color: red !important;
+            border-color: red !important;
+        }
+
+        .binnode {
+            display: inline-block;
+            white-space: nowrap;
+            ;
+            position: absolute;
+            min-width: var(--normal-outer-w);
+            height: var(--normal-outer-h);
+            line-height: var(--normal-inner-h);
+            padding: 7px;
+            border-width: var(--normal-bdwidth);
+            border-style: solid;
+            border-radius: 10px;
+            border-color: var(--normal-bdcolor);
+            /* 居中 */
+            transform: translate(-50%, -50%);
+            font-family: "Arial", "Microsoft YaHei", "黑体", "宋体", sans-serif;
+            font-size: var(--normal-font-size);
+            font-weight: bold;
+            text-align: center;
+            text-shadow: var(--normal-numcolor);
+            background-color: var(--normal-bgcolor);
+            color: var(--normal-numcolor);
+            z-index: 1;
+        }
+
+        .extr-binnode {
+            opacity: 0.1;
+        }
+
+        .extr-binnode:hover {
+            opacity: 0.5;
+            z-index: 2;
+        }
+
+        .extr-binnode-input {
+            min-width: var(--normal-inner-w);
+            height: var(--normal-inner-h);
+            border: none;
+            outline: none;
+            text-align: center;
+            line-height: var(--normal-inner-h);
+            font-size: var(--normal-font-size);
+        }
+
+        .left-edge {
+            position: absolute;
+            border-width: var(--normal-edgewidth) 0 0 var(--normal-edgewidth);
+            border-style: solid;
+            border-color: var(--normal-edgecolor);
+            border-radius: 3px;
+            z-index: -1;
+        }
+
+        .right-edge {
+            position: absolute;
+            border-width: var(--normal-edgewidth) var(--normal-edgewidth) 0 0;
+            border-style: solid;
+            border-color: var(--normal-edgecolor);
+            border-radius: 3px;
+            z-index: -1;
+        }
+
+        .extr-edge {
+            opacity: 0.1;
+        }
+    </style>
+    <link href="./css/button.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="TV">
+        <input v-model.number="newRoot" style="width: 40px">
+        <button class="btn btn-primary" type="button" @click="loadEmptyTree">Clear</button>
+        <button class="btn btn-primary" type="button" @click="loadDefaultTree">Reset</button>
+        <button class="btn btn-primary" type="button" @click="Traversal(0)">Preorder Traversal</button>
+        <button class="btn btn-primary" type="button" @click="Traversal(1)">Inorder Traversal</button>
+        <button class="btn btn-primary" type="button" @click="Traversal(2)">Postorder Traversal</button>
+        <label>Traversal Interval:</label>
+        <input type="number" v-model.number="optionInterval">
+        <div class="tree">
+            <binnode :class="{'active-node': node.active}" v-for="(node, ind) in nodes" :node="node"
+                :key="'node' + ind">
+            </binnode>
+            <extr-binnode v-for="(node, ind) in extrNodes" :node="node" @extr-insert="onExtrInsert($event)"
+                :key="'extNode' + ind">
+            </extr-binnode>
+            <div class="left-edge" v-for="e in edges[0]"
+                :style="{'left': e[0]+'px', 'top': e[1]+'px', 'width': e[2]+'px', 'height': e[3]+'px'}"></div>
+            <div class="right-edge" v-for="e in edges[1]"
+                :style="{'left': e[0]+'px', 'top': e[1]+'px', 'width': e[2]+'px', 'height': e[3]+'px'}"></div>
+            <div class="left-edge extr-edge" v-for="e in extrEdges[0]"
+                :style="{'left': e[0]+'px', 'top': e[1]+'px', 'width': e[2]+'px', 'height': e[3]+'px'}"></div>
+            <div class="right-edge extr-edge" v-for="e in extrEdges[1]"
+                :style="{'left': e[0]+'px', 'top': e[1]+'px', 'width': e[2]+'px', 'height': e[3]+'px'}"></div>
+        </div>
+    </div>
+</body>
+
+<script src="./js/vue.js"></script>
+<script src="./js/jquery-3.4.1.js"></script>
+<script src="./js/cycle.js"></script>
+<script src="./vue/components.vue"></script>
+<script src="./js/BinTree.js"></script>
+
+<script>
+    var vm = new Vue({
+        el: "#TV",
+        data: {
+            newRoot: 0,
+            tree: null,
+            nodes: [],
+            extrNodes: [],
+            edges: [[], []],
+            extrEdges: [[], []],
+            optionInterval: 500,
+            optionLock: false,
+        },
+        methods: {
+            init() {
+                console.log(localStorage);
+                if (localStorage.binTreeInStorage) {
+                    console.log("Recover tree from localStorage.")
+                    try {
+                        this.tree = buildFromTreeJsonObj(JSON.retrocycle(JSON.parse(localStorage.binTreeInStorage)));
+                        this.tree.root();
+                    } catch (err) {
+                        console.log(err);
+                        this.loadDefaultTree();
+                    }
+                }
+                else {
+                    this.loadDefaultTree();
+                    console.log("Load default tree.")
+                }
+            },
+            update() {
+                let structInfo = this.tree.calStructInfo()
+                this.nodes = structInfo.nodes;
+                this.edges = structInfo.edges;
+                this.extrNodes = structInfo.extrNodes;
+                this.extrEdges = structInfo.extrEdges;
+                this.saveBinTree();
+            },
+            loadEmptyTree() {
+                this.tree = new BinTree(this.newRoot);
+            },
+            loadDefaultTree() {
+                this.tree = __SampleBinTree;
+            },
+            saveBinTree() {
+                localStorage.binTreeInStorage = JSON.stringify(JSON.decycle(this.tree));
+            },
+            onExtrInsert(args) {
+                console.log('insert');
+                let node = args[0];
+                let insertion = args[1];
+                if (node.is_lc)
+                    this.tree.insertAsLC(node.parent, insertion);
+                else
+                    this.tree.insertAsRC(node.parent, insertion);
+            },
+            Traversal(method) {
+                if (this.optionLock) return false;
+                this.optionLock = true;
+                let sequence;
+                if (method === 0)
+                    sequence = preorderTraversal(this.tree.root());
+                else if (method == 1)
+                    sequence = inorderTraversal(this.tree.root());
+                else
+                    sequence = postorderTraversal(this.tree.root());
+                this.printSequenceAsyc(sequence, this.optionInterval);
+            },
+            printSequenceAsyc(sequence, interval) {
+                if (sequence.length == 0) {
+                    this.optionLock = false;
+                    return;
+                }
+                let x = sequence.shift();
+                x.active = true;
+                setTimeout(() => {
+                    x.active = false;
+                    this.printSequenceAsyc(sequence, interval);
+                }, interval);
+            }
+        },
+        watch: {
+            tree: {
+                handler(oldV, newV) {
+                    console.log("change");
+                    this.update();
+                },
+                deep: true,
+            }
+        },
+        mounted() {
+            this.init();
+            this.update();
+        },
+    })
+
+</script>
+
+</html>
