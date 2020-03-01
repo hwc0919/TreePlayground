@@ -5,12 +5,12 @@ Vue.component('binnode', {
         return { showInput: false, updation: this.node.data }
     },
     template:
-        `<div class="binnode intr-binnode" :style="{'left': node.x + 'px', 'top': node.y + 'px'}">
-            <span v-show="!showInput" style="display: inline-block; width: 100%; height: 100%;" @click="showInput = true">{{ node.data }}</span>
+        `<div class="binnode intr-binnode" :style="{'left': node.x + 'px', 'top': node.y + 'px'}" @click="divOnClick">
+            <span v-show="!showInput" style="display: inline-block; width: 100%; height: 100%;">{{ node.data }}</span>
             <label type="button" class="subtree-delete-btn delete-btn" title="remove below"
-                @click="$emit('remove-below', node)">x</label>
+                @click.stop="$emit('remove-below', node)">x</label>
             <label type="button" class="node-delete-btn delete-btn" title="remove one">x</label>
-            <binnode-input v-show="showInput" v-model="updation" @blur.native="showInput = false" @keyup.enter.native="intrUpdateData($event)">
+            <binnode-input ref="input" v-show="showInput" v-model="updation" @blur.native="inputOnBlur" @keyup.enter.native="intrUpdateData($event)">
             </binnode-input>
         </div>`,
     methods: {
@@ -21,6 +21,19 @@ Vue.component('binnode', {
             this.node.data = this.updation;
             this.$parent.update();
             e.srcElement.blur();   // force lose focus
+        },
+        divOnClick() {
+            if (this.showInput === true) return false;
+            this.showInput = true;
+            let width = this.$el.offsetWidth;
+            setTimeout(() => {
+                this.$refs.input.$el.focus();
+                this.$refs.input.width = width - 20;
+            }, 1);
+        },
+        inputOnBlur() {
+            this.showInput = false;
+            this.updation = this.node.data;
         }
     }
 });

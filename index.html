@@ -43,13 +43,13 @@
 </body>
 
 <script src="./js/vue.js"></script>
-<script src="./js/jquery-3.4.1.js"></script>
 <script src="./js/cycle.js"></script> <!-- provides JSON.decycle, JSON.retrocycle -->
 <script src="./vue/components.vue"></script>
 <script src="./js/BinTree.js"></script>
 <script src="./js/Deque.js"></script>
 
 <script>
+    var ttt;
     var vm = new Vue({
         el: "#TreePlayground",
         data: {
@@ -149,13 +149,13 @@
             }
         },
         watch: {
-            // tree: {
-            //     handler(oldV, newV) {
-            //         // console.log("change");
-            //         // this.update();
-            //     },
-            //     // deep: true,
-            // }
+            tree: {
+                handler(oldV, newV) {
+                    console.log("Detect Change in tree.");
+                    // this.update();
+                },
+                // deep: true,
+            }
         },
         mounted() {
             this.init();
