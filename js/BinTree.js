@@ -5,7 +5,7 @@ var RBColor;
 })(RBColor || (RBColor = {}));
 ;
 var BinNode = /** @class */ (function () {
-    function BinNode(e, p, lc, rc, height, npl, c, nid) {
+    function BinNode(e, p, lc, rc, height, npl, c) {
         if (e === void 0) { e = null; }
         if (p === void 0) { p = null; }
         if (lc === void 0) { lc = null; }
@@ -13,7 +13,6 @@ var BinNode = /** @class */ (function () {
         if (height === void 0) { height = 0; }
         if (npl === void 0) { npl = 0; }
         if (c === void 0) { c = RBColor.Red; }
-        if (nid === void 0) { nid = 0; }
         this.x = 0;
         this.y = 0;
         this.active = false;
@@ -24,7 +23,7 @@ var BinNode = /** @class */ (function () {
         this.height = height;
         this.npl = npl;
         this.color = c;
-        this.nid = nid;
+        this.nid = ++BinNode.N;
     }
     BinNode.prototype.size = function () {
         var s = 1;
@@ -40,6 +39,7 @@ var BinNode = /** @class */ (function () {
     BinNode.prototype.insertAsRC = function (e) {
         return this.rc = new BinNode(e, this);
     };
+    BinNode.N = 0;
     return BinNode;
 }());
 ;
@@ -82,14 +82,19 @@ var BinTree = /** @class */ (function () {
         return this._root;
     };
     // editable methods
-    BinTree.prototype.remove = function (x) {
+    BinTree.prototype.removeBelow = function (x) {
         var p = x.parent;
+        // x is not root
         if (p) {
             if (x == p.lc)
                 p.lc = null;
             else
                 p.rc = null;
+            this.update_height_above(p);
         }
+        else // delete root
+            this._root = null;
+        // update size
         this._size -= x.size();
         return x.size();
     };
@@ -125,20 +130,27 @@ var BinTree = /** @class */ (function () {
         var edges = [[], []];
         var extrNodes = [];
         var extrEdges = [[], []];
-        var stk = [];
+        var structInfo = { nodes: nodes, edges: edges, extrNodes: extrNodes, extrEdges: extrEdges };
+        // If emtpy tree
+        if (!this._root) {
+            extrNodes.push({ x: 0, y: 0, is_root: true });
+            return structInfo;
+        }
+        // Level order traversal and record structure info
+        var Q = new Deque();
         if (this._root)
-            stk.push(this._root);
-        while (stk.length > 0) {
-            var node = stk.pop();
+            Q.push(this._root);
+        while (!Q.empty()) {
+            var node = Q.shift();
             nodes.push(node);
+            //!!! Need to implement coordination calculation algorithm here
             var deltaX = Math.pow(2, (node.npl - 1)) * 80 + node.data.toString().length * 6;
-            // let deltaRCX = 2 ** (stature(node.rc)) * 80;
             var deltaY = 80;
             var nodeLCX = node.x - deltaX - (node.lc ? node.lc.data.toString().length * 6 : 0);
             var nodeRCX = node.x + deltaX + (node.rc ? node.rc.data.toString().length * 6 : 0);
             var nodeCY = node.y + deltaY;
             if (node.lc) {
-                stk.push(node.lc);
+                Q.push(node.lc);
                 node.lc.x = nodeLCX;
                 node.lc.y = nodeCY;
                 // left, top, width, height
@@ -151,7 +163,7 @@ var BinTree = /** @class */ (function () {
             if (node.rc) {
                 node.rc.x = nodeRCX;
                 node.rc.y = nodeCY;
-                stk.push(node.rc);
+                Q.push(node.rc);
                 edges[1].push([node.x, node.y, nodeRCX - node.x, deltaY - 29]);
             }
             else {
@@ -159,11 +171,24 @@ var BinTree = /** @class */ (function () {
                 extrEdges[1].push([node.x, node.y, nodeRCX - node.x, deltaY - 29]);
             }
         }
-        return { nodes: nodes, edges: edges, extrNodes: extrNodes, extrEdges: extrEdges };
+        // Return structure info object
+        return structInfo;
     };
     return BinTree;
 }());
+// A sample binary tree
 var __SampleBinTree = (function () {
+    var tree = new BinTree("Help");
+    var a = tree.insertAsLC(tree.root(), "me");
+    tree.insertAsLC(a, "this");
+    tree.insertAsRC(a, "will");
+    a = tree.insertAsRC(tree.root(), "improve");
+    tree.insertAsLC(a, "you");
+    tree.insertAsRC(a, "?");
+    return tree;
+})();
+// A sample binary search tree
+var __SampleBST = (function () {
     var tree = new BinTree(4);
     var a = tree.insertAsLC(tree.root(), 2);
     tree.insertAsLC(a, 1);
@@ -173,7 +198,10 @@ var __SampleBinTree = (function () {
     tree.insertAsRC(a, 7);
     return tree;
 })();
+// Build tree from JSON object retracted from LocalStorage
 function buildFromTreeJsonObj(treeObj) {
+    if (treeObj._root === null)
+        return new BinTree();
     var dataNode = treeObj._root;
     var tree = new BinTree(treeObj._root.data);
     var dataStk = [dataNode];

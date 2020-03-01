@@ -1,6 +1,5 @@
 enum RBColor { Red, Black };
 
-
 interface ITreeStructInfo<T> {
     nodes: Array<BinNode<T>>;
     edges: Array<Array<Array<number>>>;
@@ -13,7 +12,6 @@ interface ITreeJsonObj<T> {
     _size: number;
     [attrName: string]: any;
 }
-
 
 class BinNode<T> {
     data: T;
@@ -28,8 +26,10 @@ class BinNode<T> {
     y: number = 0;
     active: boolean = false;
 
+    static N: number = 0;
+
     constructor(e: T = null, p: BinNode<T> = null, lc: BinNode<T> = null, rc: BinNode<T> = null,
-        height: number = 0, npl: number = 0, c: RBColor = RBColor.Red, nid: number = 0) {
+        height: number = 0, npl: number = 0, c: RBColor = RBColor.Red) {
         this.data = e;
         this.parent = p;
         this.lc = lc;
@@ -37,7 +37,7 @@ class BinNode<T> {
         this.height = height;
         this.npl = npl;
         this.color = c;
-        this.nid = nid;
+        this.nid = ++BinNode.N;
     }
 
     public size(): number {
@@ -96,12 +96,16 @@ class BinTree<T> {
     }
 
     // editable methods
-    public remove(x: BinNode<T>): number {
+    public removeBelow(x: BinNode<T>): number {
         let p = x.parent;
+        // x is not root
         if (p) {
             if (x == p.lc) p.lc = null;
             else p.rc = null;
-        }
+            this.update_height_above(p);
+        } else  // delete root
+            this._root = null;
+        // update size
         this._size -= x.size();
         return x.size();
     }
@@ -137,20 +141,31 @@ class BinTree<T> {
         let edges = [[], []];
         let extrNodes = [];
         let extrEdges = [[], []];
-        let stk = [];
-        if (this._root) stk.push(this._root);
-        while (stk.length > 0) {
-            let node = stk.pop();
+        let structInfo = { nodes: nodes, edges: edges, extrNodes: extrNodes, extrEdges: extrEdges };
+
+        // If emtpy tree
+        if (!this._root) {
+            extrNodes.push({ x: 0, y: 0, is_root: true });
+            return structInfo;
+        }
+
+        // Level order traversal and record structure info
+        let Q = new Deque<BinNode<T>>();
+        if (this._root) Q.push(this._root);
+        while (!Q.empty()) {
+            let node = Q.shift();
             nodes.push(node);
+
+            //!!! Need to implement coordination calculation algorithm here
             let deltaX = 2 ** (node.npl - 1) * 80 + node.data.toString().length * 6;
-            // let deltaRCX = 2 ** (stature(node.rc)) * 80;
+
             let deltaY = 80;
 
             let nodeLCX = node.x - deltaX - (node.lc ? node.lc.data.toString().length * 6 : 0);
             let nodeRCX = node.x + deltaX + (node.rc ? node.rc.data.toString().length * 6 : 0);
             let nodeCY = node.y + deltaY;
             if (node.lc) {
-                stk.push(node.lc);
+                Q.push(node.lc);
                 node.lc.x = nodeLCX;
                 node.lc.y = nodeCY;
                 // left, top, width, height
@@ -162,19 +177,33 @@ class BinTree<T> {
             if (node.rc) {
                 node.rc.x = nodeRCX;
                 node.rc.y = nodeCY;
-                stk.push(node.rc);
+                Q.push(node.rc);
                 edges[1].push([node.x, node.y, nodeRCX - node.x, deltaY - 29]);
             } else {
                 extrNodes.push({ x: nodeRCX, y: nodeCY, parent: node, is_lc: false });
                 extrEdges[1].push([node.x, node.y, nodeRCX - node.x, deltaY - 29]);
             }
         }
-        return { nodes: nodes, edges: edges, extrNodes: extrNodes, extrEdges: extrEdges }
+
+        // Return structure info object
+        return structInfo;
     }
 }
 
-
+// A sample binary tree
 let __SampleBinTree = (function () {
+    let tree: BinTree<string> = new BinTree("Help");
+    let a: BinNode<string> = tree.insertAsLC(tree.root(), "me");
+    tree.insertAsLC(a, "this");
+    tree.insertAsRC(a, "will");
+    a = tree.insertAsRC(tree.root(), "improve");
+    tree.insertAsLC(a, "you");
+    tree.insertAsRC(a, "?");
+    return tree;
+})()
+
+// A sample binary search tree
+let __SampleBST = (function () {
     let tree = new BinTree(4);
     let a: BinNode<number> = tree.insertAsLC(tree.root(), 2);
     tree.insertAsLC(a, 1);
@@ -185,7 +214,11 @@ let __SampleBinTree = (function () {
     return tree;
 })()
 
+
+// Build tree from JSON object retracted from LocalStorage
 function buildFromTreeJsonObj<T>(treeObj: ITreeJsonObj<T>): BinTree<T> {
+    if (treeObj._root === null) return new BinTree<T>();
+
     let dataNode: BinNode<T> = treeObj._root;
     let tree: BinTree<T> = new BinTree<T>(treeObj._root.data);
     let dataStk: Array<BinNode<T>> = [dataNode];

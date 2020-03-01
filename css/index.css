@@ -1,0 +1,170 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    -webkit-touch-callout: none;
+    /*系统默认菜单被禁用*/
+    -webkit-user-select: none;
+    /*webkit浏览器*/
+    -khtml-user-select: none;
+    /*早期浏览器*/
+    -moz-user-select: none;
+    /*火狐*/
+    -ms-user-select: none;
+    /*IE10*/
+    user-select: none;
+}
+
+html {
+    font-size: 1px;
+}
+
+:root {
+    --normal-inner-h: 40rem;
+    --normal-outer-h: 60rem;
+    --normal-inner-w: 40rem;
+    --normal-outer-w: 60rem;
+    --normal-font-size: 25rem;
+    --normal-numcolor: rgb(55, 66, 250);
+    --normal-bdcolor: rgb(55, 66, 250);
+    --normal-bgcolor: white;
+    --normal-edgecolor: black;
+    --normal-bdwidth: 3rem;
+    --normal-edgewidth: 3rem;
+}
+
+
+#TreePlayground {
+    width: 100%;
+    height: 100%;
+}
+
+.top-tool-bar {
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    height: 80px    ;
+    width: 1000px;
+}
+
+.tree {
+    position: relative;
+    left: 50%;
+    margin-top: 50px;
+}
+
+.active-node {
+    color: red !important;
+    border-color: red !important;
+}
+
+.binnode {
+    display: inline-block;
+    white-space: nowrap;
+    position: absolute;
+    min-width: var(--normal-outer-w);
+    height: var(--normal-outer-h);
+    line-height: var(--normal-inner-h);
+    padding: 7rem;
+    border-width: var(--normal-bdwidth);
+    border-style: solid;
+    border-radius: 10rem;
+    border-color: var(--normal-bdcolor);
+    /* 居中 */
+    transform: translate(-50%, -50%);
+    font-family: "Arial", "Microsoft YaHei", "黑体", "宋体", sans-serif;
+    font-size: var(--normal-font-size);
+    font-weight: bold;
+    text-align: center;
+    text-shadow: var(--normal-numcolor);
+    background-color: var(--normal-bgcolor);
+    color: var(--normal-numcolor);
+    z-index: 1;
+}
+
+.extr-binnode {
+    z-index: 0;
+    opacity: 0.1;
+}
+
+.extr-binnode:hover {
+    opacity: 0.5;
+    z-index: 10;
+}
+
+.extr-binnode-input {
+    min-width: var(--normal-inner-w);
+    height: var(--normal-inner-h);
+    border: none;
+    outline: none;
+    text-align: center;
+    line-height: var(--normal-inner-h);
+    font-size: var(--normal-font-size);
+}
+
+.delete-btn {
+    position: absolute;
+    top: 0;
+    font-size: 15rem;
+    line-height: 15rem;
+    color: grey;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 3;
+}
+
+.binnode:hover .delete-btn {
+    opacity: 0.5;
+}
+
+.subtree-delete-btn {
+    right: 5rem;
+}
+
+.subtree-delete-btn:hover {
+    opacity: 1 !important;
+    color: red;
+}
+
+.subtree-delete-btn:active {
+    text-shadow: 0 0 1rem red;
+}
+
+.node-delete-btn {
+    left: 5rem;
+}
+
+.node-delete-btn:hover {
+    opacity: 1 !important;
+    color: blue;
+}
+
+.node-delete-btn:active {
+    text-shadow: 0 0 1rem blue;
+}
+
+
+
+.left-edge {
+    position: absolute;
+    border-width: var(--normal-edgewidth) 0 0 var(--normal-edgewidth);
+    border-style: solid;
+    border-color: var(--normal-edgecolor);
+    border-radius: 3rem;
+    z-index: -1;
+}
+
+.right-edge {
+    position: absolute;
+    border-width: var(--normal-edgewidth) var(--normal-edgewidth) 0 0;
+    border-style: solid;
+    border-color: var(--normal-edgecolor);
+    border-radius: 3rem;
+    z-index: -1;
+}
+
+.extr-edge {
+    opacity: 0.1;
+}

@@ -3,8 +3,9 @@
     border-radius: 5px;
     outline: none;
     padding: 5px 10px;
-    height: 30px;
+    height: 40px;
     cursor: pointer;
+    font-size: 16px;
 }
 
 .btn:active {
