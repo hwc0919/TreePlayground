@@ -15,6 +15,15 @@ interface ITreeJsonObj<T> {
     [attrName: string]: any;
 }
 
+interface IExtrNodeObj<T> {
+    x: number;
+    y: number;
+    parent: BinNode<T>;
+    isRoot?: boolean;
+    isLC?: boolean;
+    lc?: BinNode<T>;
+}
+
 function stature<T>(x: BinNode<T>): number {
     if (x === null) return -1;
     else return x.height;
@@ -103,50 +112,96 @@ export class BinTree<T> {
         let extrNodes = [];
         let extrEdges = [[], []];
         let structInfo = { nodes: nodes, edges: edges, extrNodes: extrNodes, extrEdges: extrEdges };
-
         // If emtpy tree
         if (!this._root) {
-            extrNodes.push({ x: 0, y: 0, is_root: true });
+            extrNodes.push({ x: 0, y: 0, isRoot: true });
             return structInfo;
         }
 
-        // Level order traversal and record structure info
-        let Q = new Deque<BinNode<T>>();
-        if (this._root) Q.push(this._root);
-        while (!Q.empty()) {
-            let node = Q.shift();
-            nodes.push(node);
-
-            //!!! Need to implement coordination calculation algorithm here
-            let deltaL = 2 ** stature(node.lc) * 80 + node.data.toString().length * 6;
-            let deltaR = 2 ** stature(node.rc) * 80 + node.data.toString().length * 6;
-            let deltaY = 80;
-
-            let nodeLCX = node.x - deltaL - (node.lc ? node.lc.data.toString().length * 6 : 0);
-            let nodeRCX = node.x + deltaR + (node.rc ? node.rc.data.toString().length * 6 : 0);
-            let nodeCY = node.y + deltaY;
-            if (node.lc) {
-                Q.push(node.lc);
-                node.lc.x = nodeLCX;
-                node.lc.y = nodeCY;
-                // left, top, width, height
-                edges[0].push([nodeLCX, node.y, node.x - nodeLCX, deltaY - 29]);
-            } else {
-                extrNodes.push({ x: nodeLCX, y: nodeCY, parent: node, is_lc: true });
-                extrEdges[0].push([nodeLCX, node.y, node.x - nodeLCX, deltaY - 29]);
-            }
-            if (node.rc) {
-                node.rc.x = nodeRCX;
-                node.rc.y = nodeCY;
-                Q.push(node.rc);
-                edges[1].push([node.x, node.y, nodeRCX - node.x, deltaY - 29]);
-            } else {
-                extrNodes.push({ x: nodeRCX, y: nodeCY, parent: node, is_lc: false });
-                extrEdges[1].push([node.x, node.y, nodeRCX - node.x, deltaY - 29]);
+        // 逐层遍历
+        this._root.y = 0;
+        let levels: Array<Array<BinNode<T> | IExtrNodeObj<T>>> = [[this._root]];
+        nodes.push(this._root);
+        for (let i: number = 0; i <= this._root.height; i++) {
+            levels.push([]);
+            for (let j: number = 0; j < levels[i].length; j++) {
+                let node: any = levels[i][j];
+                let levelY = 80 * (i + 1);
+                // 为外部节点添加一个外部节点孩子
+                if (node.lc === undefined) {
+                    levels[i + 1].push({ x: 0, y: levelY, parent: node });
+                    continue;
+                }
+                // 为内部节点添加两个孩子
+                if (node.lc) {
+                    node.lc.y = levelY;
+                    levels[i + 1].push(node.lc);
+                    nodes.push(node.lc);
+                }
+                else {
+                    let extrNodeObj: IExtrNodeObj<T> = { x: 0, y: levelY, parent: node, isLC: true }
+                    levels[i + 1].push(extrNodeObj);
+                    extrNodes.push(extrNodeObj);
+                }
+                if (node.rc) {
+                    node.rc.y = levelY;
+                    levels[i + 1].push(node.rc);
+                    nodes.push(node.rc);
+                }
+                else {
+                    let extrNodeObj: IExtrNodeObj<T> = { x: 0, y: levelY, parent: node, isLC: false }
+                    levels[i + 1].push(extrNodeObj);
+                    extrNodes.push(extrNodeObj);
+                }
             }
         }
 
-        // Return structure info object
+        // 计算最底层横坐标
+        let lastLevel = levels[levels.length - 1];
+        for (let j: number = 0; j < lastLevel.length; j++) {
+            lastLevel[j].x = 80 * j;
+        }
+        // 逐层反推横坐标
+        for (let i: number = levels.length - 1; i >= 1; i--) {
+            let curLevel = levels[i];
+            for (let j: number = 0; j < curLevel.length;) {
+                // 父亲是内部节点
+                let jParent: BinNode<T> = curLevel[j].parent;
+                if (j < curLevel.length - 1 && jParent == curLevel[j + 1].parent) {
+                    jParent.x = Math.floor((curLevel[j].x + curLevel[j + 1].x) / 2);
+                    j += 2;
+                } else { // parent is also external node
+                    curLevel[j].parent.x = curLevel[j].x;
+                    j++;
+                }
+            }
+        }
+
+        // 调整根节点至中心
+        let deltaX = this._root.x;
+        this._root.x = 0;
+        for (let i: number = levels.length - 1; i >= 1; i--) {
+            let curLevel = levels[i];
+            for (let j: number = 0; j < curLevel.length; j++) curLevel[j].x -= deltaX;
+        }
+
+        // 添加内部边和外部边
+        for (let i: number = levels.length - 1; i >= 1; i--) {
+            let curLevel = levels[i];
+            for (let j: number = 0; j < curLevel.length;) {
+                // 仅当父亲是内部节点时添加边
+                let jParent: BinNode<T> = curLevel[j].parent;
+                if (j < curLevel.length - 1 && jParent == curLevel[j + 1].parent) {
+                    let leftEdge: Array<number> = [curLevel[j].x, jParent.y, jParent.x - curLevel[j].x, 51];
+                    if (curLevel[j].lc === undefined) extrEdges[0].push(leftEdge);
+                    else edges[0].push(leftEdge);
+                    let rightEdge: Array<number> = [jParent.x, jParent.y, curLevel[j + 1].x - jParent.x, 51];
+                    if (curLevel[j + 1].lc === undefined) extrEdges[1].push(rightEdge);
+                    else edges[1].push(rightEdge);
+                    j += 2;
+                } else j++;
+            }
+        }
         return structInfo;
     }
 
@@ -249,5 +304,4 @@ export class BinTree<T> {
     }
 }
 
-window['BinNode'] = BinNode;
 window['BinTree'] = BinTree;

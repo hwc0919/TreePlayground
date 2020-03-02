@@ -42,7 +42,8 @@ var vm = new Vue({
         update() {
             console.log("Update");
             this.trvlParams.lock = false;
-            Object.assign(this.structInfo, this.tree.calStructInfo())
+            this.structInfo = this.tree.calStructInfo();
+            // Object.assign(this.structInfo, this.tree.calStructInfo())
             // Save to localStorage
             localStorage["temp" + this.curTreeType] = JSON.stringify(JSON.decycle(this.tree));
             localStorage.curTreeType = this.curTreeType;
@@ -88,6 +89,25 @@ var vm = new Vue({
         },
 
         // Events Handlers
+        onIntrUpdate(args) {
+            console.log("onIntrUpdate");
+            let node = args[0];
+            let updation = args[1];
+            if (this.curTreeType !== "BinTree") {
+                if (this.tree.search(updation)) {
+                    alert("Already exists!");
+                    return false;
+                } else if (BinNode.isLC(node) && updation > node.parent.data ||
+                    BinNode.isRC(node) && updation < node.parent.data ||
+                    node.lc && updation < node.lc.data ||
+                    node.rc && updation > node.rc.data) {
+                    alert("Must maintain order.");
+                    return false;
+                }
+            }
+            node.data = updation;
+            this.update();
+        },
         onExtrInsert(args) {
             console.log("onExtrInsert");
             let node = args[0];
@@ -99,7 +119,10 @@ var vm = new Vue({
                     alert("Already exists!");
                     return false;
                 }
-                if (node.is_lc === true && insertion > node.parent.data || node.is_lc === false && insertion < node.parent.data) {
+                if (node.isLC === true && insertion > node.parent.data ||
+                    node.isLC === true && (pred = node.parent.pred()) && insertion < pred.data ||
+                    node.isLC === false && insertion < node.parent.data ||
+                    node.isLC === false && (succ = node.parent.succ()) && insertion > succ.data) {
                     alert("Must maintain order.");
                     return false;
                 }
@@ -108,13 +131,12 @@ var vm = new Vue({
                     else this.BSTParams.allowExtrInsert = true;
                 }
             }
-            if (node.is_root)
+            if (node.isRoot)
                 this.tree.insertAsRoot(insertion);
-            else if (node.is_lc)
+            else if (node.isLC)
                 this.tree.insertAsLC(node.parent, insertion);
             else
                 this.tree.insertAsRC(node.parent, insertion);
-
             this.update();
         },
         onRemoveBelow(node) {

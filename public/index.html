@@ -12,7 +12,7 @@
 <body>
     <div id="TreePlayground">
         <div class="top-tool-bar">
-            <select v-model="curTreeType" style="height: 40px;">
+            <select v-model="curTreeType" style="width: 80px; height: 40px;">
                 <option v-for="status, ttype in availTreeTypes" v-text="ttype" :value="ttype" :disabled="!status">
                 </option>
             </select>
@@ -31,10 +31,11 @@
         </div>
         <!-- Tree Visualization Part -->
         <div class="tree" @mousedown.self="onMouseDown($event)" @mousemove.self='onMouseMove($event)'
-            @mouseup.self='onMouseLeave($event)'>
+            @mouseup.self="onMouseLeave($event)">
             <!-- Internal Tree Nodes -->
             <binnode v-for="(node, ind) in structInfo.nodes" :class="{'active-node': node.active}" :node="node"
-                :key="'node' + ind" @remove-below="onRemoveBelow($event)" @remove-one="onRemoveOne($event)">
+                :key="'node' + ind" @remove-below="onRemoveBelow($event)" @remove-one="onRemoveOne($event)"
+                @intr-update="onIntrUpdate($event)">
             </binnode>
             <!-- External Tree Nodes -->
             <extr-binnode v-for="(node, ind) in structInfo.extrNodes" :node="node" :key="'extNode' + ind"

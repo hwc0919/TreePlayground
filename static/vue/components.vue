@@ -11,16 +11,15 @@ Vue.component('binnode', {
                 @click.stop="$emit('remove-below', node)">x</label>
             <label v-show="$root.curTreeType !== 'BinTree'" type="button" class="node-delete-btn delete-btn" title="remove one" 
                 @click.stop="$emit('remove-one', node)">x</label>
-            <binnode-input ref="input" v-show="showInput" v-model="updation" @blur.native="inputOnBlur" @keyup.enter.native="intrUpdateData($event)">
+            <binnode-input ref="input" v-show="showInput" v-model="updation" @blur.native="inputOnBlur" @keyup.enter.native="emitIntrUpdate($event)">
             </binnode-input>
         </div>`,
     methods: {
-        intrUpdateData(e) {
-            if (this.updation == "" || this.updation == this.data) return false;
-            if (/^[0-9]*$/.exec(this.updation))
-                this.updation = Number(this.updation);
-            this.node.data = this.updation;
-            this.$parent.update();
+        emitIntrUpdate(e) {
+            let x = this.$parent.assertInt(this.updation);
+            if (x == null || x == this.node.data) return false;
+            this.$emit('intr-update', [this.node, x]);
+            this.updation = "";
             e.srcElement.blur();   // force lose focus
         },
         divOnClick() {
