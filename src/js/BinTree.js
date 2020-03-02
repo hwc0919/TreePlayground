@@ -73,12 +73,12 @@ class BinTree {
         this.update_height_above(x);
         return x.rc;
     }
-    reattachAsLC(x, lc) {
+    reAttachAsLC(x, lc) {
         x.lc = x;
         if (lc)
             lc.parent = x;
     }
-    reattachAsRC(x, rc) {
+    reAttachAsRC(x, rc) {
         x.rc = x;
         if (rc)
             rc.parent = x;
@@ -102,10 +102,11 @@ class BinTree {
             let node = Q.shift();
             nodes.push(node);
             //!!! Need to implement coordination calculation algorithm here
-            let deltaX = Math.pow(2, (node.npl - 1)) * 80 + node.data.toString().length * 6;
+            let deltaL = Math.pow(2, stature(node.lc)) * 80 + node.data.toString().length * 6;
+            let deltaR = Math.pow(2, stature(node.rc)) * 80 + node.data.toString().length * 6;
             let deltaY = 80;
-            let nodeLCX = node.x - deltaX - (node.lc ? node.lc.data.toString().length * 6 : 0);
-            let nodeRCX = node.x + deltaX + (node.rc ? node.rc.data.toString().length * 6 : 0);
+            let nodeLCX = node.x - deltaL - (node.lc ? node.lc.data.toString().length * 6 : 0);
+            let nodeRCX = node.x + deltaR + (node.rc ? node.rc.data.toString().length * 6 : 0);
             let nodeCY = node.y + deltaY;
             if (node.lc) {
                 Q.push(node.lc);
@@ -135,9 +136,9 @@ class BinTree {
     // Build tree from JSON object retracted from LocalStorage
     static buildFromTreeJsonObj(treeObj) {
         if (treeObj._root === null)
-            return new BinTree();
+            return new this();
         let dataNode = treeObj._root;
-        let tree = new BinTree(treeObj._root.data);
+        let tree = new this(treeObj._root.data);
         let dataStk = [dataNode];
         let nodeStk = [tree.root()];
         while (dataStk.length > 0) {
@@ -204,29 +205,31 @@ class BinTree {
         }
         return sequence;
     }
+    static levelTraversal(x) {
+        let sequence = [];
+        let Q = new Deque_1.Deque([x]);
+        while (!Q.empty()) {
+            x = Q.shift();
+            sequence.push(x);
+            if (x.lc)
+                Q.push(x.lc);
+            if (x.rc)
+                Q.push(x.rc);
+        }
+        return sequence;
+    }
+    // A sample binary tree
+    static genSampleTree() {
+        let tree = new BinTree(1);
+        let a = tree.insertAsLC(tree.root(), 2);
+        tree.insertAsLC(a, 3);
+        tree.insertAsRC(a, 4);
+        a = tree.insertAsRC(tree.root(), 5);
+        tree.insertAsLC(a, 6);
+        tree.insertAsRC(a, 7);
+        return tree;
+    }
 }
 exports.BinTree = BinTree;
-// A sample binary tree
-BinTree.sampleBinTree = (function () {
-    let tree = new BinTree("Help");
-    let a = tree.insertAsLC(tree.root(), "me");
-    tree.insertAsLC(a, "this");
-    tree.insertAsRC(a, "will");
-    a = tree.insertAsRC(tree.root(), "improve");
-    tree.insertAsLC(a, "you");
-    tree.insertAsRC(a, "?");
-    return tree;
-})();
-// A sample binary search tree
-BinTree.sampleBST = (function () {
-    let tree = new BinTree(4);
-    let a = tree.insertAsLC(tree.root(), 2);
-    tree.insertAsLC(a, 1);
-    tree.insertAsRC(a, 3);
-    a = tree.insertAsRC(tree.root(), 6);
-    tree.insertAsLC(a, 5);
-    tree.insertAsRC(a, 7);
-    return tree;
-})();
-window['BinTree'] = BinTree;
 window['BinNode'] = BinNode_1.BinNode;
+window['BinTree'] = BinTree;

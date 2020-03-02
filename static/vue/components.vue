@@ -9,7 +9,8 @@ Vue.component('binnode', {
             <span v-show="!showInput" style="display: inline-block; width: 100%; height: 100%;">{{ node.data }}</span>
             <label type="button" class="subtree-delete-btn delete-btn" title="remove below"
                 @click.stop="$emit('remove-below', node)">x</label>
-            <label type="button" class="node-delete-btn delete-btn" title="remove one">x</label>
+            <label v-show="$root.curTreeType !== 'BinTree'" type="button" class="node-delete-btn delete-btn" title="remove one" 
+                @click.stop="$emit('remove-one', node)">x</label>
             <binnode-input ref="input" v-show="showInput" v-model="updation" @blur.native="inputOnBlur" @keyup.enter.native="intrUpdateData($event)">
             </binnode-input>
         </div>`,
@@ -24,6 +25,7 @@ Vue.component('binnode', {
         },
         divOnClick() {
             if (this.showInput === true) return false;
+            this.updation = this.node.data;
             this.showInput = true;
             let width = this.$el.offsetWidth;
             setTimeout(() => {
@@ -53,13 +55,12 @@ Vue.component('extr-binnode', {
         `,
     methods: {
         emitExtrInsert() {
-            if (this.insertion == "") return false;
-            if (/^[0-9]*$/.exec(this.insertion))
-                this.insertion = Number(this.insertion);
-            this.$emit('extr-insert', [this.node, this.insertion]);
+            let x = this.$parent.assertInt(this.insertion);
+            if (x == null) return;
+            this.$emit('extr-insert', [this.node, x]);
             this.insertion = "";
         }
-    },
+    }
 });
 
 Vue.component('binnode-input', {

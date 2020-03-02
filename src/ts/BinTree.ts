@@ -88,11 +88,11 @@ export class BinTree<T> {
         this.update_height_above(x);
         return x.rc;
     }
-    public reattachAsLC(x: BinNode<T>, lc: BinNode<T>): void {
+    public reAttachAsLC(x: BinNode<T>, lc: BinNode<T>): void {
         x.lc = x;
         if (lc) lc.parent = x;
     }
-    public reattachAsRC(x: BinNode<T>, rc: BinNode<T>): void {
+    public reAttachAsRC(x: BinNode<T>, rc: BinNode<T>): void {
         x.rc = x;
         if (rc) rc.parent = x;
     }
@@ -118,12 +118,12 @@ export class BinTree<T> {
             nodes.push(node);
 
             //!!! Need to implement coordination calculation algorithm here
-            let deltaX = 2 ** (node.npl - 1) * 80 + node.data.toString().length * 6;
-
+            let deltaL = 2 ** stature(node.lc) * 80 + node.data.toString().length * 6;
+            let deltaR = 2 ** stature(node.rc) * 80 + node.data.toString().length * 6;
             let deltaY = 80;
 
-            let nodeLCX = node.x - deltaX - (node.lc ? node.lc.data.toString().length * 6 : 0);
-            let nodeRCX = node.x + deltaX + (node.rc ? node.rc.data.toString().length * 6 : 0);
+            let nodeLCX = node.x - deltaL - (node.lc ? node.lc.data.toString().length * 6 : 0);
+            let nodeRCX = node.x + deltaR + (node.rc ? node.rc.data.toString().length * 6 : 0);
             let nodeCY = node.y + deltaY;
             if (node.lc) {
                 Q.push(node.lc);
@@ -152,10 +152,10 @@ export class BinTree<T> {
 
     // Build tree from JSON object retracted from LocalStorage
     static buildFromTreeJsonObj<T>(treeObj: ITreeJsonObj<T>): BinTree<T> {
-        if (treeObj._root === null) return new BinTree<T>();
+        if (treeObj._root === null) return new this();
 
         let dataNode: BinNode<T> = treeObj._root;
-        let tree: BinTree<T> = new BinTree<T>(treeObj._root.data);
+        let tree: BinTree<T> = new this(treeObj._root.data);
         let dataStk: Array<BinNode<T>> = [dataNode];
         let nodeStk: Array<BinNode<T>> = [tree.root()];
         while (dataStk.length > 0) {
@@ -223,30 +223,31 @@ export class BinTree<T> {
         return sequence;
     }
 
-    // A sample binary tree
-    static sampleBinTree = (function () {
-        let tree: BinTree<string> = new BinTree("Help");
-        let a: BinNode<string> = tree.insertAsLC(tree.root(), "me");
-        tree.insertAsLC(a, "this");
-        tree.insertAsRC(a, "will");
-        a = tree.insertAsRC(tree.root(), "improve");
-        tree.insertAsLC(a, "you");
-        tree.insertAsRC(a, "?");
-        return tree;
-    })()
 
-    // A sample binary search tree
-    static sampleBST = (function () {
-        let tree = new BinTree(4);
+    static levelTraversal<T>(x: BinNode<T>): Array<BinNode<T>> {
+        let sequence: Array<BinNode<T>> = [];
+        let Q: Deque<BinNode<T>> = new Deque([x]);
+        while (!Q.empty()) {
+            x = Q.shift();
+            sequence.push(x);
+            if (x.lc) Q.push(x.lc);
+            if (x.rc) Q.push(x.rc);
+        }
+        return sequence;
+    }
+
+    // A sample binary tree
+    static genSampleTree(): BinTree<number> {
+        let tree: BinTree<number> = new BinTree(1);
         let a: BinNode<number> = tree.insertAsLC(tree.root(), 2);
-        tree.insertAsLC(a, 1);
-        tree.insertAsRC(a, 3);
-        a = tree.insertAsRC(tree.root(), 6);
-        tree.insertAsLC(a, 5);
+        tree.insertAsLC(a, 3);
+        tree.insertAsRC(a, 4);
+        a = tree.insertAsRC(tree.root(), 5);
+        tree.insertAsLC(a, 6);
         tree.insertAsRC(a, 7);
         return tree;
-    })()
+    }
 }
 
-window['BinTree'] = BinTree;
 window['BinNode'] = BinNode;
+window['BinTree'] = BinTree;

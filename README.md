@@ -1,6 +1,7 @@
 # TreePlayground
 A tool to generate, visualize and manipulate various kind of tree structures.
 
+Entrance file is ./public/index.html
 Functions are only guaranteed in Chrome.
 
 ## Objective

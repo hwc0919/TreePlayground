@@ -2,8 +2,11 @@ export class Deque<T> {
     _elem_out: Array<T>;
     _elem_in: Array<T>;
 
-    constructor() {
-        this._elem_in = [];
+    constructor(e: Array<T> = null) {
+        if (!e || e.length === 0)
+            this._elem_in = [];
+        else
+            this._elem_in = e;
         this._elem_out = [];
     }
     public size(): number { return this._elem_in.length + this._elem_out.length; }

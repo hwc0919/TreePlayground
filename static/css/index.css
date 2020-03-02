@@ -45,16 +45,50 @@ html {
     display: flex;
     justify-content: space-evenly;
     align-items: center;
-    height: 80px    ;
+    height: 80px;
     width: 1000px;
 }
 
+
 .tree {
+    position: absolute;
+    margin-top: 100px;
+    width: 50px;
+    left: 50%;
+}
+
+.tree::before {
+    content: "";
+    display: block;
+    width: 30px;
+    height: 30px;
+    border: 2px dashed black;
+    border-radius: 30%;
     position: relative;
-    width: 10px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 50px;
+    top: -80px;
+    transform: translate(-50%, -50%);
+    cursor: move;
+    opacity: 0.5;
+}
+
+.tree::after {
+    content: "";
+    display: block;
+    width: 0px;
+    height: 34px;
+    border: 2px solid black;
+    position: relative;
+    top: -80px;
+    transform: translate(-50%, -50%);
+    opacity: 0.5;
+}
+
+.tree:hover::before  {
+    opacity: 1;
+}
+
+.tree:active::before {
+    border-width: 3px;
 }
 
 .active-node {
@@ -85,7 +119,6 @@ html {
     color: var(--normal-numcolor);
     z-index: 1;
 }
-
 
 .extr-binnode {
     z-index: 0;
@@ -147,8 +180,6 @@ html {
 .node-delete-btn:active {
     text-shadow: 0 0 1rem blue;
 }
-
-
 
 .left-edge {
     position: absolute;

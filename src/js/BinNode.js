@@ -20,6 +20,15 @@ class BinNode {
         this.color = c;
         this.nid = ++BinNode.N;
     }
+    static isRoot(x) {
+        return !x.parent;
+    }
+    static isLC(x) {
+        return x.parent && x === x.parent.lc;
+    }
+    static isRC(x) {
+        return x.parent && x === x.parent.rc;
+    }
     size() {
         let s = 1;
         if (this.lc)
@@ -33,6 +42,21 @@ class BinNode {
     }
     insertAsRC(e) {
         return this.rc = new BinNode(e, this);
+    }
+    // Return direct successor in inorder sequence
+    succ() {
+        let s = this;
+        if (s.rc) {
+            s = s.rc;
+            while (s.lc)
+                s = s.lc;
+        }
+        else {
+            while (BinNode.isRC(s))
+                s = s.parent;
+            s = s.parent;
+        }
+        return s;
     }
 }
 exports.BinNode = BinNode;

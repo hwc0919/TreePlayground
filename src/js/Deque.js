@@ -1,8 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class Deque {
-    constructor() {
-        this._elem_in = [];
+    constructor(e = null) {
+        if (!e || e.length === 0)
+            this._elem_in = [];
+        else
+            this._elem_in = e;
         this._elem_out = [];
     }
     size() { return this._elem_in.length + this._elem_out.length; }

@@ -15,6 +15,16 @@ export class BinNode<T> {
 
     static N: number = 0;
 
+    static isRoot<T>(x: BinNode<T>): boolean {
+        return !x.parent;
+    }
+    static isLC<T>(x: BinNode<T>): boolean {
+        return x.parent && x === x.parent.lc;
+    }
+    static isRC<T>(x: BinNode<T>): boolean {
+        return x.parent && x === x.parent.rc;
+    }
+
     constructor(e: T = null, p: BinNode<T> = null, lc: BinNode<T> = null, rc: BinNode<T> = null,
         height: number = 0, npl: number = 0, c: RBColor = RBColor.Red) {
         this.data = e;
@@ -38,5 +48,18 @@ export class BinNode<T> {
     }
     public insertAsRC(e: T): BinNode<T> {
         return this.rc = new BinNode<T>(e, this);
+    }
+
+    // Return direct successor in inorder sequence
+    public succ(): BinNode<T> {
+        let s: BinNode<T> = this;
+        if (s.rc) {
+            s = s.rc;
+            while (s.lc) s = s.lc;
+        } else {
+            while (BinNode.isRC(s)) s = s.parent;
+            s = s.parent;
+        }
+        return s;
     }
 };

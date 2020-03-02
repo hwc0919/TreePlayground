@@ -12,28 +12,41 @@
 <body>
     <div id="TreePlayground">
         <div class="top-tool-bar">
-            <button class="btn" type="button" @click="saveToHistory" style="cursor:not-allowed" title="unfinish"
-                disabled>Save Tree</button>
-            <button class="btn btn-primary" type="button" @click="loadSampleBinTree">Sample</button>
-            <button class="btn btn-primary" type="button" @click="traversal(0)">Preorder Traversal</button>
-            <button class="btn btn-primary" type="button" @click="traversal(1)">Inorder Traversal</button>
-            <button class="btn btn-primary" type="button" @click="traversal(2)">Postorder Traversal</button>
+            <select v-model="curTreeType" style="height: 40px;">
+                <option v-for="status, ttype in availTreeTypes" v-text="ttype" :value="ttype" :disabled="!status">
+                </option>
+            </select>
+            <!-- <button class="btn" type="button" @click="saveToHistory" style="cursor:not-allowed" title="unfinish"
+                disabled>Save Tree</button> -->
+            <button class="btn btn-primary" type="button" @click="reset">Reset</button>
+            <button class="btn btn-primary" type="button" @click="loadSampleTree">Sample</button>
+            <button class="btn btn-primary" type="button" @click="traversal(0)">先序遍历</button>
+            <button class="btn btn-primary" type="button" @click="traversal(1)">中序遍历</button>
+            <button class="btn btn-primary" type="button" @click="traversal(2)">后序遍历</button>
+            <button class="btn btn-primary" type="button" @click="traversal(3)">层次遍历</button>
             <div style="width: 180px">
                 <h4>Traversal Interval: <label v-text="trvlParams.interval + 'ms'">600ms</label></h4>
                 <input type="range" min="200" max="1000" v-model.number="trvlParams.interval">
             </div>
         </div>
-        <div class="tree">
+        <!-- Tree Visualization Part -->
+        <div class="tree" @mousedown.self="onMouseDown($event)" @mousemove.self='onMouseMove($event)'
+            @mouseup.self='onMouseLeave($event)'>
+            <!-- Internal Tree Nodes -->
             <binnode v-for="(node, ind) in structInfo.nodes" :class="{'active-node': node.active}" :node="node"
-                :key="'node' + ind" @remove-below="onRemoveBelow($event)">
+                :key="'node' + ind" @remove-below="onRemoveBelow($event)" @remove-one="onRemoveOne($event)">
             </binnode>
-            <extr-binnode v-for="(node, ind) in structInfo.extrNodes" :node="node" @extr-insert="onExtrInsert($event)"
-                :key="'extNode' + ind">
+            <!-- External Tree Nodes -->
+            <extr-binnode v-for="(node, ind) in structInfo.extrNodes" :node="node" :key="'extNode' + ind"
+                @extr-insert="onExtrInsert($event)">
             </extr-binnode>
+            <!-- Internal Tree Edges -->
             <div class="left-edge" v-for="e in structInfo.edges[0]"
                 :style="{'left': e[0]+'px', 'top': e[1]+'px', 'width': e[2]+'px', 'height': e[3]+'px'}"></div>
             <div class="right-edge" v-for="e in structInfo.edges[1]"
                 :style="{'left': e[0]+'px', 'top': e[1]+'px', 'width': e[2]+'px', 'height': e[3]+'px'}"></div>
+
+            <!-- External Tree Edges -->
             <div class="left-edge extr-edge" v-for="e in structInfo.extrEdges[0]"
                 :style="{'left': e[0]+'px', 'top': e[1]+'px', 'width': e[2]+'px', 'height': e[3]+'px'}"></div>
             <div class="right-edge extr-edge" v-for="e in structInfo.extrEdges[1]"
@@ -46,121 +59,6 @@
 <script src="../static/js/vue.js"></script>
 <script src="../static/vue/components.vue"></script>
 <script src="./bundle.js"></script>
-
-<script>
-    var vm = new Vue({
-        el: "#TreePlayground",
-        data: {
-            tree: null,
-            structInfo: {
-                nodes: [],
-                extrNodes: [],
-                edges: [[], []],
-                extrEdges: [[], []],
-            },
-            trvlParams: {
-                sequence: [],
-                interval: 600,
-                lock: false
-            },
-        },
-        methods: {
-            init() {
-                if (localStorage.tempBinTree) {
-                    console.log("Recover tree from localStorage.")
-                    this.loadFromTemp();
-                }
-                else {
-                    console.log("Load default tree.")
-                    this.loadSampleBinTree();
-                }
-                // Reset locks
-                this.trvlParams.lock = false;
-            },
-            update() {
-                console.log("BinTree Update");
-                this.structInfo = this.tree.calStructInfo()
-                this.trvlParams.lock = false;
-                this.saveAsTemp();
-            },
-            saveAsTemp() {
-                localStorage.tempBinTree = JSON.stringify(JSON.decycle(this.tree));
-            },
-            loadFromTemp() {
-                this.tree = BinTree.buildFromTreeJsonObj(JSON.retrocycle(JSON.parse(localStorage.tempBinTree)));
-            },
-            saveToHistory() {
-
-            },
-            loadFromHistory() {
-
-            },
-            loadSampleBinTree() {
-                this.tree = BinTree.sampleBinTree;
-                this.update();
-            },
-            traversal(method) {
-                if (this.trvlParams.lock) return false;
-                this.trvlParams.lock = true;
-                if (method === 0)
-                    sequence = BinTree.preorderTraversal(this.tree.root());
-                else if (method == 1)
-                    sequence = BinTree.inorderTraversal(this.tree.root());
-                else
-                    sequence = BinTree.postorderTraversal(this.tree.root());
-                this.trvlParams.sequence = [];
-                this._printSequenceAsyc(sequence);
-            },
-            _printSequenceAsyc(sequence) {
-                if (sequence.length == 0) {
-                    this.trvlParams.lock = false;
-                    return;
-                }
-                if (!this.trvlParams.lock) return false;
-                let x = sequence.shift();
-                this.trvlParams.sequence.push(x);
-                x.active = true;
-                setTimeout(() => {
-                    x.active = false;
-                    this._printSequenceAsyc(sequence);
-                }, this.trvlParams.interval);
-            },
-
-            // Events Handlers
-            onExtrInsert(args) {
-                console.log("onExtrInsert");
-                let node = args[0];
-                let insertion = args[1];
-                if (node.is_root)
-                    this.tree.insertAsRoot(insertion);
-                else if (node.is_lc)
-                    this.tree.insertAsLC(node.parent, insertion);
-                else
-                    this.tree.insertAsRC(node.parent, insertion);
-                this.update();
-            },
-            onRemoveBelow(node) {
-                console.log("onRemoveBelow");
-                console.log(node);
-                this.tree.removeBelow(node);
-                this.update();
-            }
-        },
-        watch: {
-            tree: {
-                handler(oldV, newV) {
-                    console.log("Detect Change in tree.");
-                    // this.update();
-                },
-                // deep: true,
-            }
-        },
-        mounted() {
-            this.init();
-            this.update();
-        },
-    })
-
-</script>
+<script src="../static/js/indexVM.js"></script>
 
 </html>
