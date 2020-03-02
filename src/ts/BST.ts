@@ -94,13 +94,13 @@ export class BST<T> extends BinTree<T> {
 
     // A sample binary search tree
     static genSampleTree(): BST<number> {
-        let tree = new BST(4);
-        let a: BinNode<number> = tree.insertAsLC(tree.root(), 2);
-        tree.insertAsLC(a, 1);
-        tree.insertAsRC(a, 3);
-        a = tree.insertAsRC(tree.root(), 6);
-        tree.insertAsLC(a, 5);
+        let tree = new BST(10);
+        let a: BinNode<number> = tree.insertAsLC(tree.root(), 5);
+        tree.insertAsLC(a, 2);
         tree.insertAsRC(a, 7);
+        a = tree.insertAsRC(tree.root(), 16);
+        tree.insertAsLC(a, 12);
+        tree.insertAsRC(a, 20);
         return tree;
     }
 }

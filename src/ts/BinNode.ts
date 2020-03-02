@@ -62,4 +62,19 @@ export class BinNode<T> {
         }
         return s;
     }
+
+    // Return direct successor in inorder sequence
+    public pred(): BinNode<T> {
+        let s: BinNode<T> = this;
+        if (s.lc) {
+            s = s.lc;
+            while (s.rc) s = s.rc;
+        } else {
+            while (BinNode.isLC(s)) s = s.parent;
+            s = s.parent;
+        }
+        return s;
+    }
 };
+
+window['BinNode'] = BinNode;
