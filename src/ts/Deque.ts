@@ -1,4 +1,4 @@
-class Deque<T> {
+export class Deque<T> {
     _elem_out: Array<T>;
     _elem_in: Array<T>;
 
@@ -31,3 +31,5 @@ class Deque<T> {
         return this._elem_out.pop();
     }
 }
+
+window['Deque'] = Deque;

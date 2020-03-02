@@ -1,31 +1,34 @@
-var Deque = /** @class */ (function () {
-    function Deque() {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class Deque {
+    constructor() {
         this._elem_in = [];
         this._elem_out = [];
     }
-    Deque.prototype.size = function () { return this._elem_in.length + this._elem_out.length; };
-    Deque.prototype.empty = function () { return this.size() === 0; };
-    Deque.prototype.push = function (e) {
+    size() { return this._elem_in.length + this._elem_out.length; }
+    empty() { return this.size() === 0; }
+    push(e) {
         this._elem_in.push(e);
-    };
-    Deque.prototype.unshift = function (e) {
+    }
+    unshift(e) {
         this._elem_out.push(e);
-    };
-    Deque.prototype.pop = function () {
+    }
+    pop() {
         if (this._elem_in.length === 0) {
             this._elem_in = this._elem_out;
             this._elem_in.reverse();
             this._elem_out = [];
         }
         return this._elem_in.pop();
-    };
-    Deque.prototype.shift = function () {
+    }
+    shift() {
         if (this._elem_out.length === 0) {
             this._elem_out = this._elem_in;
             this._elem_out.reverse();
             this._elem_in = [];
         }
         return this._elem_out.pop();
-    };
-    return Deque;
-}());
+    }
+}
+exports.Deque = Deque;
+window['Deque'] = Deque;

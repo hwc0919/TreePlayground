@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TreeVisualizer - Nitromelon</title>
-    <link rel="stylesheet" href="./css/index.css">
-    <link rel="stylesheet" href="./css/button.css">
+    <link rel="stylesheet" href="../static/css/index.css">
+    <link rel="stylesheet" href="../static/css/button.css">
 </head>
 
 <body>
@@ -42,14 +42,12 @@
     </div>
 </body>
 
-<script src="./js/vue.js"></script>
-<script src="./js/cycle.js"></script> <!-- provides JSON.decycle, JSON.retrocycle -->
-<script src="./vue/components.vue"></script>
-<script src="./js/BinTree.js"></script>
-<script src="./js/Deque.js"></script>
+<script src="../static/js/cycle.js"></script>
+<script src="../static/js/vue.js"></script>
+<script src="../static/vue/components.vue"></script>
+<script src="./bundle.js"></script>
 
 <script>
-    var ttt;
     var vm = new Vue({
         el: "#TreePlayground",
         data: {
@@ -89,7 +87,7 @@
                 localStorage.tempBinTree = JSON.stringify(JSON.decycle(this.tree));
             },
             loadFromTemp() {
-                this.tree = buildFromTreeJsonObj(JSON.retrocycle(JSON.parse(localStorage.tempBinTree)));
+                this.tree = BinTree.buildFromTreeJsonObj(JSON.retrocycle(JSON.parse(localStorage.tempBinTree)));
             },
             saveToHistory() {
 
@@ -98,18 +96,18 @@
 
             },
             loadSampleBinTree() {
-                this.tree = __SampleBinTree;
+                this.tree = BinTree.sampleBinTree;
                 this.update();
             },
             traversal(method) {
                 if (this.trvlParams.lock) return false;
                 this.trvlParams.lock = true;
                 if (method === 0)
-                    sequence = preorderTraversal(this.tree.root());
+                    sequence = BinTree.preorderTraversal(this.tree.root());
                 else if (method == 1)
-                    sequence = inorderTraversal(this.tree.root());
+                    sequence = BinTree.inorderTraversal(this.tree.root());
                 else
-                    sequence = postorderTraversal(this.tree.root());
+                    sequence = BinTree.postorderTraversal(this.tree.root());
                 this.trvlParams.sequence = [];
                 this._printSequenceAsyc(sequence);
             },

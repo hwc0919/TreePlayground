@@ -51,7 +51,9 @@ html {
 
 .tree {
     position: relative;
-    left: 50%;
+    width: 10px;
+    margin-left: auto;
+    margin-right: auto;
     margin-top: 50px;
 }
 
@@ -83,6 +85,7 @@ html {
     color: var(--normal-numcolor);
     z-index: 1;
 }
+
 
 .extr-binnode {
     z-index: 0;

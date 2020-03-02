@@ -1,4 +1,6 @@
-enum RBColor { Red, Black };
+import { Deque } from "./Deque"
+import { BinNode } from "./BinNode"
+
 
 interface ITreeStructInfo<T> {
     nodes: Array<BinNode<T>>;
@@ -13,53 +15,12 @@ interface ITreeJsonObj<T> {
     [attrName: string]: any;
 }
 
-class BinNode<T> {
-    data: T;
-    parent: BinNode<T>;
-    lc: BinNode<T>;
-    rc: BinNode<T>;
-    height: number;
-    npl: number;
-    color: RBColor;
-    nid: number;
-    x: number = 0;
-    y: number = 0;
-    active: boolean = false;
-
-    static N: number = 0;
-
-    constructor(e: T = null, p: BinNode<T> = null, lc: BinNode<T> = null, rc: BinNode<T> = null,
-        height: number = 0, npl: number = 0, c: RBColor = RBColor.Red) {
-        this.data = e;
-        this.parent = p;
-        this.lc = lc;
-        this.rc = rc;
-        this.height = height;
-        this.npl = npl;
-        this.color = c;
-        this.nid = ++BinNode.N;
-    }
-
-    public size(): number {
-        let s = 1;
-        if (this.lc) s += this.lc.size();
-        if (this.rc) s += this.rc.size();
-        return s;
-    }
-    public insertAsLC(e: T): BinNode<T> {
-        return this.lc = new BinNode<T>(e, this);
-    }
-    public insertAsRC(e: T): BinNode<T> {
-        return this.rc = new BinNode<T>(e, this);
-    }
-};
-
 function stature<T>(x: BinNode<T>): number {
     if (x === null) return -1;
     else return x.height;
 }
 
-class BinTree<T> {
+export class BinTree<T> {
     protected _root: BinNode<T>;
     protected _size: number;
 
@@ -188,102 +149,104 @@ class BinTree<T> {
         // Return structure info object
         return structInfo;
     }
-}
 
-// A sample binary tree
-let __SampleBinTree = (function () {
-    let tree: BinTree<string> = new BinTree("Help");
-    let a: BinNode<string> = tree.insertAsLC(tree.root(), "me");
-    tree.insertAsLC(a, "this");
-    tree.insertAsRC(a, "will");
-    a = tree.insertAsRC(tree.root(), "improve");
-    tree.insertAsLC(a, "you");
-    tree.insertAsRC(a, "?");
-    return tree;
-})()
+    // Build tree from JSON object retracted from LocalStorage
+    static buildFromTreeJsonObj<T>(treeObj: ITreeJsonObj<T>): BinTree<T> {
+        if (treeObj._root === null) return new BinTree<T>();
 
-// A sample binary search tree
-let __SampleBST = (function () {
-    let tree = new BinTree(4);
-    let a: BinNode<number> = tree.insertAsLC(tree.root(), 2);
-    tree.insertAsLC(a, 1);
-    tree.insertAsRC(a, 3);
-    a = tree.insertAsRC(tree.root(), 6);
-    tree.insertAsLC(a, 5);
-    tree.insertAsRC(a, 7);
-    return tree;
-})()
-
-
-// Build tree from JSON object retracted from LocalStorage
-function buildFromTreeJsonObj<T>(treeObj: ITreeJsonObj<T>): BinTree<T> {
-    if (treeObj._root === null) return new BinTree<T>();
-
-    let dataNode: BinNode<T> = treeObj._root;
-    let tree: BinTree<T> = new BinTree<T>(treeObj._root.data);
-    let dataStk: Array<BinNode<T>> = [dataNode];
-    let nodeStk: Array<BinNode<T>> = [tree.root()];
-    while (dataStk.length > 0) {
-        dataNode = dataStk.pop();
-        let node = nodeStk.pop();
-        if (dataNode.lc) {
-            tree.insertAsLC(node, dataNode.lc.data);
-            dataStk.push(dataNode.lc);
-            nodeStk.push(node.lc);
-        }
-        if (dataNode.rc) {
-            tree.insertAsRC(node, dataNode.rc.data);
-            dataStk.push(dataNode.rc);
-            nodeStk.push(node.rc);
-        }
-    }
-    return tree;
-}
-
-// preorder Traversal and store sequence in an array.
-function preorderTraversal<T>(x: BinNode<T>): Array<BinNode<T>> {
-    let sequence = [];
-    let stk: Array<BinNode<T>> = [x];
-    while (stk.length > 0) {
-        x = stk.pop();
-        while (x) {
-            sequence.push(x);
-            if (x.rc) stk.push(x.rc);
-            x = x.lc;
-        }
-    }
-    return sequence;
-}
-
-function inorderTraversal<T>(x: BinNode<T>): Array<BinNode<T>> {
-    let sequence = [];
-    let stk: Array<BinNode<T>> = [];
-    while (x || stk.length > 0) {
-        while (x) {
-            stk.push(x);
-            x = x.lc;
-        }
-        x = stk.pop();
-        sequence.push(x);
-        x = x.rc;
-    }
-    return sequence;
-}
-
-function postorderTraversal<T>(x: BinNode<T>): Array<BinNode<T>> {
-    let sequence = [];
-    let stk: Array<BinNode<T>> = [x];
-    while (stk.length > 0) {
-        if (x.parent != stk[stk.length - 1]) {
-            x = stk[stk.length - 1];
-            while (x) {
-                if (x.rc) stk.push(x.rc);
-                if (x.lc) stk.push(x.lc);
-                x = x.lc ? x.lc : x.rc;
+        let dataNode: BinNode<T> = treeObj._root;
+        let tree: BinTree<T> = new BinTree<T>(treeObj._root.data);
+        let dataStk: Array<BinNode<T>> = [dataNode];
+        let nodeStk: Array<BinNode<T>> = [tree.root()];
+        while (dataStk.length > 0) {
+            dataNode = dataStk.pop();
+            let node = nodeStk.pop();
+            if (dataNode.lc) {
+                tree.insertAsLC(node, dataNode.lc.data);
+                dataStk.push(dataNode.lc);
+                nodeStk.push(node.lc);
+            }
+            if (dataNode.rc) {
+                tree.insertAsRC(node, dataNode.rc.data);
+                dataStk.push(dataNode.rc);
+                nodeStk.push(node.rc);
             }
         }
-        x = stk.pop();
-        sequence.push(x);
+        return tree;
     }
-    return sequence;
+
+    // preorder Traversal and store sequence in an array.
+    static preorderTraversal<T>(x: BinNode<T>): Array<BinNode<T>> {
+        let sequence = [];
+        let stk: Array<BinNode<T>> = [x];
+        while (stk.length > 0) {
+            x = stk.pop();
+            while (x) {
+                sequence.push(x);
+                if (x.rc) stk.push(x.rc);
+                x = x.lc;
+            }
+        }
+        return sequence;
+    }
+
+    static inorderTraversal<T>(x: BinNode<T>): Array<BinNode<T>> {
+        let sequence = [];
+        let stk: Array<BinNode<T>> = [];
+        while (x || stk.length > 0) {
+            while (x) {
+                stk.push(x);
+                x = x.lc;
+            }
+            x = stk.pop();
+            sequence.push(x);
+            x = x.rc;
+        }
+        return sequence;
+    }
+
+    static postorderTraversal<T>(x: BinNode<T>): Array<BinNode<T>> {
+        let sequence = [];
+        let stk: Array<BinNode<T>> = [x];
+        while (stk.length > 0) {
+            if (x.parent != stk[stk.length - 1]) {
+                x = stk[stk.length - 1];
+                while (x) {
+                    if (x.rc) stk.push(x.rc);
+                    if (x.lc) stk.push(x.lc);
+                    x = x.lc ? x.lc : x.rc;
+                }
+            }
+            x = stk.pop();
+            sequence.push(x);
+        }
+        return sequence;
+    }
+
+    // A sample binary tree
+    static sampleBinTree = (function () {
+        let tree: BinTree<string> = new BinTree("Help");
+        let a: BinNode<string> = tree.insertAsLC(tree.root(), "me");
+        tree.insertAsLC(a, "this");
+        tree.insertAsRC(a, "will");
+        a = tree.insertAsRC(tree.root(), "improve");
+        tree.insertAsLC(a, "you");
+        tree.insertAsRC(a, "?");
+        return tree;
+    })()
+
+    // A sample binary search tree
+    static sampleBST = (function () {
+        let tree = new BinTree(4);
+        let a: BinNode<number> = tree.insertAsLC(tree.root(), 2);
+        tree.insertAsLC(a, 1);
+        tree.insertAsRC(a, 3);
+        a = tree.insertAsRC(tree.root(), 6);
+        tree.insertAsLC(a, 5);
+        tree.insertAsRC(a, 7);
+        return tree;
+    })()
 }
+
+window['BinTree'] = BinTree;
+window['BinNode'] = BinNode;
