@@ -1,4 +1,5 @@
-// const VueLoaderPlugin = require('vue-loader/lib/plugin');
+const VueLoaderPlugin = require('vue-loader/lib/plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     entry: [__dirname + "/src/js/main.js"],
@@ -8,22 +9,23 @@ module.exports = {
     },
     watch: true,
     mode: "none",
-    // plugins: [
-    //     new VueLoaderPlugin()
-    // ],
-    // module: {
-    //     rules: [
-    //         {
-    //             test: /.vue$/,
-    //             loader: 'vue-loader'
-    //         },
-    //         {
-    //             test: /.css$/,
-    //             use: [
-    //                 'style-loader',
-    //                 'css-loader'
-    //             ]
-    //         }
-    //     ]
-    // }
+    plugins: [
+        new VueLoaderPlugin(),
+        // new HtmlWebpackPlugin()
+    ],
+    module: {
+        rules: [
+            {
+                test: /.vue$/,
+                loader: 'vue-loader'
+            },
+            {
+                test: /.css$/,
+                use: [
+                    'style-loader',
+                    'css-loader'
+                ]
+            }
+        ]
+    }
 }

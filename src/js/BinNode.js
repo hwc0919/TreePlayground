@@ -1,12 +1,10 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var RBColor;
+export var RBColor;
 (function (RBColor) {
     RBColor[RBColor["Red"] = 0] = "Red";
     RBColor[RBColor["Black"] = 1] = "Black";
-})(RBColor = exports.RBColor || (exports.RBColor = {}));
+})(RBColor || (RBColor = {}));
 ;
-class BinNode {
+export class BinNode {
     constructor(e = null, p = null, lc = null, rc = null, height = 0, npl = 0, c = RBColor.Red) {
         this.x = 0;
         this.y = 0;
@@ -74,7 +72,6 @@ class BinNode {
         return s;
     }
 }
-exports.BinNode = BinNode;
 BinNode.N = 0;
 ;
 window['BinNode'] = BinNode;

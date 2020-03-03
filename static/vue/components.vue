@@ -1,4 +1,6 @@
 // Internal BinNode
+import Vue from "../js/vue"
+
 Vue.component('binnode', {
     props: ['node'],
     data() {

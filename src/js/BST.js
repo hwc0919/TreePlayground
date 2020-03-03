@@ -1,8 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const BinTree_1 = require("./BinTree");
-const BinNode_1 = require("./BinNode");
-class BST extends BinTree_1.BinTree {
+import { BinTree } from "./BinTree";
+import { BinNode } from "./BinNode";
+export class BST extends BinTree {
     // 3 + 4 Reconstruction of BBST
     connect34(a, b, c, t0, t1, t2, t3) {
         this.reAttachAsLC(a, t0);
@@ -21,15 +19,15 @@ class BST extends BinTree_1.BinTree {
         let p = x.parent;
         let g = p.parent;
         let gp = g.parent;
-        let gIsLC = BinNode_1.BinNode.isLC(g);
-        if (BinNode_1.BinNode.isLC(p)) {
-            if (BinNode_1.BinNode.isLC(x))
+        let gIsLC = BinNode.isLC(g);
+        if (BinNode.isLC(p)) {
+            if (BinNode.isLC(x))
                 x = this.connect34(x, p, g, x.lc, x.rc, p.rc, g.rc);
             else
                 x = this.connect34(p, x, g, p.lc, x.lc, x.rc, g.rc);
         }
         else {
-            if (BinNode_1.BinNode.isLC(x))
+            if (BinNode.isLC(x))
                 x = this.connect34(g, x, p, g.lc, x.lc, x.rc, p.rc);
             else
                 x = this.connect34(g, p, x, g.lc, p.lc, x.lc, x.rc);
@@ -53,7 +51,7 @@ class BST extends BinTree_1.BinTree {
         let v = this.search(e);
         if (v)
             return v;
-        v = new BinNode_1.BinNode(e, this._hot);
+        v = new BinNode(e, this._hot);
         this._size++;
         if (!this._root)
             this._root = v;
@@ -79,7 +77,7 @@ class BST extends BinTree_1.BinTree {
             x.parent = this._hot;
         if (!this._hot)
             this._root = x;
-        else if (BinNode_1.BinNode.isLC(w))
+        else if (BinNode.isLC(w))
             this._hot.lc = x;
         else
             this._hot.rc = x;
@@ -106,5 +104,4 @@ class BST extends BinTree_1.BinTree {
         return tree;
     }
 }
-exports.BST = BST;
 window['BST'] = BST;

@@ -1,6 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-class Deque {
+export class Deque {
     constructor(e = null) {
         if (!e || e.length === 0)
             this._elem_in = [];
@@ -33,5 +31,4 @@ class Deque {
         return this._elem_out.pop();
     }
 }
-exports.Deque = Deque;
 window['Deque'] = Deque;
