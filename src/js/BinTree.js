@@ -1,14 +1,12 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const Deque_1 = require("./Deque");
-const BinNode_1 = require("./BinNode");
+import { Deque } from "./Deque";
+import { BinNode } from "./BinNode";
 function stature(x) {
     if (x === null)
         return -1;
     else
         return x.height;
 }
-class BinTree {
+export class BinTree {
     constructor(e = null) {
         if (e === null) {
             this._size = 0;
@@ -16,7 +14,7 @@ class BinTree {
         }
         else {
             this._size = 1;
-            this._root = new BinNode_1.BinNode(e);
+            this._root = new BinNode(e);
         }
     }
     update_height(x) {
@@ -57,7 +55,7 @@ class BinTree {
         return x.size();
     }
     insertAsRoot(e) {
-        this._root = new BinNode_1.BinNode(e);
+        this._root = new BinNode(e);
         this._size = 1;
         return this._root;
     }
@@ -270,7 +268,7 @@ class BinTree {
     }
     static levelTraversal(x) {
         let sequence = [];
-        let Q = new Deque_1.Deque([x]);
+        let Q = new Deque([x]);
         while (!Q.empty()) {
             x = Q.shift();
             sequence.push(x);
@@ -293,5 +291,4 @@ class BinTree {
         return tree;
     }
 }
-exports.BinTree = BinTree;
 window['BinTree'] = BinTree;
