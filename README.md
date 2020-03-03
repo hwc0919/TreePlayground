@@ -2,8 +2,11 @@
 A tool to generate, visualize and manipulate various kind of tree structures.
 
 To run the program, you only need to download contents in folder 'dist'.
+
 No compatibility testing. Functions are only guaranteed in Chrome.
+
 若要运行程序, 只需要下载文件夹"dist"中的内容即可.
+
 没有测试兼容性, 只能保证chorme浏览器下正常运行.
 
 
