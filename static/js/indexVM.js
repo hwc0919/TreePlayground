@@ -2,7 +2,12 @@ var vm = new Vue({
     el: "#TreePlayground",
     data: {
         availTreeTypes: { "BinTree": true, "BST": true, "AVL": false, "Splay": false, "RedBlack": false },
-        curTreeType: "BinTree",
+        commonParams: {
+            treeScale: 100,
+            curTreeType: "BinTree",
+            offsetLeft: 0,
+            offsetTop: 0
+        },
         treeClassMap: { "BinTree": BinTree, "BST": BST },
         trees: { "BinTree": null, "BST": null },
         // tree: null,
@@ -14,7 +19,7 @@ var vm = new Vue({
         },
         trvlParams: {
             sequence: [],
-            interval: 600,
+            interval: 500,
             lock: false
         },
         BSTParams: {
@@ -43,10 +48,9 @@ var vm = new Vue({
             console.log("Update");
             this.trvlParams.lock = false;
             this.structInfo = this.tree.calStructInfo();
-            // Object.assign(this.structInfo, this.tree.calStructInfo())
             // Save to localStorage
             localStorage["temp" + this.curTreeType] = JSON.stringify(JSON.decycle(this.tree));
-            localStorage.curTreeType = this.curTreeType;
+            localStorage.commonParams = JSON.stringify(this.commonParams);
         },
 
         saveToHistory() {
@@ -149,37 +153,52 @@ var vm = new Vue({
             this.tree.removeAt(node);
             this.update();
         },
-        onMouseDown(event) {
+        onTreeMouseDown(event) {
+            console.log("mouse down")
+            this.treeXY = [event.target.offsetLeft, event.target.offsetTop];
+            this.mouseXY = [event.x, event.y];
             this.is_moving = true;
         },
-        onMouseMove: function (event) {
+        onTPMouseMove: function (event) {
             if (this.is_moving) {
-                event.target.style.left = event.x - 0 + 'px';
-                event.target.style.top = event.y - 15 + 'px';
+                this.$refs.tree.style.left = this.treeXY[0] + event.x - this.mouseXY[0] + "px";
+                this.$refs.tree.style.top = this.treeXY[1] + event.y - this.mouseXY[1] + "px";
             }
         },
-        onMouseLeave(e) {
+        onTreeMouseLeave(e) {
             this.is_moving = false;
         },
         // Validators
-        assertInt(x) {
-            x = parseInt(x);
+        assertNumber(x) {
+            x = Number(x);
             if (isNaN(x)) return null;
+            if (x > 66666666666) return 66666666666;
             return x;
         }
     },
     computed: {
         tree: {
-            get() {
-                return this.trees[this.curTreeType];
-            },
+            get() { return this.trees[this.curTreeType]; },
             set(newTree) {
                 this.trees[this.curTreeType] = newTree;
                 this.update();
             }
         },
+        curTreeType: {
+            get() { return this.commonParams.curTreeType; },
+            set(newV) { this.commonParams.curTreeType = newV; }
+        },
+        treeScale: {
+            get() { return this.commonParams.treeScale; },
+            set(newV) { this.commonParams.treeScale = newV; }
+        },
+
         curTreeClass() {
             return this.treeClassMap[this.curTreeType];
+        },
+        adjustScale() {
+            let scale = this.treeScale / 100;
+            return `transform:scale(${scale})`;
         }
     },
     watch: {
@@ -193,10 +212,17 @@ var vm = new Vue({
         // Init tree object when tree type changes.
         curTreeType() {
             this.init();
+        },
+        commonParams: {
+            handler() {
+                localStorage.commonParams = JSON.stringify(this.commonParams);
+            }, deep: true
         }
     },
     mounted() {
-        this.curTreeType = localStorage.curTreeType;
+        // this.curTreeType = localStorage.curTreeType;
+        try { this.commonParams = JSON.parse(localStorage.commonParams); }
+        catch (err) { }
         if (this.availTreeTypes[this.curTreeType] == undefined) this.curTreeType = "BinTree";
         this.init();
     },

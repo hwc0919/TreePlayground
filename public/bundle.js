@@ -1,1 +1,662 @@
-!function(t){var e={};function r(s){if(e[s])return e[s].exports;var i=e[s]={i:s,l:!1,exports:{}};return t[s].call(i.exports,i,i.exports,r),i.l=!0,i.exports}r.m=t,r.c=e,r.d=function(t,e,s){r.o(t,e)||Object.defineProperty(t,e,{enumerable:!0,get:s})},r.r=function(t){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(t,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(t,"__esModule",{value:!0})},r.t=function(t,e){if(1&e&&(t=r(t)),8&e)return t;if(4&e&&"object"==typeof t&&t&&t.__esModule)return t;var s=Object.create(null);if(r.r(s),Object.defineProperty(s,"default",{enumerable:!0,value:t}),2&e&&"string"!=typeof t)for(var i in t)r.d(s,i,function(e){return t[e]}.bind(null,i));return s},r.n=function(t){var e=t&&t.__esModule?function(){return t.default}:function(){return t};return r.d(e,"a",e),e},r.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},r.p="",r(r.s=3)}([function(t,e,r){"use strict";Object.defineProperty(e,"__esModule",{value:!0});class s{constructor(t=null){t&&0!==t.length?this._elem_in=t:this._elem_in=[],this._elem_out=[]}size(){return this._elem_in.length+this._elem_out.length}empty(){return 0===this.size()}push(t){this._elem_in.push(t)}unshift(t){this._elem_out.push(t)}pop(){return 0===this._elem_in.length&&(this._elem_in=this._elem_out,this._elem_in.reverse(),this._elem_out=[]),this._elem_in.pop()}shift(){return 0===this._elem_out.length&&(this._elem_out=this._elem_in,this._elem_out.reverse(),this._elem_in=[]),this._elem_out.pop()}}e.Deque=s,window.Deque=s},function(t,e,r){"use strict";Object.defineProperty(e,"__esModule",{value:!0});const s=r(0),i=r(2);function n(t){return null===t?-1:t.height}class o{constructor(t=null){null===t?(this._size=0,this._root=null):(this._size=1,this._root=new i.BinNode(t))}update_height(t){t.height=1+Math.max(n(t.lc),n(t.rc)),t.npl=t.lc&&t.rc?1+Math.min(t.lc.npl,t.rc.npl):0}update_height_above(t){for(;t;)this.update_height(t),t=t.parent}size(){return this._size}empty(){return!this._root}root(){return this._root}removeBelow(t){let e=t.parent;return e?(t==e.lc?e.lc=null:e.rc=null,this.update_height_above(e)):this._root=null,this._size-=t.size(),t.size()}insertAsRoot(t){return this._root=new i.BinNode(t),this._size=1,this._root}insertAsLC(t,e){return this._size++,t.insertAsLC(e),this.update_height_above(t),t.lc}insertAsRC(t,e){return this._size++,t.insertAsRC(e),this.update_height_above(t),t.rc}reAttachAsLC(t,e){t.lc=t,e&&(e.parent=t)}reAttachAsRC(t,e){t.rc=t,e&&(e.parent=t)}calStructInfo(){let t=[],e=[[],[]],r=[],s=[[],[]],i={nodes:t,edges:e,extrNodes:r,extrEdges:s};if(!this._root)return r.push({x:0,y:0,isRoot:!0}),i;this._root.y=0;let n=[[this._root]];t.push(this._root);for(let e=0;e<=this._root.height;e++){n.push([]);for(let s=0;s<n[e].length;s++){let i=n[e][s],o=80*(e+1);if(void 0!==i.lc){if(i.lc)i.lc.y=o,n[e+1].push(i.lc),t.push(i.lc);else{let t={x:0,y:o,parent:i,isLC:!0};n[e+1].push(t),r.push(t)}if(i.rc)i.rc.y=o,n[e+1].push(i.rc),t.push(i.rc);else{let t={x:0,y:o,parent:i,isLC:!1};n[e+1].push(t),r.push(t)}}else n[e+1].push({x:0,y:o,parent:i})}}let o=n[n.length-1];for(let t=0;t<o.length;t++)o[t].x=80*t;for(let t=n.length-1;t>=1;t--){let e=n[t];for(let t=0;t<e.length;){let r=e[t].parent;t<e.length-1&&r==e[t+1].parent?(r.x=Math.floor((e[t].x+e[t+1].x)/2),t+=2):(e[t].parent.x=e[t].x,t++)}}let l=this._root.x;this._root.x=0;for(let t=n.length-1;t>=1;t--){let e=n[t];for(let t=0;t<e.length;t++)e[t].x-=l}for(let t=n.length-1;t>=1;t--){let r=n[t];for(let t=0;t<r.length;){let i=r[t].parent;if(t<r.length-1&&i==r[t+1].parent){let n=[r[t].x,i.y,i.x-r[t].x,51];void 0===r[t].lc?s[0].push(n):e[0].push(n);let o=[i.x,i.y,r[t+1].x-i.x,51];void 0===r[t+1].lc?s[1].push(o):e[1].push(o),t+=2}else t++}}return i}static buildFromTreeJsonObj(t){if(null===t._root)return new this;let e=t._root,r=new this(t._root.data),s=[e],i=[r.root()];for(;s.length>0;){e=s.pop();let t=i.pop();e.lc&&(r.insertAsLC(t,e.lc.data),s.push(e.lc),i.push(t.lc)),e.rc&&(r.insertAsRC(t,e.rc.data),s.push(e.rc),i.push(t.rc))}return r}static preorderTraversal(t){let e=[],r=[t];for(;r.length>0;)for(t=r.pop();t;)e.push(t),t.rc&&r.push(t.rc),t=t.lc;return e}static inorderTraversal(t){let e=[],r=[];for(;t||r.length>0;){for(;t;)r.push(t),t=t.lc;t=r.pop(),e.push(t),t=t.rc}return e}static postorderTraversal(t){let e=[],r=[t];for(;r.length>0;){if(t.parent!=r[r.length-1])for(t=r[r.length-1];t;)t.rc&&r.push(t.rc),t.lc&&r.push(t.lc),t=t.lc?t.lc:t.rc;t=r.pop(),e.push(t)}return e}static levelTraversal(t){let e=[],r=new s.Deque([t]);for(;!r.empty();)t=r.shift(),e.push(t),t.lc&&r.push(t.lc),t.rc&&r.push(t.rc);return e}static genSampleTree(){let t=new o(1),e=t.insertAsLC(t.root(),2);return t.insertAsLC(e,3),t.insertAsRC(e,4),e=t.insertAsRC(t.root(),5),t.insertAsLC(e,6),t.insertAsRC(e,7),t}}e.BinTree=o,window.BinTree=o},function(t,e,r){"use strict";var s;Object.defineProperty(e,"__esModule",{value:!0}),function(t){t[t.Red=0]="Red",t[t.Black=1]="Black"}(s=e.RBColor||(e.RBColor={}));class i{constructor(t=null,e=null,r=null,n=null,o=0,l=0,h=s.Red){this.x=0,this.y=0,this.active=!1,this.data=t,this.parent=e,this.lc=r,this.rc=n,this.height=o,this.npl=l,this.color=h,this.nid=++i.N}static isRoot(t){return!t.parent}static isLC(t){return t.parent&&t===t.parent.lc}static isRC(t){return t.parent&&t===t.parent.rc}size(){let t=1;return this.lc&&(t+=this.lc.size()),this.rc&&(t+=this.rc.size()),t}insertAsLC(t){return this.lc=new i(t,this)}insertAsRC(t){return this.rc=new i(t,this)}succ(){let t=this;if(t.rc)for(t=t.rc;t.lc;)t=t.lc;else{for(;i.isRC(t);)t=t.parent;t=t.parent}return t}pred(){let t=this;if(t.lc)for(t=t.lc;t.rc;)t=t.rc;else{for(;i.isLC(t);)t=t.parent;t=t.parent}return t}}e.BinNode=i,i.N=0,window.BinNode=i},function(t,e,r){"use strict";Object.defineProperty(e,"__esModule",{value:!0});const s=r(0),i=r(4),n=r(1);s.Deque,n.BinTree,i.BST},function(t,e,r){"use strict";Object.defineProperty(e,"__esModule",{value:!0});const s=r(1),i=r(2);class n extends s.BinTree{connect34(t,e,r,s,i,n,o){return this.reAttachAsLC(t,s),this.reAttachAsRC(t,i),this.update_height(t),this.reAttachAsLC(r,n),this.reAttachAsRC(r,o),this.update_height(r),this.reAttachAsLC(e,t),this.reAttachAsRC(e,r),this.update_height(e),e}rotateAt(t){let e=t.parent,r=e.parent,s=r.parent,n=i.BinNode.isLC(r);return(t=i.BinNode.isLC(e)?i.BinNode.isLC(t)?this.connect34(t,e,r,t.lc,t.rc,e.rc,r.rc):this.connect34(e,t,r,e.lc,t.lc,t.rc,r.rc):i.BinNode.isLC(t)?this.connect34(r,t,e,r.lc,t.lc,t.rc,e.rc):this.connect34(r,e,t,r.lc,e.lc,t.lc,t.rc)).parent=s,s&&(n?s.lc=t:s.rc=t),t}search(t){let e=this._root;for(this._hot=null;e&&e.data!=t;)this._hot=e,e=t<e.data?e.lc:e.rc;return e}insert(t){let e=this.search(t);return e||(e=new i.BinNode(t,this._hot),this._size++,this._root?t<this._hot.data?this._hot.lc=e:this._hot.rc=e:this._root=e,this.update_height_above(e),e)}removeAt(t){let e=t;return t.lc&&t.rc?(e=e.succ(),t.data=e.data,t=e.rc):t=t.lc,this._hot=e.parent,t&&(t.parent=this._hot),this._hot?i.BinNode.isLC(e)?this._hot.lc=t:this._hot.rc=t:this._root=t,t}remove(t){let e=this.search(t);return!!e&&(this.removeAt(e),this._size--,this.update_height_above(this._hot),!0)}static genSampleTree(){let t=new n(10),e=t.insertAsLC(t.root(),5);return t.insertAsLC(e,2),t.insertAsRC(e,7),e=t.insertAsRC(t.root(),16),t.insertAsLC(e,12),t.insertAsRC(e,20),t}}e.BST=n,window.BST=n}]);
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(1);
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const Deque_1 = __webpack_require__(2);
+const BST_1 = __webpack_require__(3);
+const BinTree_1 = __webpack_require__(4);
+Deque_1.Deque;
+BinTree_1.BinTree;
+BST_1.BST;
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+class Deque {
+    constructor(e = null) {
+        if (!e || e.length === 0)
+            this._elem_in = [];
+        else
+            this._elem_in = e;
+        this._elem_out = [];
+    }
+    size() { return this._elem_in.length + this._elem_out.length; }
+    empty() { return this.size() === 0; }
+    push(e) {
+        this._elem_in.push(e);
+    }
+    unshift(e) {
+        this._elem_out.push(e);
+    }
+    pop() {
+        if (this._elem_in.length === 0) {
+            this._elem_in = this._elem_out;
+            this._elem_in.reverse();
+            this._elem_out = [];
+        }
+        return this._elem_in.pop();
+    }
+    shift() {
+        if (this._elem_out.length === 0) {
+            this._elem_out = this._elem_in;
+            this._elem_out.reverse();
+            this._elem_in = [];
+        }
+        return this._elem_out.pop();
+    }
+}
+exports.Deque = Deque;
+window['Deque'] = Deque;
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const BinTree_1 = __webpack_require__(4);
+const BinNode_1 = __webpack_require__(5);
+class BST extends BinTree_1.BinTree {
+    // 3 + 4 Reconstruction of BBST
+    connect34(a, b, c, t0, t1, t2, t3) {
+        this.reAttachAsLC(a, t0);
+        this.reAttachAsRC(a, t1);
+        this.update_height(a);
+        this.reAttachAsLC(c, t2);
+        this.reAttachAsRC(c, t3);
+        this.update_height(c);
+        this.reAttachAsLC(b, a);
+        this.reAttachAsRC(b, c);
+        this.update_height(b);
+        return b;
+    }
+    // Rotate at the grandchild of lowest unbalanced bbst node
+    rotateAt(x) {
+        let p = x.parent;
+        let g = p.parent;
+        let gp = g.parent;
+        let gIsLC = BinNode_1.BinNode.isLC(g);
+        if (BinNode_1.BinNode.isLC(p)) {
+            if (BinNode_1.BinNode.isLC(x))
+                x = this.connect34(x, p, g, x.lc, x.rc, p.rc, g.rc);
+            else
+                x = this.connect34(p, x, g, p.lc, x.lc, x.rc, g.rc);
+        }
+        else {
+            if (BinNode_1.BinNode.isLC(x))
+                x = this.connect34(g, x, p, g.lc, x.lc, x.rc, p.rc);
+            else
+                x = this.connect34(g, p, x, g.lc, p.lc, x.lc, x.rc);
+        }
+        x.parent = gp;
+        if (gp)
+            gIsLC ? gp.lc = x : gp.rc = x;
+        return x;
+    }
+    // BST binary search, only go left when strictly smaller
+    search(e) {
+        let v = this._root;
+        this._hot = null;
+        while (v && v.data != e) {
+            this._hot = v;
+            v = (e < v.data) ? v.lc : v.rc;
+        }
+        return v;
+    }
+    insert(e) {
+        let v = this.search(e);
+        if (v)
+            return v;
+        v = new BinNode_1.BinNode(e, this._hot);
+        this._size++;
+        if (!this._root)
+            this._root = v;
+        else
+            (e < this._hot.data) ? this._hot.lc = v : this._hot.rc = v;
+        this.update_height_above(v);
+        return v;
+    }
+    removeAt(x) {
+        let w = x;
+        if (!x.lc)
+            x = x.lc;
+        else if (!x.rc)
+            x = x.lc;
+        else {
+            w = w.succ();
+            x.data = w.data;
+            x = w.rc;
+        }
+        this._hot = w.parent;
+        // bi-connect x(successor) and _hot
+        if (x)
+            x.parent = this._hot;
+        if (!this._hot)
+            this._root = x;
+        else if (BinNode_1.BinNode.isLC(w))
+            this._hot.lc = x;
+        else
+            this._hot.rc = x;
+        return x;
+    }
+    remove(e) {
+        let v = this.search(e);
+        if (!v)
+            return false;
+        this.removeAt(v);
+        this._size--;
+        this.update_height_above(this._hot);
+        return true;
+    }
+    // A sample binary search tree
+    static genSampleTree() {
+        let tree = new BST(10);
+        let a = tree.insertAsLC(tree.root(), 5);
+        tree.insertAsLC(a, 2);
+        tree.insertAsRC(a, 7);
+        a = tree.insertAsRC(tree.root(), 16);
+        tree.insertAsLC(a, 12);
+        tree.insertAsRC(a, 20);
+        return tree;
+    }
+}
+exports.BST = BST;
+window['BST'] = BST;
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const Deque_1 = __webpack_require__(2);
+const BinNode_1 = __webpack_require__(5);
+function stature(x) {
+    if (x === null)
+        return -1;
+    else
+        return x.height;
+}
+class BinTree {
+    constructor(e = null) {
+        if (e === null) {
+            this._size = 0;
+            this._root = null;
+        }
+        else {
+            this._size = 1;
+            this._root = new BinNode_1.BinNode(e);
+        }
+    }
+    update_height(x) {
+        x.height = 1 + Math.max(stature(x.lc), stature(x.rc));
+        x.npl = (x.lc && x.rc) ? 1 + Math.min(x.lc.npl, x.rc.npl) : 0;
+    }
+    update_height_above(x) {
+        while (x) {
+            this.update_height(x);
+            x = x.parent;
+        }
+    }
+    // readOnly methods
+    size() {
+        return this._size;
+    }
+    empty() {
+        return !this._root;
+    }
+    root() {
+        return this._root;
+    }
+    // editable methods
+    removeBelow(x) {
+        let p = x.parent;
+        // x is not root
+        if (p) {
+            if (x == p.lc)
+                p.lc = null;
+            else
+                p.rc = null;
+            this.update_height_above(p);
+        }
+        else // delete root
+            this._root = null;
+        // update size
+        this._size -= x.size();
+        return x.size();
+    }
+    insertAsRoot(e) {
+        this._root = new BinNode_1.BinNode(e);
+        this._size = 1;
+        return this._root;
+    }
+    insertAsLC(x, e) {
+        this._size++;
+        x.insertAsLC(e);
+        this.update_height_above(x);
+        return x.lc;
+    }
+    insertAsRC(x, e) {
+        this._size++;
+        x.insertAsRC(e);
+        this.update_height_above(x);
+        return x.rc;
+    }
+    reAttachAsLC(x, lc) {
+        x.lc = x;
+        if (lc)
+            lc.parent = x;
+    }
+    reAttachAsRC(x, rc) {
+        x.rc = x;
+        if (rc)
+            rc.parent = x;
+    }
+    calStructInfo() {
+        let nodes = [];
+        let edges = [[], []];
+        let extrNodes = [];
+        let extrEdges = [[], []];
+        let structInfo = { nodes: nodes, edges: edges, extrNodes: extrNodes, extrEdges: extrEdges };
+        // If emtpy tree
+        if (!this._root) {
+            extrNodes.push({ x: 0, y: 0, isRoot: true });
+            return structInfo;
+        }
+        // 逐层遍历
+        this._root.y = 0;
+        let levels = [[this._root]];
+        nodes.push(this._root);
+        for (let i = 0; i <= this._root.height; i++) {
+            levels.push([]);
+            for (let j = 0; j < levels[i].length; j++) {
+                let node = levels[i][j];
+                let levelY = 80 * (i + 1);
+                // 为外部节点添加一个外部节点孩子
+                if (node.lc === undefined) {
+                    levels[i + 1].push({ x: node.x, y: levelY, parent: node });
+                    continue;
+                }
+                let deltaX = (node.data.toString().length - 1) * 6;
+                // 为内部节点添加两个孩子
+                if (node.lc) {
+                    node.lc.x = node.x - deltaX;
+                    node.lc.y = levelY;
+                    levels[i + 1].push(node.lc);
+                    nodes.push(node.lc);
+                }
+                else {
+                    let extrNodeObj = { x: node.x - deltaX, y: levelY, parent: node, isLC: true };
+                    levels[i + 1].push(extrNodeObj);
+                    extrNodes.push(extrNodeObj);
+                }
+                if (node.rc) {
+                    node.rc.x = node.x + deltaX;
+                    node.rc.y = levelY;
+                    levels[i + 1].push(node.rc);
+                    nodes.push(node.rc);
+                }
+                else {
+                    let extrNodeObj = { x: node.x + deltaX, y: levelY, parent: node, isLC: false };
+                    levels[i + 1].push(extrNodeObj);
+                    extrNodes.push(extrNodeObj);
+                }
+            }
+        }
+        // 计算最底层横坐标
+        let lastLevel = levels[levels.length - 1];
+        let deltaL;
+        let deltaR = lastLevel[1].x - lastLevel[0].x;
+        for (let j = 1; j < lastLevel.length; j++) {
+            deltaL = deltaR;
+            deltaR = j < lastLevel.length - 1 ? lastLevel[j + 1].x - lastLevel[j].x : 0;
+            lastLevel[j].x = lastLevel[j - 1].x + 80;
+            // if (lastLevel[j - 1].parent == lastLevel[j].parent) { lastLevel[j].x += deltaL }
+            if (deltaL > 0) {
+                lastLevel[j].x += deltaL;
+            }
+        }
+        // 逐层反推横坐标
+        for (let i = levels.length - 1; i >= 1; i--) {
+            let curLevel = levels[i];
+            for (let j = 0; j < curLevel.length;) {
+                // 父亲是内部节点
+                let jParent = curLevel[j].parent;
+                if (j < curLevel.length - 1 && jParent == curLevel[j + 1].parent) {
+                    jParent.x = Math.floor((curLevel[j].x + curLevel[j + 1].x) / 2);
+                    j += 2;
+                }
+                else { // parent is also external node
+                    curLevel[j].parent.x = curLevel[j].x;
+                    j++;
+                }
+            }
+        }
+        // 调整根节点至中心
+        let deltaX = this._root.x;
+        this._root.x = 0;
+        for (let i = levels.length - 1; i >= 1; i--) {
+            let curLevel = levels[i];
+            for (let j = 0; j < curLevel.length; j++)
+                curLevel[j].x -= deltaX;
+        }
+        // 添加内部边和外部边
+        for (let i = levels.length - 1; i >= 1; i--) {
+            let curLevel = levels[i];
+            for (let j = 0; j < curLevel.length;) {
+                // 仅当父亲是内部节点时添加边
+                let jParent = curLevel[j].parent;
+                if (j < curLevel.length - 1 && jParent == curLevel[j + 1].parent) {
+                    let leftEdge = [curLevel[j].x, jParent.y, jParent.x - curLevel[j].x, 51];
+                    if (curLevel[j].lc === undefined)
+                        extrEdges[0].push(leftEdge);
+                    else
+                        edges[0].push(leftEdge);
+                    let rightEdge = [jParent.x, jParent.y, curLevel[j + 1].x - jParent.x, 51];
+                    if (curLevel[j + 1].lc === undefined)
+                        extrEdges[1].push(rightEdge);
+                    else
+                        edges[1].push(rightEdge);
+                    j += 2;
+                }
+                else
+                    j++;
+            }
+        }
+        return structInfo;
+    }
+    // Build tree from JSON object retracted from LocalStorage
+    static buildFromTreeJsonObj(treeObj) {
+        if (treeObj._root === null)
+            return new this();
+        let dataNode = treeObj._root;
+        let tree = new this(treeObj._root.data);
+        let dataStk = [dataNode];
+        let nodeStk = [tree.root()];
+        while (dataStk.length > 0) {
+            dataNode = dataStk.pop();
+            let node = nodeStk.pop();
+            if (dataNode.lc) {
+                tree.insertAsLC(node, dataNode.lc.data);
+                dataStk.push(dataNode.lc);
+                nodeStk.push(node.lc);
+            }
+            if (dataNode.rc) {
+                tree.insertAsRC(node, dataNode.rc.data);
+                dataStk.push(dataNode.rc);
+                nodeStk.push(node.rc);
+            }
+        }
+        return tree;
+    }
+    // preorder Traversal and store sequence in an array.
+    static preorderTraversal(x) {
+        let sequence = [];
+        let stk = [x];
+        while (stk.length > 0) {
+            x = stk.pop();
+            while (x) {
+                sequence.push(x);
+                if (x.rc)
+                    stk.push(x.rc);
+                x = x.lc;
+            }
+        }
+        return sequence;
+    }
+    static inorderTraversal(x) {
+        let sequence = [];
+        let stk = [];
+        while (x || stk.length > 0) {
+            while (x) {
+                stk.push(x);
+                x = x.lc;
+            }
+            x = stk.pop();
+            sequence.push(x);
+            x = x.rc;
+        }
+        return sequence;
+    }
+    static postorderTraversal(x) {
+        let sequence = [];
+        let stk = [x];
+        while (stk.length > 0) {
+            if (x.parent != stk[stk.length - 1]) {
+                x = stk[stk.length - 1];
+                while (x) {
+                    if (x.rc)
+                        stk.push(x.rc);
+                    if (x.lc)
+                        stk.push(x.lc);
+                    x = x.lc ? x.lc : x.rc;
+                }
+            }
+            x = stk.pop();
+            sequence.push(x);
+        }
+        return sequence;
+    }
+    static levelTraversal(x) {
+        let sequence = [];
+        let Q = new Deque_1.Deque([x]);
+        while (!Q.empty()) {
+            x = Q.shift();
+            sequence.push(x);
+            if (x.lc)
+                Q.push(x.lc);
+            if (x.rc)
+                Q.push(x.rc);
+        }
+        return sequence;
+    }
+    // A sample binary tree
+    static genSampleTree() {
+        let tree = new BinTree(1);
+        let a = tree.insertAsLC(tree.root(), 2);
+        tree.insertAsLC(a, 3);
+        tree.insertAsRC(a, 4);
+        a = tree.insertAsRC(tree.root(), 5);
+        tree.insertAsLC(a, 6);
+        tree.insertAsRC(a, 7);
+        return tree;
+    }
+}
+exports.BinTree = BinTree;
+window['BinTree'] = BinTree;
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var RBColor;
+(function (RBColor) {
+    RBColor[RBColor["Red"] = 0] = "Red";
+    RBColor[RBColor["Black"] = 1] = "Black";
+})(RBColor = exports.RBColor || (exports.RBColor = {}));
+;
+class BinNode {
+    constructor(e = null, p = null, lc = null, rc = null, height = 0, npl = 0, c = RBColor.Red) {
+        this.x = 0;
+        this.y = 0;
+        this.active = false;
+        this.data = e;
+        this.parent = p;
+        this.lc = lc;
+        this.rc = rc;
+        this.height = height;
+        this.npl = npl;
+        this.color = c;
+        this.nid = ++BinNode.N;
+    }
+    static isRoot(x) {
+        return !x.parent;
+    }
+    static isLC(x) {
+        return x.parent && x === x.parent.lc;
+    }
+    static isRC(x) {
+        return x.parent && x === x.parent.rc;
+    }
+    size() {
+        let s = 1;
+        if (this.lc)
+            s += this.lc.size();
+        if (this.rc)
+            s += this.rc.size();
+        return s;
+    }
+    insertAsLC(e) {
+        return this.lc = new BinNode(e, this);
+    }
+    insertAsRC(e) {
+        return this.rc = new BinNode(e, this);
+    }
+    // Return direct successor in inorder sequence
+    succ() {
+        let s = this;
+        if (s.rc) {
+            s = s.rc;
+            while (s.lc)
+                s = s.lc;
+        }
+        else {
+            while (BinNode.isRC(s))
+                s = s.parent;
+            s = s.parent;
+        }
+        return s;
+    }
+    // Return direct successor in inorder sequence
+    pred() {
+        let s = this;
+        if (s.lc) {
+            s = s.lc;
+            while (s.rc)
+                s = s.rc;
+        }
+        else {
+            while (BinNode.isLC(s))
+                s = s.parent;
+            s = s.parent;
+        }
+        return s;
+    }
+}
+exports.BinNode = BinNode;
+BinNode.N = 0;
+;
+window['BinNode'] = BinNode;
+
+
+/***/ })
+/******/ ]);

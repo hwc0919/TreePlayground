@@ -10,12 +10,8 @@
 </head>
 
 <body>
-    <div id="TreePlayground">
-        <div class="top-tool-bar">
-            <select v-model="curTreeType" style="width: 80px; height: 40px;">
-                <option v-for="status, ttype in availTreeTypes" v-text="ttype" :value="ttype" :disabled="!status">
-                </option>
-            </select>
+    <div id="TreePlayground" @mousemove='onTPMouseMove($event)'>
+        <div class="top-toolbar">
             <!-- <button class="btn" type="button" @click="saveToHistory" style="cursor:not-allowed" title="unfinish"
                 disabled>Save Tree</button> -->
             <button class="btn btn-primary" type="button" @click="reset">Reset</button>
@@ -25,13 +21,24 @@
             <button class="btn btn-primary" type="button" @click="traversal(2)">后序遍历</button>
             <button class="btn btn-primary" type="button" @click="traversal(3)">层次遍历</button>
             <div style="width: 180px">
-                <h4>Traversal Interval: <label v-text="trvlParams.interval + 'ms'">600ms</label></h4>
-                <input type="range" min="200" max="1000" v-model.number="trvlParams.interval">
+                <h4>Traversal Interval: <label v-text="trvlParams.interval + 'ms'">500ms</label></h4>
+                <input type="range" min="100" max="1500" value="500" step="100" style="width:150px;"
+                    v-model.number="trvlParams.interval">
+            </div>
+        </div>
+        <div class="left-toolbar">
+            <select id="tree-type-selector" v-model="curTreeType">
+                <option v-for="status, ttype in availTreeTypes" v-text="ttype" :value="ttype" :disabled="!status">
+                </option>
+            </select>
+            <div id="tree-scale-ranger">
+                <input type="range" min="50" max="150" value="100" v-model.number="treeScale">
+                <label>Tree Scale: <label v-text="commonParams.treeScale / 100"></label>
             </div>
         </div>
         <!-- Tree Visualization Part -->
-        <div class="tree" @mousedown.self="onMouseDown($event)" @mousemove.self='onMouseMove($event)'
-            @mouseup.self="onMouseLeave($event)">
+        <div class="tree" ref="tree" :style="adjustScale" style="transform-origin: top;"
+            @mousedown.self="onTreeMouseDown($event)" @mouseup.self="onTreeMouseLeave($event)">
             <!-- Internal Tree Nodes -->
             <binnode v-for="(node, ind) in structInfo.nodes" :class="{'active-node': node.active}" :node="node"
                 :key="'node' + ind" @remove-below="onRemoveBelow($event)" @remove-one="onRemoveOne($event)"

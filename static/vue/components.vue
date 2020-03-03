@@ -16,8 +16,9 @@ Vue.component('binnode', {
         </div>`,
     methods: {
         emitIntrUpdate(e) {
-            let x = this.$parent.assertInt(this.updation);
-            if (x == null || x == this.node.data) return false;
+            let x = this.$parent.assertNumber(this.updation);
+            if (x == null) { e.srcElement.blur(); return false; }
+            if (x == this.node.data) { this.updation = x; e.srcElement.blur(); return false; }
             this.$emit('intr-update', [this.node, x]);
             this.updation = "";
             e.srcElement.blur();   // force lose focus
@@ -54,7 +55,7 @@ Vue.component('extr-binnode', {
         `,
     methods: {
         emitExtrInsert() {
-            let x = this.$parent.assertInt(this.insertion);
+            let x = this.$parent.assertNumber(this.insertion);
             if (x == null) return;
             this.$emit('extr-insert', [this.node, x]);
             this.insertion = "";

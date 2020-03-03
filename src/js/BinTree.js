@@ -105,27 +105,30 @@ class BinTree {
                 let levelY = 80 * (i + 1);
                 // 为外部节点添加一个外部节点孩子
                 if (node.lc === undefined) {
-                    levels[i + 1].push({ x: 0, y: levelY, parent: node });
+                    levels[i + 1].push({ x: node.x, y: levelY, parent: node });
                     continue;
                 }
+                let deltaX = (node.data.toString().length - 1) * 6;
                 // 为内部节点添加两个孩子
                 if (node.lc) {
+                    node.lc.x = node.x - deltaX;
                     node.lc.y = levelY;
                     levels[i + 1].push(node.lc);
                     nodes.push(node.lc);
                 }
                 else {
-                    let extrNodeObj = { x: 0, y: levelY, parent: node, isLC: true };
+                    let extrNodeObj = { x: node.x - deltaX, y: levelY, parent: node, isLC: true };
                     levels[i + 1].push(extrNodeObj);
                     extrNodes.push(extrNodeObj);
                 }
                 if (node.rc) {
+                    node.rc.x = node.x + deltaX;
                     node.rc.y = levelY;
                     levels[i + 1].push(node.rc);
                     nodes.push(node.rc);
                 }
                 else {
-                    let extrNodeObj = { x: 0, y: levelY, parent: node, isLC: false };
+                    let extrNodeObj = { x: node.x + deltaX, y: levelY, parent: node, isLC: false };
                     levels[i + 1].push(extrNodeObj);
                     extrNodes.push(extrNodeObj);
                 }
@@ -133,8 +136,16 @@ class BinTree {
         }
         // 计算最底层横坐标
         let lastLevel = levels[levels.length - 1];
-        for (let j = 0; j < lastLevel.length; j++) {
-            lastLevel[j].x = 80 * j;
+        let deltaL;
+        let deltaR = lastLevel[1].x - lastLevel[0].x;
+        for (let j = 1; j < lastLevel.length; j++) {
+            deltaL = deltaR;
+            deltaR = j < lastLevel.length - 1 ? lastLevel[j + 1].x - lastLevel[j].x : 0;
+            lastLevel[j].x = lastLevel[j - 1].x + 80;
+            // if (lastLevel[j - 1].parent == lastLevel[j].parent) { lastLevel[j].x += deltaL }
+            if (deltaL > 0) {
+                lastLevel[j].x += deltaL;
+            }
         }
         // 逐层反推横坐标
         for (let i = levels.length - 1; i >= 1; i--) {
