@@ -1,101 +1,16 @@
 import Vue from "./js/vue"
-
-Vue.component('binnode', {
-    props: ['node'],
-    data() {
-        return { showInput: false, updation: this.node.data }
-    },
-    template:
-        `<div class="binnode intr-binnode" :style="{'left': node.x + 'px', 'top': node.y + 'px'}" @click="divOnClick">
-            <span v-show="!showInput" style="display: inline-block; width: 100%; height: 100%;">{{ node.data }}</span>
-            <label type="button" class="subtree-delete-btn delete-btn" title="remove below"
-                @click.stop="$emit('remove-below', node)">x</label>
-            <label v-show="$root.curTreeType !== 'BinTree'" type="button" class="node-delete-btn delete-btn" title="remove one" 
-                @click.stop="$emit('remove-one', node)">x</label>
-            <binnode-input ref="input" v-show="showInput" v-model="updation" @blur.native="inputOnBlur" @keyup.enter.native="emitIntrUpdate($event)">
-            </binnode-input>
-        </div>`,
-    methods: {
-        emitIntrUpdate(e) {
-            let x = this.$parent.assertNumber(this.updation);
-            if (x == null) { e.srcElement.blur(); return false; }
-            if (x == this.node.data) { this.updation = x; e.srcElement.blur(); return false; }
-            this.$emit('intr-update', [this.node, x]);
-            this.updation = "";
-            e.srcElement.blur();   // force lose focus
-        },
-        divOnClick() {
-            if (this.showInput === true) return false;
-            this.updation = this.node.data;
-            this.showInput = true;
-            let width = this.$el.offsetWidth;
-            setTimeout(() => {
-                this.$refs.input.$el.focus();
-                this.$refs.input.width = width - 20;
-            }, 1);
-        },
-        inputOnBlur() {
-            this.showInput = false;
-            this.updation = this.node.data;
-        }
-    }
-});
-
-// External BinNode
-Vue.component('extr-binnode', {
-    data: function () {
-        return { insertion: "", showInput: false };
-    },
-    props: ['node'],
-    template:
-        `<div class="binnode extr-binnode" :style="{'left': node.x + 'px', 'top': node.y + 'px'}" @click="showInput = true">
-            <binnode-input v-show="showInput" v-model="insertion" @blur.native="showInput = false" 
-                @keyup.enter.native="emitExtrInsert">
-            </binnode-input>
-        </div>
-        `,
-    methods: {
-        emitExtrInsert() {
-            let x = this.$parent.assertNumber(this.insertion);
-            if (x == null) return;
-            this.$emit('extr-insert', [this.node, x]);
-            this.insertion = "";
-        }
-    }
-});
-
-Vue.component('binnode-input', {
-    data: function () {
-        return {
-            width: 40
-        }
-    }, props: ['value'],
-    template: `
-        <input class="extr-binnode-input" :style="{'width': width + 'px'}" :value="value"
-            v-on:input="$emit('input', $event.target.value)">
-    `,
-    methods: {
-    },
-    watch: {
-        value() {
-            this.width = this.value.toString().length * 16;
-        }
-    }
-})
+import "./components/components"
 
 var vm = new Vue({
     el: "#TreePlayground",
     data: {
-        availTreeTypes: { "BinTree": true, "BST": true, "AVL": false, "Splay": false, "RedBlack": false },
+        availTreeTypes: { "BinTree": true, "BST": true, "AVL": true, "Splay": false, "RedBlack": false },
         commonParams: {
             treeScale: 100,
             curTreeType: "BinTree",
-            offsetLeft: 0,
-            offsetTop: 0
         },
-        treeClassMap: { "BinTree": BinTree, "BST": BST },
-        trees: { "BinTree": null, "BST": null },
-        // tree: null,
+        treeClassMap: { "BinTree": BinTree, "BST": BST, "AVL": AVL },
+        trees: { "BinTree": null, "BST": null, "AVL": null, "Splay": null, "RedBlack": null },
         structInfo: {
             nodes: [],
             extrNodes: [],
@@ -127,6 +42,7 @@ var vm = new Vue({
         reset() {
             console.log("Reset");
             this.trvlParams.lock = false;
+            this.treeScale = 100;
             this.update();
         },
         update() {
@@ -138,12 +54,8 @@ var vm = new Vue({
             localStorage.commonParams = JSON.stringify(this.commonParams);
         },
 
-        saveToHistory() {
-
-        },
-        loadFromHistory() {
-
-        },
+        saveToHistory() { },
+        loadFromHistory() { },
         loadSampleTree() {
             this.tree = this.curTreeClass.genSampleTree();
             this.update();
@@ -180,7 +92,7 @@ var vm = new Vue({
         },
 
         // Events Handlers
-        onIntrUpdate(args) {
+        onIntrUpdate(args) {  // Internal node requests for value update
             console.log("onIntrUpdate");
             let node = args[0];
             let updation = args[1];
@@ -199,13 +111,17 @@ var vm = new Vue({
             node.data = updation;
             this.update();
         },
-        onExtrInsert(args) {
+        onExtrInsert(args) {  // External node requests for value insertion
             console.log("onExtrInsert");
             let node = args[0];
             let insertion = args[1];
+            let curTreeType = this.curTreeType;
 
-            if (this.curTreeType !== "BinTree" && this.curTreeType !== "BST") return false;
-            if (this.curTreeType === "BST") {
+            if (curTreeType === "Splay") {
+                alert("Can't insert at external nodes in SplayTree.");
+                return false;
+            }
+            if (curTreeType !== "BinTree") {
                 if (this.tree.search(insertion)) {  // Decline duplicate
                     alert("Already exists!");
                     return false;
@@ -219,17 +135,24 @@ var vm = new Vue({
                     alert("Must maintain order.");
                     return false;
                 }
-                if (!this.BSTParams.allowExtrInsert) {
-                    if (!confirm("Enable external insertion for BST?")) return false;
-                    else this.BSTParams.allowExtrInsert = true;
-                }
             }
-            if (node.isRoot)
-                this.tree.insertAsRoot(insertion);
-            else if (node.isLC)
-                this.tree.insertAsLC(node.parent, insertion);
+            var updateH;
+            if (curTreeType === "BinTree" || curTreeType === "BST")
+                updateH = true;
             else
-                this.tree.insertAsRC(node.parent, insertion);
+                updateH = false;
+
+            if (node.isRoot)
+                this.tree.insertAsRoot(insertion, updateH);
+            else if (node.isLC)
+                this.tree.insertAsLC(node.parent, insertion, updateH);
+            else
+                this.tree.insertAsRC(node.parent, insertion, updateH);
+
+            if (curTreeType === "AVL") {
+                this.tree.search(insertion);    // locate _hot
+                this.tree.solveInsertUnbalance();
+            }
             this.update();
         },
         onRemoveBelow(node) {
@@ -240,6 +163,12 @@ var vm = new Vue({
         onRemoveOne(node) {
             console.log("onRemoveOne");
             this.tree.removeAt(node);
+            this.tree._size--;
+            if (this.curTreeType === "AVL") {
+                this.tree.search(node.data); // locate _hot
+                this.tree.solveRemoveUnbalance();
+            }
+            else if (0) { }
             this.update();
         },
         onTreeMouseDown(event) {
@@ -309,7 +238,6 @@ var vm = new Vue({
         }
     },
     mounted() {
-        // this.curTreeType = localStorage.curTreeType;
         try { this.commonParams = JSON.parse(localStorage.commonParams); }
         catch (err) { }
         if (this.availTreeTypes[this.curTreeType] == undefined) this.curTreeType = "BinTree";

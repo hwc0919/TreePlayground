@@ -91,7 +91,7 @@ body {
     /* margin-top: 100px; */
     width: 50px;
     left: 50%;
-    top: 200px;
+    top: 250px;
 }
 
 .tree::before {
@@ -168,7 +168,7 @@ body {
     z-index: 10;
 }
 
-.extr-binnode-input {
+.binnode-input {
     min-width: var(--normal-inner-w);
     height: var(--normal-inner-h);
     border: none;

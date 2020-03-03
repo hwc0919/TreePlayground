@@ -38,6 +38,7 @@ export class BST<T> extends BinTree<T> {
         }
         x.parent = gp;
         if (gp) gIsLC ? gp.lc = x : gp.rc = x;
+        else this._root = x;
         return x;
     }
 
@@ -65,7 +66,7 @@ export class BST<T> extends BinTree<T> {
 
     public removeAt(x: BinNode<T>): BinNode<T> {
         let w: BinNode<T> = x;
-        if (!x.lc) x = x.lc;
+        if (!x.lc) x = x.rc;
         else if (!x.rc) x = x.lc;
         else {
             w = w.succ();

@@ -1,11 +1,6 @@
 import { Deque } from "./Deque";
 import { BinNode } from "./BinNode";
-function stature(x) {
-    if (x === null)
-        return -1;
-    else
-        return x.height;
-}
+let stature = BinNode.stature;
 export class BinTree {
     constructor(e = null) {
         if (e === null) {
@@ -59,25 +54,27 @@ export class BinTree {
         this._size = 1;
         return this._root;
     }
-    insertAsLC(x, e) {
+    insertAsLC(x, e, updateH = true) {
         this._size++;
         x.insertAsLC(e);
-        this.update_height_above(x);
+        if (updateH)
+            this.update_height_above(x);
         return x.lc;
     }
-    insertAsRC(x, e) {
+    insertAsRC(x, e, updateH = true) {
         this._size++;
         x.insertAsRC(e);
-        this.update_height_above(x);
+        if (updateH)
+            this.update_height_above(x);
         return x.rc;
     }
     reAttachAsLC(x, lc) {
-        x.lc = x;
+        x.lc = lc;
         if (lc)
             lc.parent = x;
     }
     reAttachAsRC(x, rc) {
-        x.rc = x;
+        x.rc = rc;
         if (rc)
             rc.parent = x;
     }
@@ -202,6 +199,7 @@ export class BinTree {
         let tree = new this(treeObj._root.data);
         let dataStk = [dataNode];
         let nodeStk = [tree.root()];
+        let i = 0;
         while (dataStk.length > 0) {
             dataNode = dataStk.pop();
             let node = nodeStk.pop();

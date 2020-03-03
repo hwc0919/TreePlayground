@@ -25,6 +25,20 @@ export class BinNode<T> {
         return x.parent && x === x.parent.rc;
     }
 
+    static stature<T>(x: BinNode<T>): number {
+        if (x === null) return -1;
+        else return x.height;
+    }
+
+    static tallerChild<T>(x: BinNode<T>): BinNode<T> {
+        // assert x has grandson
+        let statureL = this.stature(x.lc);
+        let statureR = this.stature(x.rc);
+        if (statureL > statureR) return x.lc;
+        else if (statureL < statureR) return x.rc;
+        else return this.isLC(x) ? x.lc : x.rc;
+    }
+
     constructor(e: T = null, p: BinNode<T> = null, lc: BinNode<T> = null, rc: BinNode<T> = null,
         height: number = 0, npl: number = 0, c: RBColor = RBColor.Red) {
         this.data = e;

@@ -24,10 +24,7 @@ interface IExtrNodeObj<T> {
     lc?: BinNode<T>;
 }
 
-function stature<T>(x: BinNode<T>): number {
-    if (x === null) return -1;
-    else return x.height;
-}
+let stature: Function = BinNode.stature;
 
 export class BinTree<T> {
     protected _root: BinNode<T>;
@@ -85,24 +82,25 @@ export class BinTree<T> {
         this._size = 1;
         return this._root;
     }
-    public insertAsLC(x: BinNode<T>, e: T): BinNode<T> {
+    public insertAsLC(x: BinNode<T>, e: T, updateH: boolean = true): BinNode<T> {
         this._size++;
         x.insertAsLC(e);
-        this.update_height_above(x);
+        if (updateH) this.update_height_above(x);
         return x.lc;
     }
-    public insertAsRC(x: BinNode<T>, e: T): BinNode<T> {
+    public insertAsRC(x: BinNode<T>, e: T, updateH: boolean = true): BinNode<T> {
         this._size++;
         x.insertAsRC(e);
-        this.update_height_above(x);
+        if (updateH) this.update_height_above(x);
         return x.rc;
     }
+
     public reAttachAsLC(x: BinNode<T>, lc: BinNode<T>): void {
-        x.lc = x;
+        x.lc = lc;
         if (lc) lc.parent = x;
     }
     public reAttachAsRC(x: BinNode<T>, rc: BinNode<T>): void {
-        x.rc = x;
+        x.rc = rc;
         if (rc) rc.parent = x;
     }
 
@@ -224,6 +222,7 @@ export class BinTree<T> {
         let tree: BinTree<T> = new this(treeObj._root.data);
         let dataStk: Array<BinNode<T>> = [dataNode];
         let nodeStk: Array<BinNode<T>> = [tree.root()];
+        let i = 0
         while (dataStk.length > 0) {
             dataNode = dataStk.pop();
             let node = nodeStk.pop();

@@ -35,6 +35,8 @@ export class BST extends BinTree {
         x.parent = gp;
         if (gp)
             gIsLC ? gp.lc = x : gp.rc = x;
+        else
+            this._root = x;
         return x;
     }
     // BST binary search, only go left when strictly smaller
@@ -63,7 +65,7 @@ export class BST extends BinTree {
     removeAt(x) {
         let w = x;
         if (!x.lc)
-            x = x.lc;
+            x = x.rc;
         else if (!x.rc)
             x = x.lc;
         else {

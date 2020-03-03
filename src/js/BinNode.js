@@ -27,6 +27,23 @@ export class BinNode {
     static isRC(x) {
         return x.parent && x === x.parent.rc;
     }
+    static stature(x) {
+        if (x === null)
+            return -1;
+        else
+            return x.height;
+    }
+    static tallerChild(x) {
+        // assert x has grandson
+        let statureL = this.stature(x.lc);
+        let statureR = this.stature(x.rc);
+        if (statureL > statureR)
+            return x.lc;
+        else if (statureL < statureR)
+            return x.rc;
+        else
+            return this.isLC(x) ? x.lc : x.rc;
+    }
     size() {
         let s = 1;
         if (this.lc)
