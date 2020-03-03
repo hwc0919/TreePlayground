@@ -97,18 +97,17 @@ module.exports = __webpack_require__(1);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _Deque__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
-/* harmony import */ var _BST__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3);
-/* harmony import */ var _BinNode__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(5);
-/* harmony import */ var _BinTree__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(4);
-/* harmony import */ var _static_js_cycle_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(6);
-/* harmony import */ var _static_js_cycle_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_static_js_cycle_js__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var _static_css_index_css__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(7);
-/* harmony import */ var _static_css_index_css__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_static_css_index_css__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var _static_css_button_css__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(11);
-/* harmony import */ var _static_css_button_css__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_static_css_button_css__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var _static_vue_components_vue__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(13);
-/* harmony import */ var _static_js_indexVM_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(18);
+/* harmony import */ var _js_Deque__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var _js_BST__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3);
+/* harmony import */ var _js_BinNode__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(5);
+/* harmony import */ var _js_BinTree__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(4);
+/* harmony import */ var _js_cycle_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(6);
+/* harmony import */ var _js_cycle_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_js_cycle_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _css_index_css__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(7);
+/* harmony import */ var _css_index_css__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_css_index_css__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _css_button_css__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(11);
+/* harmony import */ var _css_button_css__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_css_button_css__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var _app_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(13);
 
 
 
@@ -116,12 +115,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-
-_Deque__WEBPACK_IMPORTED_MODULE_0__["Deque"];
-_BinTree__WEBPACK_IMPORTED_MODULE_3__["BinTree"];
-_BinNode__WEBPACK_IMPORTED_MODULE_2__["BinNode"];
-_BST__WEBPACK_IMPORTED_MODULE_1__["BST"];
 
 
 /***/ }),
@@ -1324,172 +1317,94 @@ module.exports = exports;
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(14);
-/* harmony import */ var _components_vue_vue_type_custom_index_0_blockType_div_class_binnode_20intr_binnode_3Astyle_7B_left_3A_20node_x_20_2B_20_px_2C_20_top_3A_20node_y_20_2B_20_px_7D_40click_divOnClick__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(15);
-/* harmony import */ var _components_vue_vue_type_custom_index_0_blockType_div_class_binnode_20intr_binnode_3Astyle_7B_left_3A_20node_x_20_2B_20_px_2C_20_top_3A_20node_y_20_2B_20_px_7D_40click_divOnClick__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_components_vue_vue_type_custom_index_0_blockType_div_class_binnode_20intr_binnode_3Astyle_7B_left_3A_20node_x_20_2B_20_px_2C_20_top_3A_20node_y_20_2B_20_px_7D_40click_divOnClick__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _components_vue_vue_type_custom_index_1_blockType_div_class_binnode_20extr_binnode_3Astyle_7B_left_3A_20node_x_20_2B_20_px_2C_20_top_3A_20node_y_20_2B_20_px_7D_40click_showInput_20_3D_20true__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(16);
-/* harmony import */ var _components_vue_vue_type_custom_index_1_blockType_div_class_binnode_20extr_binnode_3Astyle_7B_left_3A_20node_x_20_2B_20_px_2C_20_top_3A_20node_y_20_2B_20_px_7D_40click_showInput_20_3D_20true__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_components_vue_vue_type_custom_index_1_blockType_div_class_binnode_20extr_binnode_3Astyle_7B_left_3A_20node_x_20_2B_20_px_2C_20_top_3A_20node_y_20_2B_20_px_7D_40click_showInput_20_3D_20true__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _components_vue_vue_type_custom_index_2_blockType_input_class_extr_binnode_input_3Astyle_7B_width_3A_20width_20_2B_20_px_7D_3Avalue_value_v_on_3Ainput_24emit_input_2C_20_24event_target_value___WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(17);
-/* harmony import */ var _components_vue_vue_type_custom_index_2_blockType_input_class_extr_binnode_input_3Astyle_7B_width_3A_20width_20_2B_20_px_7D_3Avalue_value_v_on_3Ainput_24emit_input_2C_20_24event_target_value___WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_components_vue_vue_type_custom_index_2_blockType_input_class_extr_binnode_input_3Astyle_7B_width_3A_20width_20_2B_20_px_7D_3Avalue_value_v_on_3Ainput_24emit_input_2C_20_24event_target_value___WEBPACK_IMPORTED_MODULE_3__);
-var render, staticRenderFns
-var script = {}
+/* harmony import */ var _js_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(14);
+/* harmony import */ var _js_vue__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_js_vue__WEBPACK_IMPORTED_MODULE_0__);
 
 
-/* normalize component */
-
-var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_0__["default"])(
-  script,
-  render,
-  staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
-
-/* custom blocks */
-
-if (typeof _components_vue_vue_type_custom_index_0_blockType_div_class_binnode_20intr_binnode_3Astyle_7B_left_3A_20node_x_20_2B_20_px_2C_20_top_3A_20node_y_20_2B_20_px_7D_40click_divOnClick__WEBPACK_IMPORTED_MODULE_1___default.a === 'function') _components_vue_vue_type_custom_index_0_blockType_div_class_binnode_20intr_binnode_3Astyle_7B_left_3A_20node_x_20_2B_20_px_2C_20_top_3A_20node_y_20_2B_20_px_7D_40click_divOnClick__WEBPACK_IMPORTED_MODULE_1___default()(component)
-
-if (typeof _components_vue_vue_type_custom_index_1_blockType_div_class_binnode_20extr_binnode_3Astyle_7B_left_3A_20node_x_20_2B_20_px_2C_20_top_3A_20node_y_20_2B_20_px_7D_40click_showInput_20_3D_20true__WEBPACK_IMPORTED_MODULE_2___default.a === 'function') _components_vue_vue_type_custom_index_1_blockType_div_class_binnode_20extr_binnode_3Astyle_7B_left_3A_20node_x_20_2B_20_px_2C_20_top_3A_20node_y_20_2B_20_px_7D_40click_showInput_20_3D_20true__WEBPACK_IMPORTED_MODULE_2___default()(component)
-
-if (typeof _components_vue_vue_type_custom_index_2_blockType_input_class_extr_binnode_input_3Astyle_7B_width_3A_20width_20_2B_20_px_7D_3Avalue_value_v_on_3Ainput_24emit_input_2C_20_24event_target_value___WEBPACK_IMPORTED_MODULE_3___default.a === 'function') _components_vue_vue_type_custom_index_2_blockType_input_class_extr_binnode_input_3Astyle_7B_width_3A_20width_20_2B_20_px_7D_3Avalue_value_v_on_3Ainput_24emit_input_2C_20_24event_target_value___WEBPACK_IMPORTED_MODULE_3___default()(component)
-
-component.options.__file = "static/vue/components.vue"
-/* harmony default export */ __webpack_exports__["default"] = (component.exports);
-
-/***/ }),
-/* 14 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return normalizeComponent; });
-/* globals __VUE_SSR_CONTEXT__ */
-
-// IMPORTANT: Do NOT use ES2015 features in this file (except for modules).
-// This module is a runtime utility for cleaner component module output and will
-// be included in the final webpack user bundle.
-
-function normalizeComponent (
-  scriptExports,
-  render,
-  staticRenderFns,
-  functionalTemplate,
-  injectStyles,
-  scopeId,
-  moduleIdentifier, /* server only */
-  shadowMode /* vue-cli only */
-) {
-  // Vue.extend constructor export interop
-  var options = typeof scriptExports === 'function'
-    ? scriptExports.options
-    : scriptExports
-
-  // render functions
-  if (render) {
-    options.render = render
-    options.staticRenderFns = staticRenderFns
-    options._compiled = true
-  }
-
-  // functional template
-  if (functionalTemplate) {
-    options.functional = true
-  }
-
-  // scopedId
-  if (scopeId) {
-    options._scopeId = 'data-v-' + scopeId
-  }
-
-  var hook
-  if (moduleIdentifier) { // server build
-    hook = function (context) {
-      // 2.3 injection
-      context =
-        context || // cached call
-        (this.$vnode && this.$vnode.ssrContext) || // stateful
-        (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext) // functional
-      // 2.2 with runInNewContext: true
-      if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
-        context = __VUE_SSR_CONTEXT__
-      }
-      // inject component styles
-      if (injectStyles) {
-        injectStyles.call(this, context)
-      }
-      // register component module identifier for async chunk inferrence
-      if (context && context._registeredComponents) {
-        context._registeredComponents.add(moduleIdentifier)
-      }
+_js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('binnode', {
+    props: ['node'],
+    data() {
+        return { showInput: false, updation: this.node.data }
+    },
+    template:
+        `<div class="binnode intr-binnode" :style="{'left': node.x + 'px', 'top': node.y + 'px'}" @click="divOnClick">
+            <span v-show="!showInput" style="display: inline-block; width: 100%; height: 100%;">{{ node.data }}</span>
+            <label type="button" class="subtree-delete-btn delete-btn" title="remove below"
+                @click.stop="$emit('remove-below', node)">x</label>
+            <label v-show="$root.curTreeType !== 'BinTree'" type="button" class="node-delete-btn delete-btn" title="remove one" 
+                @click.stop="$emit('remove-one', node)">x</label>
+            <binnode-input ref="input" v-show="showInput" v-model="updation" @blur.native="inputOnBlur" @keyup.enter.native="emitIntrUpdate($event)">
+            </binnode-input>
+        </div>`,
+    methods: {
+        emitIntrUpdate(e) {
+            let x = this.$parent.assertNumber(this.updation);
+            if (x == null) { e.srcElement.blur(); return false; }
+            if (x == this.node.data) { this.updation = x; e.srcElement.blur(); return false; }
+            this.$emit('intr-update', [this.node, x]);
+            this.updation = "";
+            e.srcElement.blur();   // force lose focus
+        },
+        divOnClick() {
+            if (this.showInput === true) return false;
+            this.updation = this.node.data;
+            this.showInput = true;
+            let width = this.$el.offsetWidth;
+            setTimeout(() => {
+                this.$refs.input.$el.focus();
+                this.$refs.input.width = width - 20;
+            }, 1);
+        },
+        inputOnBlur() {
+            this.showInput = false;
+            this.updation = this.node.data;
+        }
     }
-    // used by ssr in case component is cached and beforeCreate
-    // never gets called
-    options._ssrRegister = hook
-  } else if (injectStyles) {
-    hook = shadowMode
-      ? function () { injectStyles.call(this, this.$root.$options.shadowRoot) }
-      : injectStyles
-  }
+});
 
-  if (hook) {
-    if (options.functional) {
-      // for template-only hot-reload because in that case the render fn doesn't
-      // go through the normalizer
-      options._injectStyles = hook
-      // register for functional component in vue file
-      var originalRender = options.render
-      options.render = function renderWithStyleInjection (h, context) {
-        hook.call(context)
-        return originalRender(h, context)
-      }
-    } else {
-      // inject component registration as beforeCreate hook
-      var existing = options.beforeCreate
-      options.beforeCreate = existing
-        ? [].concat(existing, hook)
-        : [hook]
+// External BinNode
+_js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('extr-binnode', {
+    data: function () {
+        return { insertion: "", showInput: false };
+    },
+    props: ['node'],
+    template:
+        `<div class="binnode extr-binnode" :style="{'left': node.x + 'px', 'top': node.y + 'px'}" @click="showInput = true">
+            <binnode-input v-show="showInput" v-model="insertion" @blur.native="showInput = false" 
+                @keyup.enter.native="emitExtrInsert">
+            </binnode-input>
+        </div>
+        `,
+    methods: {
+        emitExtrInsert() {
+            let x = this.$parent.assertNumber(this.insertion);
+            if (x == null) return;
+            this.$emit('extr-insert', [this.node, x]);
+            this.insertion = "";
+        }
     }
-  }
+});
 
-  return {
-    exports: scriptExports,
-    options: options
-  }
-}
+_js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('binnode-input', {
+    data: function () {
+        return {
+            width: 40
+        }
+    }, props: ['value'],
+    template: `
+        <input class="extr-binnode-input" :style="{'width': width + 'px'}" :value="value"
+            v-on:input="$emit('input', $event.target.value)">
+    `,
+    methods: {
+    },
+    watch: {
+        value() {
+            this.width = this.value.toString().length * 16;
+        }
+    }
+})
 
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports) {
-
-
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports) {
-
-
-
-/***/ }),
-/* 17 */
-/***/ (function(module, exports) {
-
-
-
-/***/ }),
-/* 18 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(19);
-/* harmony import */ var _vue__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_vue__WEBPACK_IMPORTED_MODULE_0__);
-
-
-var vm = new _vue__WEBPACK_IMPORTED_MODULE_0___default.a({
+var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
     el: "#TreePlayground",
     data: {
         availTreeTypes: { "BinTree": true, "BST": true, "AVL": false, "Splay": false, "RedBlack": false },
@@ -1557,6 +1472,7 @@ var vm = new _vue__WEBPACK_IMPORTED_MODULE_0___default.a({
         traversal(method) {
             if (this.trvlParams.lock) return false;
             this.trvlParams.lock = true;
+            let sequence;
             if (method === 0)
                 sequence = BinTree.preorderTraversal(this.tree.root());
             else if (method == 1)
@@ -1565,6 +1481,7 @@ var vm = new _vue__WEBPACK_IMPORTED_MODULE_0___default.a({
                 sequence = BinTree.postorderTraversal(this.tree.root());
             else if (method == 3)
                 sequence = BinTree.levelTraversal(this.tree.root());
+            // display traversal sequence
             this.trvlParams.sequence = [];
             this._printSequenceAsyc(sequence);
         },
@@ -1614,6 +1531,8 @@ var vm = new _vue__WEBPACK_IMPORTED_MODULE_0___default.a({
                     alert("Already exists!");
                     return false;
                 }
+                // pred and succ of parent
+                let pred, succ;
                 if (node.isLC === true && insertion > node.parent.data ||
                     node.isLC === true && (pred = node.parent.pred()) && insertion < pred.data ||
                     node.isLC === false && insertion < node.parent.data ||
@@ -1717,10 +1636,12 @@ var vm = new _vue__WEBPACK_IMPORTED_MODULE_0___default.a({
         if (this.availTreeTypes[this.curTreeType] == undefined) this.curTreeType = "BinTree";
         this.init();
     },
-})
+});
+
+window.vm = vm;
 
 /***/ }),
-/* 19 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, setImmediate) {/*!
@@ -13688,10 +13609,10 @@ var vm = new _vue__WEBPACK_IMPORTED_MODULE_0___default.a({
 
 }));
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(20), __webpack_require__(21).setImmediate))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(15), __webpack_require__(16).setImmediate))
 
 /***/ }),
-/* 20 */
+/* 15 */
 /***/ (function(module, exports) {
 
 var g;
@@ -13717,7 +13638,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 21 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {var scope = (typeof global !== "undefined" && global) ||
@@ -13773,7 +13694,7 @@ exports._unrefActive = exports.active = function(item) {
 };
 
 // setimmediate attaches itself to the global object
-__webpack_require__(22);
+__webpack_require__(17);
 // On some exotic environments, it's not clear which object `setimmediate` was
 // able to install onto.  Search each possibility in the same order as the
 // `setimmediate` library.
@@ -13784,10 +13705,10 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
                          (typeof global !== "undefined" && global.clearImmediate) ||
                          (this && this.clearImmediate);
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(20)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(15)))
 
 /***/ }),
-/* 22 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, process) {(function (global, undefined) {
@@ -13977,10 +13898,10 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
     attachTo.clearImmediate = clearImmediate;
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(20), __webpack_require__(23)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(15), __webpack_require__(18)))
 
 /***/ }),
-/* 23 */
+/* 18 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
