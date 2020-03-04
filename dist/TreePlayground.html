@@ -11,7 +11,7 @@
 </head>
 
 <body>
-    <div id="TreePlayground" @mousemove='onTPMouseMove($event)'>
+    <div id="TreePlayground" @mousemove='onTPMouseMove($event)' @touchmove='onTPMouseMove($event)'>
         <!-- Top Toolbar -->
         <div class="top-toolbar">
             <button class="btn btn-primary top-toolbar-item" type="button" @click="loadSampleTree">Sample</button>
@@ -38,8 +38,9 @@
         </div>
         <!-- Tree Visualization Part -->
         <div class="tree" ref="tree" :style="adjustScale" style="transform-origin: top;"
-            @mousedown.self="onTreeMouseDown($event)" @mouseup.self="onTreeMouseLeave($event)">
-            <!-- Top Fake Node -->
+            @mousedown.self="onTreeMouseDown($event)" @mouseup.self="onTreeMouseLeave($event)"
+            @touchstart.self="onTreeMouseDown($event)" @touchend.self="onTreeMouseLeave($event)">
+            <!-- Top Functional Node -->
             <top-binnode id="trvl-sequence" :data="topSequence" @top-build="onTopBuild" @top-insert="onTopInsert"
                 @top-search="onTopSearch"></top-binnode>
             <div class="left-message">{{ messages.left }}</div>

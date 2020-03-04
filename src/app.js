@@ -255,16 +255,31 @@ var vm = new Vue({
         onTreeMouseDown(event) {
             console.log("Start drag")
             this.treeXY = [event.target.offsetLeft, event.target.offsetTop];
-            this.mouseXY = [event.x, event.y];
+            switch (event.type) {
+                case "mousedown": this.mouseXY = [event.x, event.y]; break;
+                case "touchstart":
+                    this.mouseXY = [event.touches[0].clientX, event.touches[0].clientY];
+                    break;
+                default: return;
+            }
             this.is_moving = true;
         },
         onTPMouseMove: function (event) {
             if (this.is_moving) {
-                this.$refs.tree.style.left = this.treeXY[0] + event.x - this.mouseXY[0] + "px";
-                this.$refs.tree.style.top = this.treeXY[1] + event.y - this.mouseXY[1] + "px";
+                let newXY;
+                switch (event.type) {
+                    case "mousemove": newXY = [event.x, event.y]; break;
+                    case "touchmove":
+                        newXY = [event.touches[0].clientX, event.touches[0].clientY];
+                        break;
+                    default: return;
+                }
+                this.$refs.tree.style.left = this.treeXY[0] + newXY[0] - this.mouseXY[0] + "px";
+                this.$refs.tree.style.top = this.treeXY[1] + newXY[1] - this.mouseXY[1] + "px";
             }
         },
         onTreeMouseLeave(e) {
+            console.log("mouse leave")
             this.is_moving = false;
         },
         // Validators

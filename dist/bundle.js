@@ -1726,16 +1726,31 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
         onTreeMouseDown(event) {
             console.log("Start drag")
             this.treeXY = [event.target.offsetLeft, event.target.offsetTop];
-            this.mouseXY = [event.x, event.y];
+            switch (event.type) {
+                case "mousedown": this.mouseXY = [event.x, event.y]; break;
+                case "touchstart":
+                    this.mouseXY = [event.touches[0].clientX, event.touches[0].clientY];
+                    break;
+                default: return;
+            }
             this.is_moving = true;
         },
         onTPMouseMove: function (event) {
             if (this.is_moving) {
-                this.$refs.tree.style.left = this.treeXY[0] + event.x - this.mouseXY[0] + "px";
-                this.$refs.tree.style.top = this.treeXY[1] + event.y - this.mouseXY[1] + "px";
+                let newXY;
+                switch (event.type) {
+                    case "mousemove": newXY = [event.x, event.y]; break;
+                    case "touchmove":
+                        newXY = [event.touches[0].clientX, event.touches[0].clientY];
+                        break;
+                    default: return;
+                }
+                this.$refs.tree.style.left = this.treeXY[0] + newXY[0] - this.mouseXY[0] + "px";
+                this.$refs.tree.style.top = this.treeXY[1] + newXY[1] - this.mouseXY[1] + "px";
             }
         },
         onTreeMouseLeave(e) {
+            console.log("mouse leave")
             this.is_moving = false;
         },
         // Validators
@@ -14390,10 +14405,10 @@ _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('top-binnode', {
     template:
         `<div class="binnode top-binnode" @click="divOnClick">
             <span v-show="!showInput" style="display: inline-block; width: 100%; height: 100%;">{{ sequence }}</span>
-            <label class="top-build-btn node-upper-btn" title="由真二叉树层次遍历序列构建, 逗号分隔. 自行保证序列合法性." 
+            <label v-show="showTopBuild" class="top-build-btn node-upper-btn" title="由真二叉树层次遍历序列构建, 逗号分隔. 自行保证序列合法性." 
                 @click.stop="emitTopBuild"><i>B</i></label>
-                <label class="top-insert-btn node-upper-btn" title="按次序插入" @click.stop="emitTopInsert"><i>I</i></label>
-                <label class="top-search-btn node-upper-btn" title="查找单个数值" @click.stop="emitTopSearch"><i>S</i></label>
+            <label v-show="showTopInsert" class="top-insert-btn node-upper-btn" title="按次序插入" @click.stop="emitTopInsert"><i>I</i></label>
+            <label v-show="showTopSearch" class="top-search-btn node-upper-btn" title="查找单个数值" @click.stop="emitTopSearch"><i>S</i></label>
             <binnode-input ref="input" v-show="showInput" v-model="sequence" @blur="showInput=false" @keyup.enter.native="emitTopInsert">
             </binnode-input>
         </div>`,
@@ -14428,6 +14443,17 @@ _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('top-binnode', {
             if (num === null) return false;
             this.sequence = num.toString();
             this.$emit('top-search', num);
+        }
+    },
+    computed: {
+        showTopSearch() {
+            return this.$parent.curTreeType !== "BinTree";
+        },
+        showTopInsert() {
+            return this.$parent.curTreeType !== "BinTree";
+        },
+        showTopBuild() {
+            return true;
         }
     },
     watch: {

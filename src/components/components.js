@@ -119,10 +119,10 @@ Vue.component('top-binnode', {
     template:
         `<div class="binnode top-binnode" @click="divOnClick">
             <span v-show="!showInput" style="display: inline-block; width: 100%; height: 100%;">{{ sequence }}</span>
-            <label class="top-build-btn node-upper-btn" title="由真二叉树层次遍历序列构建, 逗号分隔. 自行保证序列合法性." 
+            <label v-show="showTopBuild" class="top-build-btn node-upper-btn" title="由真二叉树层次遍历序列构建, 逗号分隔. 自行保证序列合法性." 
                 @click.stop="emitTopBuild"><i>B</i></label>
-                <label class="top-insert-btn node-upper-btn" title="按次序插入" @click.stop="emitTopInsert"><i>I</i></label>
-                <label class="top-search-btn node-upper-btn" title="查找单个数值" @click.stop="emitTopSearch"><i>S</i></label>
+            <label v-show="showTopInsert" class="top-insert-btn node-upper-btn" title="按次序插入" @click.stop="emitTopInsert"><i>I</i></label>
+            <label v-show="showTopSearch" class="top-search-btn node-upper-btn" title="查找单个数值" @click.stop="emitTopSearch"><i>S</i></label>
             <binnode-input ref="input" v-show="showInput" v-model="sequence" @blur="showInput=false" @keyup.enter.native="emitTopInsert">
             </binnode-input>
         </div>`,
@@ -157,6 +157,17 @@ Vue.component('top-binnode', {
             if (num === null) return false;
             this.sequence = num.toString();
             this.$emit('top-search', num);
+        }
+    },
+    computed: {
+        showTopSearch() {
+            return this.$parent.curTreeType !== "BinTree";
+        },
+        showTopInsert() {
+            return this.$parent.curTreeType !== "BinTree";
+        },
+        showTopBuild() {
+            return true;
         }
     },
     watch: {
