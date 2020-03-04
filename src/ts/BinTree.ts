@@ -118,6 +118,8 @@ export class BinTree<T> {
 
         // 逐层遍历
         this._root.y = 0;
+        this._root.active = false;
+        this._root.visited = false;
         let levels: Array<Array<BinNode<T> | IExtrNodeObj<T>>> = [[this._root]];
         nodes.push(this._root);
         for (let i: number = 0; i <= this._root.height; i++) {
@@ -130,6 +132,8 @@ export class BinTree<T> {
                     levels[i + 1].push({ x: node.x, y: levelY, parent: node });
                     continue;
                 }
+                node.active = false;
+                node.visited = false;
 
                 let deltaX = (node.data.toString().length - 1) * 6;
                 // 为内部节点添加两个孩子
@@ -238,6 +242,17 @@ export class BinTree<T> {
             }
         }
         return tree;
+    }
+
+    public buildFromBinSequence(sequence: Array<T>): void {
+        this.insertAsRoot(sequence[0]);
+        let ind = 1;
+        let Q: Deque<BinNode<T>> = new Deque([this._root]);
+        while (ind < sequence.length && !Q.empty()) {
+            let node = Q.shift();
+            if (sequence[ind] != null) Q.push(this.insertAsLC(node, sequence[ind++]));
+            if (sequence[ind] != null) Q.push(this.insertAsRC(node, sequence[ind++]));
+        }
     }
 
     // preorder Traversal and store sequence in an array.

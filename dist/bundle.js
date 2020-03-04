@@ -106,9 +106,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _js_cycle_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_js_cycle_js__WEBPACK_IMPORTED_MODULE_5__);
 /* harmony import */ var _css_index_css__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(8);
 /* harmony import */ var _css_index_css__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_css_index_css__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var _css_button_css__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(12);
+/* harmony import */ var _css_button_css__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(15);
 /* harmony import */ var _css_button_css__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(_css_button_css__WEBPACK_IMPORTED_MODULE_7__);
-/* harmony import */ var _app_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(14);
+/* harmony import */ var _app_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(17);
 
 
 
@@ -384,6 +384,8 @@ class BinTree {
         }
         // 逐层遍历
         this._root.y = 0;
+        this._root.active = false;
+        this._root.visited = false;
         let levels = [[this._root]];
         nodes.push(this._root);
         for (let i = 0; i <= this._root.height; i++) {
@@ -396,6 +398,8 @@ class BinTree {
                     levels[i + 1].push({ x: node.x, y: levelY, parent: node });
                     continue;
                 }
+                node.active = false;
+                node.visited = false;
                 let deltaX = (node.data.toString().length - 1) * 6;
                 // 为内部节点添加两个孩子
                 if (node.lc) {
@@ -509,6 +513,18 @@ class BinTree {
         }
         return tree;
     }
+    buildFromBinSequence(sequence) {
+        this.insertAsRoot(sequence[0]);
+        let ind = 1;
+        let Q = new _Deque__WEBPACK_IMPORTED_MODULE_0__["Deque"]([this._root]);
+        while (ind < sequence.length && !Q.empty()) {
+            let node = Q.shift();
+            if (sequence[ind] != null)
+                Q.push(this.insertAsLC(node, sequence[ind++]));
+            if (sequence[ind] != null)
+                Q.push(this.insertAsRC(node, sequence[ind++]));
+        }
+    }
     // preorder Traversal and store sequence in an array.
     static preorderTraversal(x) {
         let sequence = [];
@@ -604,6 +620,7 @@ class BinNode {
         this.x = 0;
         this.y = 0;
         this.active = false;
+        this.visited = false;
         this.data = e;
         this.parent = p;
         this.lc = lc;
@@ -1252,9 +1269,15 @@ module.exports = function (list, options) {
 
 // Imports
 var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(11);
+var ___CSS_LOADER_AT_RULE_IMPORT_0___ = __webpack_require__(12);
+var ___CSS_LOADER_AT_RULE_IMPORT_1___ = __webpack_require__(13);
+var ___CSS_LOADER_AT_RULE_IMPORT_2___ = __webpack_require__(14);
 exports = ___CSS_LOADER_API_IMPORT___(false);
+exports.i(___CSS_LOADER_AT_RULE_IMPORT_0___);
+exports.i(___CSS_LOADER_AT_RULE_IMPORT_1___);
+exports.i(___CSS_LOADER_AT_RULE_IMPORT_2___);
 // Module
-exports.push([module.i, "* {\r\n    padding: 0;\r\n    margin: 0;\r\n    box-sizing: border-box;\r\n    -webkit-touch-callout: none;\r\n    /*系统默认菜单被禁用*/\r\n    -webkit-user-select: none;\r\n    /*webkit浏览器*/\r\n    -khtml-user-select: none;\r\n    /*早期浏览器*/\r\n    -moz-user-select: none;\r\n    /*火狐*/\r\n    -ms-user-select: none;\r\n    /*IE10*/\r\n    user-select: none;\r\n}\r\n\r\nhtml {\r\n    font-size: 1px;\r\n    width: 100%;\r\n    height: 100%;\r\n}\r\n\r\nbody {\r\n    width: 100%;\r\n    height: 100%;\r\n}\r\n\r\n:root {\r\n    --normal-inner-h: 40rem;\r\n    --normal-outer-h: 60rem;\r\n    --normal-inner-w: 40rem;\r\n    --normal-outer-w: 60rem;\r\n    --normal-font-size: 25rem;\r\n    --normal-numcolor: rgb(55, 66, 250);\r\n    --normal-bdcolor: rgb(55, 66, 250);\r\n    --normal-bgcolor: white;\r\n    --normal-edgecolor: black;\r\n    --normal-bdwidth: 3rem;\r\n    --normal-edgewidth: 3rem;\r\n}\r\n\r\n\r\n\r\n#TreePlayground {\r\n    position: relative;\r\n    padding: 10px 50px;\r\n    width: 100%;\r\n    height: 100%;\r\n}\r\n\r\n.top-toolbar {\r\n    /* position: fixed; */\r\n    margin-left: auto;\r\n    margin-right: auto;\r\n    display: flex;\r\n    justify-content: space-evenly;\r\n    align-items: center;\r\n    height: 80px;\r\n    width: 1000px;\r\n    z-index: 100;\r\n    background-color: rgba(255, 255, 255, 0.8);\r\n}\r\n\r\n.left-toolbar {\r\n    position: fixed;\r\n    top: 100px;\r\n    z-index: 100;\r\n    background-color: rgba(255, 255, 255, 0.8);\r\n}\r\n\r\n.left-toolbar #tree-type-selector {\r\n    width: 120rem;\r\n    height: 40rem;\r\n    padding: 5rem;\r\n    font-size: 20rem;\r\n    margin-bottom: 80rem;\r\n}\r\n\r\n.left-toolbar #tree-scale-ranger input {\r\n    transform: rotate(-90deg);\r\n    display: block;\r\n    margin-bottom: 60rem;\r\n}\r\n.left-toolbar #tree-scale-ranger label {\r\n    font-size: 20rem;\r\n}\r\n\r\n.tree {\r\n    position: absolute;\r\n    /* margin-top: 100px; */\r\n    width: 50px;\r\n    left: 50%;\r\n    top: 250px;\r\n}\r\n\r\n.tree::before {\r\n    content: \"\";\r\n    display: block;\r\n    width: 30px !important;\r\n    height: 30px !important;\r\n    border: 2px dashed black !important;\r\n    border-radius: 30% !important;\r\n    position: relative;\r\n    top: -80px;\r\n    transform: translate(-50%, -50%);\r\n    cursor: move;\r\n    opacity: 0.5;\r\n    z-index: 1000;\r\n}\r\n\r\n.tree::after {\r\n    content: \"\";\r\n    display: block;\r\n    width: 0px;\r\n    height: 34px;\r\n    border: 2px solid black;\r\n    position: relative;\r\n    top: -80px;\r\n    transform: translate(-50%, -50%);\r\n    opacity: 0.5;\r\n}\r\n\r\n.tree:hover::before  {\r\n    opacity: 1;\r\n}\r\n\r\n.tree:active::before {\r\n    border-width: 3px;\r\n}\r\n\r\n.active-node {\r\n    color: red !important;\r\n    border-color: red !important;\r\n}\r\n\r\n.binnode {\r\n    display: inline-block;\r\n    white-space: nowrap;\r\n    position: absolute;\r\n    min-width: var(--normal-outer-w);\r\n    height: var(--normal-outer-h);\r\n    line-height: var(--normal-inner-h);\r\n    padding: 7rem;\r\n    border-width: var(--normal-bdwidth);\r\n    border-style: solid;\r\n    border-radius: 10rem;\r\n    border-color: var(--normal-bdcolor);\r\n    /* 居中 */\r\n    transform: translate(-50%, -50%);\r\n    font-family: \"Arial\", \"Microsoft YaHei\", \"黑体\", \"宋体\", sans-serif;\r\n    font-size: var(--normal-font-size);\r\n    font-weight: bold;\r\n    text-align: center;\r\n    text-shadow: var(--normal-numcolor);\r\n    background-color: var(--normal-bgcolor);\r\n    color: var(--normal-numcolor);\r\n    z-index: 1;\r\n}\r\n\r\n.extr-binnode {\r\n    z-index: 0;\r\n    opacity: 0.1;\r\n}\r\n\r\n.extr-binnode:hover {\r\n    opacity: 0.5;\r\n    z-index: 10;\r\n}\r\n\r\n.binnode-input {\r\n    min-width: var(--normal-inner-w);\r\n    height: var(--normal-inner-h);\r\n    border: none;\r\n    outline: none;\r\n    text-align: center;\r\n    line-height: var(--normal-inner-h);\r\n    font-size: var(--normal-font-size);\r\n}\r\n\r\n.delete-btn {\r\n    position: absolute;\r\n    top: 0;\r\n    font-size: 15rem;\r\n    line-height: 15rem;\r\n    color: grey;\r\n    opacity: 0;\r\n    cursor: pointer;\r\n    z-index: 3;\r\n}\r\n\r\n.binnode:hover .delete-btn {\r\n    opacity: 0.5;\r\n}\r\n\r\n.subtree-delete-btn {\r\n    right: 5rem;\r\n}\r\n\r\n.subtree-delete-btn:hover {\r\n    opacity: 1 !important;\r\n    color: red;\r\n}\r\n\r\n.subtree-delete-btn:active {\r\n    text-shadow: 0 0 1rem red;\r\n}\r\n\r\n.node-delete-btn {\r\n    left: 5rem;\r\n}\r\n\r\n.node-delete-btn:hover {\r\n    opacity: 1 !important;\r\n    color: blue;\r\n}\r\n\r\n.node-delete-btn:active {\r\n    text-shadow: 0 0 1rem blue;\r\n}\r\n\r\n.left-edge {\r\n    position: absolute;\r\n    border-width: var(--normal-edgewidth) 0 0 var(--normal-edgewidth);\r\n    border-style: solid;\r\n    border-color: var(--normal-edgecolor);\r\n    border-radius: 3rem;\r\n    z-index: -1;\r\n}\r\n\r\n.right-edge {\r\n    position: absolute;\r\n    border-width: var(--normal-edgewidth) var(--normal-edgewidth) 0 0;\r\n    border-style: solid;\r\n    border-color: var(--normal-edgecolor);\r\n    border-radius: 3rem;\r\n    z-index: -1;\r\n}\r\n\r\n.extr-edge {\r\n    opacity: 0.1;\r\n}", ""]);
+exports.push([module.i, "* {\r\n    padding: 0;\r\n    margin: 0;\r\n    box-sizing: border-box;\r\n    -webkit-touch-callout: none;\r\n    /*系统默认菜单被禁用*/\r\n    -webkit-user-select: none;\r\n    /*webkit浏览器*/\r\n    -khtml-user-select: none;\r\n    /*早期浏览器*/\r\n    -moz-user-select: none;\r\n    /*火狐*/\r\n    -ms-user-select: none;\r\n    /*IE10*/\r\n    user-select: none;\r\n}\r\n\r\nhtml, body {\r\n    width: 100%;\r\n    height: 100%;\r\n    min-width: 600px;\r\n}\r\n\r\n:root {\r\n    --normal-inner-h: 40px;\r\n    --normal-outer-h: 60px;\r\n    --normal-inner-w: 40px;\r\n    --normal-outer-w: 60px;\r\n    --normal-font-size: 25px;\r\n    --normal-numcolor: rgb(55, 66, 250);\r\n    --normal-bdcolor: rgb(55, 66, 250);\r\n    --normal-bgcolor: white;\r\n    --normal-edgecolor: black;\r\n    --normal-bdwidth: 3px;\r\n    --normal-edgewidth: 3px;\r\n}\r\n\r\n\r\n#TreePlayground {\r\n    position: relative;\r\n    padding: 10px 50px;\r\n    width: 100%;\r\n    height: 100%;\r\n}\r\n\r\n.tree {\r\n    position: absolute;\r\n    width: 50px;\r\n    left: 50%;\r\n    top: 300px;\r\n}\r\n\r\n.tree::before {\r\n    content: \"\";\r\n    display: block;\r\n    width: 30px !important;\r\n    height: 30px !important;\r\n    border: 2px dashed black !important;\r\n    border-radius: 30% !important;\r\n    position: relative;\r\n    top: -80px;\r\n    transform: translate(-50%, -50%);\r\n    cursor: move;\r\n    opacity: 0.5;\r\n    z-index: 1000;\r\n}\r\n\r\n.tree::after {\r\n    content: \"\";\r\n    display: block;\r\n    width: 0px;\r\n    height: 34px;\r\n    border: 2px solid black;\r\n    position: relative;\r\n    top: -80px;\r\n    transform: translate(-50%, -50%);\r\n    opacity: 0.5;\r\n}\r\n\r\n.tree:hover::before  {\r\n    opacity: 1;\r\n}\r\n\r\n.tree:active::before {\r\n    border-width: 3px;\r\n}\r\n\r\n.left-message {\r\n    position: absolute;\r\n    right: 93px;\r\n    top: -95px;\r\n    font-size: 24px;\r\n    color: gray;\r\n    white-space: nowrap;\r\n}\r\n\r\n.right-message {\r\n    position: absolute;\r\n    left: 40px;\r\n    top: -95px;\r\n    font-size: 24px;\r\n    color: gray;\r\n    white-space: nowrap;\r\n}", ""]);
 // Exports
 module.exports = exports;
 
@@ -1363,8 +1386,47 @@ function toComment(sourceMap) {
 /* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
+// Imports
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(11);
+exports = ___CSS_LOADER_API_IMPORT___(false);
+// Module
+exports.push([module.i, ".top-toolbar {\r\n    position: fixed;\r\n    left: 50%;\r\n    transform: translateX(-50%);\r\n    /* margin-left: auto; */\r\n    /* margin-right: auto; */\r\n    display: flex;\r\n    justify-content: space-between;\r\n    align-items: center;\r\n    height: 80px;\r\n    width: 800px;\r\n    min-width: 400px;\r\n    z-index: 100;\r\n    background-color: rgba(255, 255, 255, 0.8);\r\n}\r\n\r\n@media screen and (max-width: 800px) {\r\n    .top-toolbar {\r\n        flex-wrap: wrap;\r\n        width: auto;\r\n    }\r\n}\r\n\r\n#trav-intrvl-ranger,\r\n#trav-intrvl-ranger input {\r\n    width: 150px;\r\n}\r\n\r\n\r\n.top-toolbar-item {\r\n    margin: 10px;\r\n}\r\n\r\n.top-toolbar button {\r\n    width: 85px;\r\n}\r\n\r\n.left-toolbar {\r\n    position: fixed;\r\n    display: flex;\r\n    flex-direction: column;\r\n    justify-content: space-between;\r\n    align-items: center;\r\n    top: 150px;\r\n    width: 100px;\r\n    z-index: 100;\r\n    background-color: rgba(255, 255, 255, 0.8);\r\n}\r\n\r\n.left-toolbar #tree-type-selector {\r\n    width: 100%;\r\n    height: 40px;\r\n    padding: 5px;\r\n    font-size: 18px;\r\n    margin-top: 10px;\r\n    margin-bottom: 60px;\r\n}\r\n\r\n.left-toolbar button {\r\n    width: 100%;\r\n}\r\n\r\n.left-toolbar #tree-scale-ranger {\r\n    width: 100%;\r\n    align-self: center;\r\n}\r\n\r\n.left-toolbar #tree-scale-ranger input {\r\n    transform: rotate(-90deg);\r\n    transform-origin: bottom;\r\n    display: block;\r\n    /* margin-bottom: 60px; */\r\n}\r\n.left-toolbar #tree-scale-ranger h4 {\r\n    text-align: center;\r\n    margin-top: 80px;\r\n    display: block;\r\n}", ""]);
+// Exports
+module.exports = exports;
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Imports
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(11);
+exports = ___CSS_LOADER_API_IMPORT___(false);
+// Module
+exports.push([module.i, ".binnode {\r\n    display: inline-block;\r\n    white-space: nowrap;\r\n    position: absolute;\r\n    min-width: var(--normal-outer-w);\r\n    height: var(--normal-outer-h);\r\n    line-height: var(--normal-inner-h);\r\n    padding: 7px;\r\n    border-width: var(--normal-bdwidth);\r\n    border-style: solid;\r\n    border-radius: 10px;\r\n    border-color: var(--normal-bdcolor);\r\n    /* 居中 */\r\n    transform: translate(-50%, -50%);\r\n    font-family: \"Arial\", \"Microsoft YaHei\", \"黑体\", \"宋体\", sans-serif;\r\n    font-size: var(--normal-font-size);\r\n    font-weight: bold;\r\n    text-align: center;\r\n    text-shadow: var(--normal-numcolor);\r\n    background-color: var(--normal-bgcolor);\r\n    color: var(--normal-numcolor);\r\n    z-index: 1;\r\n}\r\n\r\n.extr-binnode {\r\n    z-index: 0;\r\n    opacity: 0.1;\r\n}\r\n\r\n.extr-binnode:hover {\r\n    opacity: 0.5;\r\n    z-index: 10;\r\n}\r\n\r\n.binnode-input {\r\n    min-width: var(--normal-inner-w);\r\n    height: var(--normal-inner-h);\r\n    border: none;\r\n    outline: none;\r\n    text-align: center;\r\n    line-height: var(--normal-inner-h);\r\n    font-size: var(--normal-font-size);\r\n}\r\n\r\n.active-node {\r\n    color: red !important;\r\n    border-color: red !important;\r\n}\r\n\r\n.visited-node {\r\n    color: gray !important;\r\n    border-color: gray !important;\r\n}\r\n\r\n.node-upper-btn {\r\n    position: absolute;\r\n    top: -20px;\r\n    font-size: 19px;\r\n    line-height: 20px;\r\n    width: 15px;\r\n    height: 20px;\r\n    text-align: center;\r\n    color: grey;\r\n    opacity: 0;\r\n    cursor: pointer;\r\n    z-index: 3;\r\n}\r\n\r\n.binnode:hover .node-upper-btn {\r\n    opacity: 0.5;\r\n}\r\n\r\n.subtree-delete-btn {\r\n    right: 0px;\r\n}\r\n\r\n.subtree-delete-btn:hover {\r\n    opacity: 1 !important;\r\n    color: red;\r\n}\r\n\r\n.node-delete-btn {\r\n    left: 0px;\r\n}\r\n\r\n.node-delete-btn:hover {\r\n    opacity: 1 !important;\r\n    color: blue;\r\n}\r\n\r\n.node-upper-btn:active {\r\n    text-shadow: 0 0 1px;\r\n}\r\n\r\n#trvl-sequence {\r\n    position: absolute;\r\n    top: -140px;\r\n    transform: translate(-50%, -50%);\r\n    color: gray;\r\n    border-color: gray;\r\n}\r\n\r\n.top-build-btn {\r\n    left: 0;\r\n}\r\n.top-build-btn:hover {\r\n    color: red;\r\n    opacity: 1 !important;\r\n}\r\n\r\n.top-insert-btn {\r\n    left: 50%;\r\n    transform: translateX(-50%);\r\n}\r\n\r\n.top-insert-btn:hover {\r\n    color: blue;\r\n    opacity: 1 !important;\r\n}\r\n\r\n.top-search-btn {\r\n    right: 0;\r\n}\r\n\r\n.top-search-btn:hover {\r\n    color: black;\r\n    opacity: 1 !important;\r\n}", ""]);
+// Exports
+module.exports = exports;
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Imports
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(11);
+exports = ___CSS_LOADER_API_IMPORT___(false);
+// Module
+exports.push([module.i, ".left-edge {\r\n    position: absolute;\r\n    border-width: var(--normal-edgewidth) 0 0 var(--normal-edgewidth);\r\n    border-style: solid;\r\n    border-color: var(--normal-edgecolor);\r\n    border-radius: 3px;\r\n    z-index: -1;\r\n}\r\n\r\n.right-edge {\r\n    position: absolute;\r\n    border-width: var(--normal-edgewidth) var(--normal-edgewidth) 0 0;\r\n    border-style: solid;\r\n    border-color: var(--normal-edgecolor);\r\n    border-radius: 3px;\r\n    z-index: -1;\r\n}\r\n\r\n.extr-edge {\r\n    opacity: 0.1;\r\n}", ""]);
+// Exports
+module.exports = exports;
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
 var api = __webpack_require__(9);
-            var content = __webpack_require__(13);
+            var content = __webpack_require__(16);
 
             content = content.__esModule ? content.default : content;
 
@@ -1386,7 +1448,7 @@ var exported = content.locals ? content.locals : {};
 module.exports = exported;
 
 /***/ }),
-/* 13 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Imports
@@ -1399,14 +1461,14 @@ module.exports = exports;
 
 
 /***/ }),
-/* 14 */
+/* 17 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _js_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(15);
+/* harmony import */ var _js_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(18);
 /* harmony import */ var _js_vue__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_js_vue__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _components_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(20);
+/* harmony import */ var _components_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(23);
 
 
 
@@ -1418,6 +1480,9 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
             treeScale: 100,
             curTreeType: "BinTree",
         },
+        messages: {
+            left: "", right: ""
+        },
         treeClassMap: { "BinTree": BinTree, "BST": BST, "AVL": AVL },
         trees: { "BinTree": null, "BST": null, "AVL": null, "Splay": null, "RedBlack": null },
         structInfo: {
@@ -1426,18 +1491,19 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
             edges: [[], []],
             extrEdges: [[], []],
         },
+        topSequence: [],
         trvlParams: {
-            sequence: [],
             interval: 500,
             lock: false
         },
         BSTParams: {
             allowExtrInsert: false,
         },
+        alertTag: 0
     },
     methods: {
         init() {
-            console.log("Init " + this.curTreeType);
+            this.alertAsync("Init " + this.curTreeType);
             if (localStorage["temp" + this.curTreeType]) {
                 console.log("Recover tree from localStorage.")
                 let jsonTreeObj = JSON.retrocycle(JSON.parse(localStorage["temp" + this.curTreeType]));
@@ -1450,8 +1516,8 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
         },
         reset() {
             console.log("Reset");
-            this.trvlParams.lock = false;
-            this.treeScale = 100;
+            this.messages = { left: "", right: "" };
+            this.topSequence = [];
             this.update();
         },
         update() {
@@ -1469,8 +1535,16 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
             this.tree = this.curTreeClass.genSampleTree();
             this.update();
         },
+        alertAsync(message, time = 1000) {
+            this.messages.right = message;
+            let tag = ++this.alertTag;
+            setTimeout((e = tag) => {
+                if (e === this.alertTag) this.messages.right = "";
+            }, time);
+        },
         traversal(method) {
             if (this.trvlParams.lock) return false;
+            this.update();
             this.trvlParams.lock = true;
             let sequence;
             if (method === 0)
@@ -1482,21 +1556,27 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
             else if (method == 3)
                 sequence = BinTree.levelTraversal(this.tree.root());
             // display traversal sequence
-            this.trvlParams.sequence = [];
-            this._printSequenceAsyc(sequence);
+            this.topSequence = [];
+            this.messages.left = method == 0 ? "先序遍历" : (method == 1 ? "中序遍历" :
+                (method == 2 ? "后续遍历" : (method == 3 ? "层次遍历" : "")));
+            this._printSequenceAsyc(sequence, () => { this.trvlParams.lock = false; this.messages.left = "" });
         },
-        _printSequenceAsyc(sequence) {
+        _printSequenceAsyc(sequence, callback) {
             if (sequence.length == 0) {
-                this.trvlParams.lock = false;
+                setTimeout(() => {
+                    this.update();
+                }, 2 * this.trvlParams.interval);
+                if (typeof callback === "function") callback();
                 return;
             }
             if (!this.trvlParams.lock) return false;
             let x = sequence.shift();
-            this.trvlParams.sequence.push(x);
+            this.topSequence.push(x.data);
             x.active = true;
             setTimeout(() => {
                 x.active = false;
-                this._printSequenceAsyc(sequence);
+                if (this.trvlParams.lock) x.visited = true;
+                this._printSequenceAsyc(sequence, callback);
             }, this.trvlParams.interval);
         },
 
@@ -1564,13 +1644,14 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
             }
             this.update();
         },
+        // Remove whole subtree
         onRemoveBelow(node) {
-            console.log("onRemoveBelow");
             this.tree.removeBelow(node);
             this.update();
+            this.alertAsync(`Remove Below ${node.data}`, 1000);
         },
+        // Remove one node
         onRemoveOne(node) {
-            console.log("onRemoveOne");
             this.tree.removeAt(node);
             this.tree._size--;
             if (this.curTreeType === "AVL") {
@@ -1579,9 +1660,71 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
             }
             else if (0) {}
             this.update();
+            this.alertAsync(`Remove ${node.data}`, 1000);
         },
+        // Proper Rebuild
+        onTopBuild(sequence) {
+            if (this.curTreeType !== "BinTree")
+                this.alertAsync("请自行保证合法性, 不合法的树会造成操作异常.", 2500);
+            this.tree.buildFromBinSequence(sequence);
+            this.update();
+            this.messages.left = "真二叉树层次序列构建";
+        },
+        // Insert sequence
+        onTopInsert(sequence) {
+            console.log("Insert by sequence");
+            this.topSequence = sequence;
+            this.insertAsync();
+        },
+        insertAsync() {
+            while (this.topSequence.length > 0 && this.topSequence[0] === null) this.topSequence.shift();
+            if (this.topSequence.length === 0) { this.trvlParams.lock = false; return false; }
+            let num = this.topSequence.shift();
+            this.messages.left = `Insert ${num}`;
+            this.trvlParams.lock = true;
+            this.searchAsync(this.tree.root(), num, (res) => {
+                if (res) this.alertAsync(`${num} Exists`);
+                else { this.tree.insert(num); this.alertAsync(`${num} Inserted`); }
+                this.update();
+                this.trvlParams.lock = true;
+                this.insertAsync();
+            })
+        },
+        // Search value
+        onTopSearch(num) {
+            this.update();
+            this.trvlParams.lock = true;
+            this.messages.left = `Search ${num}`;
+            this.searchAsync(this.tree.root(), num, (res) => {
+                if (res) this.alertAsync("Found");
+                else Math.random() < 0.5 ? this.alertAsync("Not Found") : this.alertAsync("404");
+            });
+        },
+        searchAsync(node, num, callback) {
+            if (!this.trvlParams.lock || !node) {
+                this.trvlParams.lock = false;
+                if (typeof callback === "function") callback(false);
+                return false;
+            }
+            node.active = true;
+            if (num === node.data) {
+                this.trvlParams.lock = false; {
+                    if (typeof callback === "function") callback(true);
+                    return true;
+                }
+            } else {
+                setTimeout(() => {
+                    node.active = false;
+                    node.visited = true;
+                    if (num < node.data) node = node.lc;
+                    else node = node.rc;
+                    this.searchAsync(node, num, callback);
+                }, this.trvlParams.interval);
+            }
+        },
+        // Drag tree
         onTreeMouseDown(event) {
-            console.log("mouse down")
+            console.log("Start drag")
             this.treeXY = [event.target.offsetLeft, event.target.offsetTop];
             this.mouseXY = [event.x, event.y];
             this.is_moving = true;
@@ -1597,11 +1740,22 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
         },
         // Validators
         assertNumber(x) {
+            if (typeof x === "string") x = x.trim();
+            if (x === "") return null;
             x = Number(x);
             if (isNaN(x)) return null;
-            if (x > 66666666666) return 66666666666;
+            if (x > 666666666666) return 666666666666;
             return x;
-        }
+        },
+        strToArr(str) {
+            str = str.trim();
+            if (str === "") return false;
+            let arr = str.split(/,|，/);
+            for (let i = 0; i < arr.length; i++) {
+                arr[i] = this.assertNumber(arr[i]);
+            }
+            return arr;
+        },
     },
     computed: {
         tree: {
@@ -1657,7 +1811,7 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
 window.vm = vm;
 
 /***/ }),
-/* 15 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, setImmediate) {/*!
@@ -13625,10 +13779,10 @@ window.vm = vm;
 
 }));
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(16), __webpack_require__(17).setImmediate))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(19), __webpack_require__(20).setImmediate))
 
 /***/ }),
-/* 16 */
+/* 19 */
 /***/ (function(module, exports) {
 
 var g;
@@ -13654,7 +13808,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 17 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {var scope = (typeof global !== "undefined" && global) ||
@@ -13710,7 +13864,7 @@ exports._unrefActive = exports.active = function(item) {
 };
 
 // setimmediate attaches itself to the global object
-__webpack_require__(18);
+__webpack_require__(21);
 // On some exotic environments, it's not clear which object `setimmediate` was
 // able to install onto.  Search each possibility in the same order as the
 // `setimmediate` library.
@@ -13721,10 +13875,10 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
                          (typeof global !== "undefined" && global.clearImmediate) ||
                          (this && this.clearImmediate);
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(16)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(19)))
 
 /***/ }),
-/* 18 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, process) {(function (global, undefined) {
@@ -13914,10 +14068,10 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
     attachTo.clearImmediate = clearImmediate;
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(16), __webpack_require__(19)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(19), __webpack_require__(22)))
 
 /***/ }),
-/* 19 */
+/* 22 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -14107,13 +14261,15 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 20 */
+/* 23 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _js_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(15);
+/* harmony import */ var _js_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(18);
 /* harmony import */ var _js_vue__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_js_vue__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _js_BinNode__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(5);
+
 
 
 _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('binnode-input', {
@@ -14123,17 +14279,27 @@ _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('binnode-input', {
         }
     }, props: ['value'],
     template: `
-        <input class="binnode-input" :style="{'width': width + 'px'}" :value="value"
-            v-on:input="$emit('input', $event.target.value)">
+        <div>
+            <input ref="input" class="binnode-input" :style="{'width': width + 'px' }" :value="value"
+                @input="$emit('input', $event.target.value)" @blur="$emit('blur')" @focus="onFocus">
+            <span ref="widthIndicator" style="display: inline-block; visibility: hidden; position: absolute; padding: 10px">{{ value }}</span>
+        </div>
     `,
     methods: {
+        forceFocus() {
+            this.$refs.input.focus();
+        },
+        onFocus() {
+            this.width = this.$refs.widthIndicator.offsetWidth;
+        },
     },
     watch: {
         value() {
-            this.width = this.value.toString().length * 16;
+            this.width = this.$refs.widthIndicator.offsetWidth;
         }
     }
 })
+
 
 _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('binnode', {
     props: ['node'],
@@ -14143,11 +14309,11 @@ _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('binnode', {
     template:
         `<div class="binnode intr-binnode" :style="{'left': node.x + 'px', 'top': node.y + 'px'}" @click="divOnClick">
             <span v-show="!showInput" style="display: inline-block; width: 100%; height: 100%;">{{ node.data }}</span>
-            <label v-show="showRemoveBelow" type="button" class="subtree-delete-btn delete-btn" title="remove below"
-                @click.stop="$emit('remove-below', node)">x</label>
-            <label v-show="showRemoveOne" type="button" class="node-delete-btn delete-btn" title="remove one" 
-                @click.stop="$emit('remove-one', node)">x</label>
-            <binnode-input ref="input" v-show="showInput" v-model="updation" @blur.native="inputOnBlur" @keyup.enter.native="emitIntrUpdate($event)">
+            <label v-show="showRemoveOne" class="node-delete-btn node-upper-btn" title="remove one" 
+                @click.stop="$emit('remove-one', node)">&times;</label>
+            <label v-show="showRemoveBelow" class="subtree-delete-btn node-upper-btn" title="remove below"
+                @click.stop="$emit('remove-below', node)">&times;</label>
+            <binnode-input ref="input" v-show="showInput" v-model="updation" @blur="inputOnBlur" @keyup.enter.native="emitIntrUpdate($event)">
             </binnode-input>
         </div>`,
     methods: {
@@ -14157,16 +14323,14 @@ _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('binnode', {
             if (x == this.node.data) { this.updation = x; e.srcElement.blur(); return false; }
             this.$emit('intr-update', [this.node, x]);
             this.updation = "";
-            e.srcElement.blur();   // force lose focus
+            this.inputOnBlur();   // force lose focus
         },
         divOnClick() {
             if (this.showInput === true) return false;
             this.updation = this.node.data;
             this.showInput = true;
-            let width = this.$el.offsetWidth;
             setTimeout(() => {
-                this.$refs.input.$el.focus();
-                this.$refs.input.width = width - 20;
+                this.$refs.input.forceFocus();
             }, 1);
         },
         inputOnBlur() {
@@ -14177,7 +14341,7 @@ _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('binnode', {
     computed: {
         showRemoveBelow() {
             var curTreeType = this.$parent.commonParams.curTreeType;
-            return curTreeType === "BinTree" || curTreeType === "BST";
+            return curTreeType === "BinTree" || curTreeType === "BST" || !this.node.parent;
         },
         showRemoveOne() {
             var curTreeType = this.$parent.commonParams.curTreeType;
@@ -14188,7 +14352,7 @@ _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('binnode', {
 
 // External BinNode
 _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('extr-binnode', {
-    data: function () {
+    data() {
         return { insertion: "", showInput: false };
     },
     props: ['node'],
@@ -14201,21 +14365,77 @@ _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('extr-binnode', {
         `,
     methods: {
         emitExtrInsert() {
-            let x = this.$parent.assertNumber(this.insertion);
-            if (x == null) return;
-            this.$emit('extr-insert', [this.node, x]);
+            let insertion = this.$parent.assertNumber(this.insertion);
+            if (insertion == null) return false;
+            this.$emit('extr-insert', [this.node, insertion]);
             this.insertion = "";
         },
         divOnClick() {
             if (this.showInput === true) return false;
             this.showInput = true;
             setTimeout(() => {
-                this.$refs.input.$el.focus();
+                this.$refs.input.forceFocus();
             }, 1);
         }
     }
 });
 
+{/*  */ }
+
+_js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('top-binnode', {
+    data() {
+        return { sequence: this.data.toString(), showInput: false };
+    },
+    props: ['data'],
+    template:
+        `<div class="binnode top-binnode" @click="divOnClick">
+            <span v-show="!showInput" style="display: inline-block; width: 100%; height: 100%;">{{ sequence }}</span>
+            <label class="top-build-btn node-upper-btn" title="由真二叉树层次遍历序列构建, 逗号分隔. 自行保证序列合法性." 
+                @click.stop="emitTopBuild"><i>B</i></label>
+                <label class="top-insert-btn node-upper-btn" title="按次序插入" @click.stop="emitTopInsert"><i>I</i></label>
+                <label class="top-search-btn node-upper-btn" title="查找单个数值" @click.stop="emitTopSearch"><i>S</i></label>
+            <binnode-input ref="input" v-show="showInput" v-model="sequence" @blur="showInput=false" @keyup.enter.native="emitTopInsert">
+            </binnode-input>
+        </div>`,
+    methods: {
+        divOnClick() {
+            if (this.showInput === true) return false;
+            this.showInput = true;
+            setTimeout(() => {
+                this.$refs.input.forceFocus();
+            }, 1);
+        },
+        emitTopBuild() {
+            if (this.$parent.tree && this.$parent.tree.root())
+                if (!confirm("Overwrite current tree?")) return false;
+
+            let sequence = this.$parent.strToArr(this.sequence);
+            this.sequence = sequence.toString();
+
+            if (sequence[0] === null) {
+                alert("Empty Root!");
+                return false;
+            }
+            this.$emit('top-build', sequence);
+        },
+        emitTopInsert() {
+            let sequence = this.$parent.strToArr(this.sequence);
+            this.sequence = sequence.toString();
+            this.$emit('top-insert', sequence);
+        },
+        emitTopSearch() {
+            let num = this.$parent.assertNumber(this.sequence);
+            if (num === null) return false;
+            this.sequence = num.toString();
+            this.$emit('top-search', num);
+        }
+    },
+    watch: {
+        data() {
+            this.sequence = this.data.toString();
+        }
+    }
+});
 
 /***/ })
 /******/ ]);

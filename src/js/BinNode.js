@@ -9,6 +9,7 @@ export class BinNode {
         this.x = 0;
         this.y = 0;
         this.active = false;
+        this.visited = false;
         this.data = e;
         this.parent = p;
         this.lc = lc;

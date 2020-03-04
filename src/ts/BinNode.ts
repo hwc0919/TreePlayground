@@ -12,6 +12,7 @@ export class BinNode<T> {
     x: number = 0;
     y: number = 0;
     active: boolean = false;
+    visited: boolean = false;
 
     static N: number = 0;
 

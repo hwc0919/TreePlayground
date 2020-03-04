@@ -1,0 +1,128 @@
+.binnode {
+    display: inline-block;
+    white-space: nowrap;
+    position: absolute;
+    min-width: var(--normal-outer-w);
+    height: var(--normal-outer-h);
+    line-height: var(--normal-inner-h);
+    padding: 7px;
+    border-width: var(--normal-bdwidth);
+    border-style: solid;
+    border-radius: 10px;
+    border-color: var(--normal-bdcolor);
+    /* 居中 */
+    transform: translate(-50%, -50%);
+    font-family: "Arial", "Microsoft YaHei", "黑体", "宋体", sans-serif;
+    font-size: var(--normal-font-size);
+    font-weight: bold;
+    text-align: center;
+    text-shadow: var(--normal-numcolor);
+    background-color: var(--normal-bgcolor);
+    color: var(--normal-numcolor);
+    z-index: 1;
+}
+
+.extr-binnode {
+    z-index: 0;
+    opacity: 0.1;
+}
+
+.extr-binnode:hover {
+    opacity: 0.5;
+    z-index: 10;
+}
+
+.binnode-input {
+    min-width: var(--normal-inner-w);
+    height: var(--normal-inner-h);
+    border: none;
+    outline: none;
+    text-align: center;
+    line-height: var(--normal-inner-h);
+    font-size: var(--normal-font-size);
+}
+
+.active-node {
+    color: red !important;
+    border-color: red !important;
+}
+
+.visited-node {
+    color: gray !important;
+    border-color: gray !important;
+}
+
+.node-upper-btn {
+    position: absolute;
+    top: -20px;
+    font-size: 19px;
+    line-height: 20px;
+    width: 15px;
+    height: 20px;
+    text-align: center;
+    color: grey;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 3;
+}
+
+.binnode:hover .node-upper-btn {
+    opacity: 0.5;
+}
+
+.subtree-delete-btn {
+    right: 0px;
+}
+
+.subtree-delete-btn:hover {
+    opacity: 1 !important;
+    color: red;
+}
+
+.node-delete-btn {
+    left: 0px;
+}
+
+.node-delete-btn:hover {
+    opacity: 1 !important;
+    color: blue;
+}
+
+.node-upper-btn:active {
+    text-shadow: 0 0 1px;
+}
+
+#trvl-sequence {
+    position: absolute;
+    top: -140px;
+    transform: translate(-50%, -50%);
+    color: gray;
+    border-color: gray;
+}
+
+.top-build-btn {
+    left: 0;
+}
+.top-build-btn:hover {
+    color: red;
+    opacity: 1 !important;
+}
+
+.top-insert-btn {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.top-insert-btn:hover {
+    color: blue;
+    opacity: 1 !important;
+}
+
+.top-search-btn {
+    right: 0;
+}
+
+.top-search-btn:hover {
+    color: black;
+    opacity: 1 !important;
+}

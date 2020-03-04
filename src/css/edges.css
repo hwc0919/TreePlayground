@@ -1,0 +1,21 @@
+.left-edge {
+    position: absolute;
+    border-width: var(--normal-edgewidth) 0 0 var(--normal-edgewidth);
+    border-style: solid;
+    border-color: var(--normal-edgecolor);
+    border-radius: 3px;
+    z-index: -1;
+}
+
+.right-edge {
+    position: absolute;
+    border-width: var(--normal-edgewidth) var(--normal-edgewidth) 0 0;
+    border-style: solid;
+    border-color: var(--normal-edgecolor);
+    border-radius: 3px;
+    z-index: -1;
+}
+
+.extr-edge {
+    opacity: 0.1;
+}

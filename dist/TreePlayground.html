@@ -4,42 +4,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TreeVisualizer - Nitromelon</title>
+    <meta name="author" content="NitroMelon">
+    <meta name="school" content="Tsinghua University">
+    <meta name="git" content="https://github.com/hwc0919/TreePlayground">
+    <title>TreePlayground - NitroMelon</title>
 </head>
 
 <body>
     <div id="TreePlayground" @mousemove='onTPMouseMove($event)'>
+        <!-- Top Toolbar -->
         <div class="top-toolbar">
-            <!-- <button class="btn" type="button" @click="saveToHistory" style="cursor:not-allowed" title="unfinish"
-                disabled>Save Tree</button> -->
-            <button class="btn btn-primary" type="button" @click="reset">Reset</button>
-            <button class="btn btn-primary" type="button" @click="loadSampleTree">Sample</button>
-            <button class="btn btn-primary" type="button" @click="traversal(0)">先序遍历</button>
-            <button class="btn btn-primary" type="button" @click="traversal(1)">中序遍历</button>
-            <button class="btn btn-primary" type="button" @click="traversal(2)">后序遍历</button>
-            <button class="btn btn-primary" type="button" @click="traversal(3)">层次遍历</button>
-            <div style="width: 180px">
-                <h4>Traversal Interval: <label v-text="trvlParams.interval + 'ms'">500ms</label></h4>
-                <input type="range" min="100" max="1500" value="500" step="100" style="width:150px;"
-                    v-model.number="trvlParams.interval">
+            <button class="btn btn-primary top-toolbar-item" type="button" @click="loadSampleTree">Sample</button>
+            <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(0)">先序遍历</button>
+            <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(1)">中序遍历</button>
+            <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(2)">后序遍历</button>
+            <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(3)">层次遍历</button>
+            <div id="trav-intrvl-ranger" class="top-toolbar-item">
+                <h4 style="margin: 5px">遍历间隔: <label v-text="trvlParams.interval + 'ms'">500ms</label></h4>
+                <input type="range" min="100" max="1500" value="500" step="100" v-model.number="trvlParams.interval">
             </div>
         </div>
+        <!-- Left Toolbar -->
         <div class="left-toolbar">
+            <button class="btn btn-default" type="button" @click="reset">Reset</button>
             <select id="tree-type-selector" v-model="curTreeType">
                 <option v-for="status, ttype in availTreeTypes" v-text="ttype" :value="ttype" :disabled="!status">
                 </option>
             </select>
             <div id="tree-scale-ranger">
                 <input type="range" min="50" max="150" value="100" v-model.number="treeScale">
-                <label>Tree Scale: <label v-text="commonParams.treeScale / 100"></label>
+                <h4>Scale: <label v-text="commonParams.treeScale + '%'"></h4>
             </div>
         </div>
         <!-- Tree Visualization Part -->
         <div class="tree" ref="tree" :style="adjustScale" style="transform-origin: top;"
             @mousedown.self="onTreeMouseDown($event)" @mouseup.self="onTreeMouseLeave($event)">
+            <!-- Top Fake Node -->
+            <top-binnode id="trvl-sequence" :data="topSequence" @top-build="onTopBuild" @top-insert="onTopInsert"
+                @top-search="onTopSearch"></top-binnode>
+            <div class="left-message">{{ messages.left }}</div>
+            <div class="right-message">{{ messages.right }}</div>
             <!-- Internal Tree Nodes -->
-            <binnode v-for="(node, ind) in structInfo.nodes" :class="{'active-node': node.active}" :node="node"
-                :key="'node' + ind" @remove-below="onRemoveBelow($event)" @remove-one="onRemoveOne($event)"
+            <binnode v-for="(node, ind) in structInfo.nodes" :node="node" :key="'node' + ind"
+                :class="{'active-node': node.active, 'visited-node': node.visited}"
+                @remove-below="onRemoveBelow($event)" @remove-one="onRemoveOne($event)"
                 @intr-update="onIntrUpdate($event)">
             </binnode>
             <!-- External Tree Nodes -->
@@ -59,8 +67,8 @@
                 :style="{'left': e[0]+'px', 'top': e[1]+'px', 'width': e[2]+'px', 'height': e[3]+'px'}"></div>
         </div>
     </div>
+    <div id="footer" style="position: fixed; left: 0; bottom: 0;">Copyright @ 2020 NitroMelon </div>
     <script src="./bundle.js"></script>
 </body>
-
 
 </html>

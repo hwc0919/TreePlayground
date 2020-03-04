@@ -9,6 +9,9 @@ var vm = new Vue({
             treeScale: 100,
             curTreeType: "BinTree",
         },
+        messages: {
+            left: "", right: ""
+        },
         treeClassMap: { "BinTree": BinTree, "BST": BST, "AVL": AVL },
         trees: { "BinTree": null, "BST": null, "AVL": null, "Splay": null, "RedBlack": null },
         structInfo: {
@@ -17,18 +20,19 @@ var vm = new Vue({
             edges: [[], []],
             extrEdges: [[], []],
         },
+        topSequence: [],
         trvlParams: {
-            sequence: [],
             interval: 500,
             lock: false
         },
         BSTParams: {
             allowExtrInsert: false,
         },
+        alertTag: 0
     },
     methods: {
         init() {
-            console.log("Init " + this.curTreeType);
+            this.alertAsync("Init " + this.curTreeType);
             if (localStorage["temp" + this.curTreeType]) {
                 console.log("Recover tree from localStorage.")
                 let jsonTreeObj = JSON.retrocycle(JSON.parse(localStorage["temp" + this.curTreeType]));
@@ -41,8 +45,8 @@ var vm = new Vue({
         },
         reset() {
             console.log("Reset");
-            this.trvlParams.lock = false;
-            this.treeScale = 100;
+            this.messages = { left: "", right: "" };
+            this.topSequence = [];
             this.update();
         },
         update() {
@@ -60,8 +64,16 @@ var vm = new Vue({
             this.tree = this.curTreeClass.genSampleTree();
             this.update();
         },
+        alertAsync(message, time = 1000) {
+            this.messages.right = message;
+            let tag = ++this.alertTag;
+            setTimeout((e = tag) => {
+                if (e === this.alertTag) this.messages.right = "";
+            }, time);
+        },
         traversal(method) {
             if (this.trvlParams.lock) return false;
+            this.update();
             this.trvlParams.lock = true;
             let sequence;
             if (method === 0)
@@ -73,21 +85,27 @@ var vm = new Vue({
             else if (method == 3)
                 sequence = BinTree.levelTraversal(this.tree.root());
             // display traversal sequence
-            this.trvlParams.sequence = [];
-            this._printSequenceAsyc(sequence);
+            this.topSequence = [];
+            this.messages.left = method == 0 ? "先序遍历" : (method == 1 ? "中序遍历" :
+                (method == 2 ? "后续遍历" : (method == 3 ? "层次遍历" : "")));
+            this._printSequenceAsyc(sequence, () => { this.trvlParams.lock = false; this.messages.left = "" });
         },
-        _printSequenceAsyc(sequence) {
+        _printSequenceAsyc(sequence, callback) {
             if (sequence.length == 0) {
-                this.trvlParams.lock = false;
+                setTimeout(() => {
+                    this.update();
+                }, 2 * this.trvlParams.interval);
+                if (typeof callback === "function") callback();
                 return;
             }
             if (!this.trvlParams.lock) return false;
             let x = sequence.shift();
-            this.trvlParams.sequence.push(x);
+            this.topSequence.push(x.data);
             x.active = true;
             setTimeout(() => {
                 x.active = false;
-                this._printSequenceAsyc(sequence);
+                if (this.trvlParams.lock) x.visited = true;
+                this._printSequenceAsyc(sequence, callback);
             }, this.trvlParams.interval);
         },
 
@@ -155,13 +173,14 @@ var vm = new Vue({
             }
             this.update();
         },
+        // Remove whole subtree
         onRemoveBelow(node) {
-            console.log("onRemoveBelow");
             this.tree.removeBelow(node);
             this.update();
+            this.alertAsync(`Remove Below ${node.data}`, 1000);
         },
+        // Remove one node
         onRemoveOne(node) {
-            console.log("onRemoveOne");
             this.tree.removeAt(node);
             this.tree._size--;
             if (this.curTreeType === "AVL") {
@@ -170,9 +189,71 @@ var vm = new Vue({
             }
             else if (0) { }
             this.update();
+            this.alertAsync(`Remove ${node.data}`, 1000);
         },
+        // Proper Rebuild
+        onTopBuild(sequence) {
+            if (this.curTreeType !== "BinTree")
+                this.alertAsync("请自行保证合法性, 不合法的树会造成操作异常.", 2500);
+            this.tree.buildFromBinSequence(sequence);
+            this.update();
+            this.messages.left = "真二叉树层次序列构建";
+        },
+        // Insert sequence
+        onTopInsert(sequence) {
+            console.log("Insert by sequence");
+            this.topSequence = sequence;
+            this.insertAsync();
+        },
+        insertAsync() {
+            while (this.topSequence.length > 0 && this.topSequence[0] === null) this.topSequence.shift();
+            if (this.topSequence.length === 0) { this.trvlParams.lock = false; return false; }
+            let num = this.topSequence.shift();
+            this.messages.left = `Insert ${num}`;
+            this.trvlParams.lock = true;
+            this.searchAsync(this.tree.root(), num, (res) => {
+                if (res) this.alertAsync(`${num} Exists`);
+                else { this.tree.insert(num); this.alertAsync(`${num} Inserted`); }
+                this.update();
+                this.trvlParams.lock = true;
+                this.insertAsync();
+            })
+        },
+        // Search value
+        onTopSearch(num) {
+            this.update();
+            this.trvlParams.lock = true;
+            this.messages.left = `Search ${num}`;
+            this.searchAsync(this.tree.root(), num, (res) => {
+                if (res) this.alertAsync("Found");
+                else Math.random() < 0.5 ? this.alertAsync("Not Found") : this.alertAsync("404");
+            });
+        },
+        searchAsync(node, num, callback) {
+            if (!this.trvlParams.lock || !node) {
+                this.trvlParams.lock = false;
+                if (typeof callback === "function") callback(false);
+                return false;
+            }
+            node.active = true;
+            if (num === node.data) {
+                this.trvlParams.lock = false; {
+                    if (typeof callback === "function") callback(true);
+                    return true;
+                }
+            } else {
+                setTimeout(() => {
+                    node.active = false;
+                    node.visited = true;
+                    if (num < node.data) node = node.lc;
+                    else node = node.rc;
+                    this.searchAsync(node, num, callback);
+                }, this.trvlParams.interval);
+            }
+        },
+        // Drag tree
         onTreeMouseDown(event) {
-            console.log("mouse down")
+            console.log("Start drag")
             this.treeXY = [event.target.offsetLeft, event.target.offsetTop];
             this.mouseXY = [event.x, event.y];
             this.is_moving = true;
@@ -188,11 +269,22 @@ var vm = new Vue({
         },
         // Validators
         assertNumber(x) {
+            if (typeof x === "string") x = x.trim();
+            if (x === "") return null;
             x = Number(x);
             if (isNaN(x)) return null;
-            if (x > 66666666666) return 66666666666;
+            if (x > 666666666666) return 666666666666;
             return x;
-        }
+        },
+        strToArr(str) {
+            str = str.trim();
+            if (str === "") return false;
+            let arr = str.split(/,|，/);
+            for (let i = 0; i < arr.length; i++) {
+                arr[i] = this.assertNumber(arr[i]);
+            }
+            return arr;
+        },
     },
     computed: {
         tree: {
