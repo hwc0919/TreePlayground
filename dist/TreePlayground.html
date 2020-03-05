@@ -14,7 +14,8 @@
     <div id="TreePlayground" @mousemove='onTPMouseMove($event)' @touchmove='onTPMouseMove($event)'>
         <!-- Top Toolbar -->
         <div class="top-toolbar">
-            <button class="btn btn-primary top-toolbar-item" type="button" @click="loadSampleTree(); update()">Sample</button>
+            <button class="btn btn-primary top-toolbar-item" type="button"
+                @click="loadSampleTree(); update()">Sample</button>
             <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(0)">先序遍历</button>
             <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(1)">中序遍历</button>
             <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(2)">后序遍历</button>
@@ -38,8 +39,8 @@
         </div>
         <!-- Tree Visualization Part -->
         <div class="tree" ref="tree" :style="adjustScale" style="transform-origin: top;"
-            @mousedown.self="onTreeMouseDown" @mouseup.self="onTreeMouseLeave"
-            @touchstart.self="onTreeMouseDown" @touchend.self="onTreeMouseLeave">
+            @mousedown.self="onTreeMouseDown" @mouseup.self="onTreeMouseLeave" @touchstart.self="onTreeMouseDown"
+            @touchend.self="onTreeMouseLeave">
             <!-- Top Functional Node -->
             <top-binnode id="trvl-sequence" :data="topSequence" @top-build="onTopBuild" @top-insert="onTopInsert"
                 @top-search="onTopSearch" @top-help="onTopHelp" @top-proper="onTopProper"></top-binnode>
@@ -47,9 +48,8 @@
             <div class="right-message">{{ messages.right }}</div>
             <!-- Internal Tree Nodes -->
             <binnode v-for="(node, ind) in structInfo.nodes" :node="node" :key="'node' + ind"
-                :class="{'active-node': node.active, 'visited-node': node.visited}"
-                @remove-below="onRemoveBelow" @remove-one="onRemoveOne"
-                @intr-update="onIntrUpdate">
+                :class="{'active-node': node.active, 'visited-node': node.visited}" @remove-below="onRemoveBelow"
+                @remove-one="onRemoveOne" @intr-update="onIntrUpdate">
             </binnode>
             <!-- External Tree Nodes -->
             <extr-binnode v-for="(node, ind) in structInfo.extrNodes" :node="node" :key="'extNode' + ind"
@@ -68,7 +68,10 @@
                 :style="{'left': e[0]+'px', 'top': e[1]+'px', 'width': e[2]+'px', 'height': e[3]+'px'}"></div>
         </div>
     </div>
-    <div id="footer" style="position: fixed; left: 0; bottom: 0;">Copyright @ 2020 NitroMelon </div>
+    <div id="footer" style="position: fixed; left: 0; bottom: 0;">Copyright @ 2020 NitroMelon
+        <a href="https://github.com/hwc0919/TreePlayground" target="_blank">Source Code</a>
+        <a href="https://github.com/hwc0919/TreePlayground/issues" target="_blank">Bug report</a>
+    </div>
     <script src="./bundle.js"></script>
 </body>
 

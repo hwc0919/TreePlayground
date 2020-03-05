@@ -1647,6 +1647,7 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
 
         // Events Handlers
         onIntrUpdate(args) {  // Internal node requests for value update
+            this.update();
             let node = args[0];
             let updation = args[1];
             let successMessage = `Change ${node.data} to ${updation}`;
@@ -1660,8 +1661,10 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
             node.data = updation;
             this.update();
             this.messages.left = successMessage;
+            node.active = true;   // Caution: Mark recent active
         },  // TODO: active newly updated node. Update before and after every action.
         onExtrInsert(args) {  // External node requests for value insertion
+            this.update();
             let node = args[0];
             let insertion = args[1];
             let curTreeType = this.curTreeType;
@@ -1678,37 +1681,47 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
                 // check new order
                 if (!this.checkNodeOrder(node, insertion)) return false;
             }
-            var updateH;
+            var updateH, retNode;
             if (curTreeType === "BinTree" || curTreeType === "BST")
                 updateH = true;
             else
                 updateH = false;
 
             if (node.isRoot)
-                this.tree.insertAsRoot(insertion, updateH);
+                retNode = this.tree.insertAsRoot(insertion, updateH);
             else if (node.isLC)
-                this.tree.insertAsLC(node.parent, insertion, updateH);
+                retNode = this.tree.insertAsLC(node.parent, insertion, updateH);
             else
-                this.tree.insertAsRC(node.parent, insertion, updateH);
+                retNode = this.tree.insertAsRC(node.parent, insertion, updateH);
 
             if (curTreeType === "AVL") {
                 this.tree.search(insertion);    // locate _hot
                 this.tree.solveInsertUnbalance();   // TODO: change to async
             }
             this.update();
+            console.log(retNode);
+            retNode.active = true;  // Caution: Mark recent active
             this.messages.left = `Insert ${insertion}`;
         },
         checkNodeOrder(node, newV) {
             let pred, succ;
             let isLC = node.isLC || BinNode.isLC(node);
-            if (isLC === true && newV > node.parent.data ||
-                isLC === true && (pred = node.parent.pred()) && newV < pred.data ||
-                isLC === false && newV < node.parent.data ||
-                isLC === false && (succ = node.parent.succ()) && newV > succ.data ||
-                node.lc && newV < node.lc.data || node.rc && newV > node.rc.data) {
-                this.alertAsync("Must maintain order.", 2500);
-                return false;
-            } return true;
+            if (node.lc === undefined) {  // External nodes
+                if (isLC === true && newV > node.parent.data ||
+                    isLC === true && (pred = node.parent.pred()) && newV < pred.data ||
+                    isLC === false && newV < node.parent.data ||
+                    isLC === false && (succ = node.parent.succ()) && newV > succ.data) {
+                    this.alertAsync("Must maintain order.", 2500);
+                    return false;
+                }
+            } else {    // Internal nodes
+                if ((pred = node.pred()) && newV < pred.data ||
+                    (succ = node.succ()) && newV > succ.data) {
+                    this.alertAsync("Must maintain order.", 2500);
+                    return false;
+                }
+            }
+            return true;
         },
         // Remove whole subtree
         onRemoveBelow(node) {
@@ -1720,10 +1733,8 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
         onRemoveOne(node) {
             this.tree.removeAt(node);
             this.tree._size--;
-            if (this.curTreeType === "AVL") {
-                this.tree.search(node.data); // locate _hot
+            if (this.curTreeType === "AVL") // BugFixed0305 : _hot already at position after removeAt
                 this.tree.solveRemoveUnbalance();
-            }
             else if (0) {}
             this.update();
             this.alertAsync(`Remove ${node.data}`);
@@ -1735,7 +1746,6 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
             this.tree.buildFromBinSequence(sequence);
             this.update();
             this.messages.left = "真二叉树层次序列构建";
-
             this.curTreeClass.checkValidity(this.tree, (res, message) => {
                 if (!res) this.alertAsync(message, 3000);
             })
@@ -1743,6 +1753,7 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
         // Insert sequence
         onTopInsert(sequence) {
             console.log("Insert by sequence");
+            this.update();
             this.topSequence = sequence;
             this.insertAsync();
         },
@@ -1752,12 +1763,15 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
             let num = this.topSequence.shift();
             this.messages.left = `Insert ${num}`;
             this.trvlParams.lock = true;
-            this.searchAsync(this.tree.root(), num, (res) => {
-                if (res) this.alertAsync(`${num} Exists`);
-                else { this.tree.insert(num); this.alertAsync(`${num} Inserted`); }
+            this.searchAsync(this.tree.root(), num, (res, node) => {
+                let recentNode = null;
+                if (res) { this.alertAsync(`${num} Exists`); recentNode = node; }
+                else { recentNode = this.tree.insert(num); this.alertAsync(`${num} Inserted`); }
                 this.update();
-                this.trvlParams.lock = true;
-                this.insertAsync();
+                if (this.topSequence.length === 0) { // Caution: Add another quit check, to fasten last recent active! 
+                    recentNode.active = true;  // Caution: Mark recent active
+                    this.trvlParams.lock = false; return false;
+                } else this.insertAsync();
             })
         },
         // Search value
@@ -1791,7 +1805,7 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
             node.active = true;
             if (num === node.data) {
                 this.trvlParams.lock = false; {
-                    if (typeof callback === "function") callback(true);
+                    if (typeof callback === "function") callback(true, node);
                     return true;
                 }
             } else {
@@ -1880,9 +1894,8 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
     },
     watch: {
         tree: {
-            handler(oldV, newV) {
+            handler() {
                 console.log("Detect Change in tree.");
-                // this.update();
             },
             deep: true,
         },
