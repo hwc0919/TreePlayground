@@ -21,8 +21,8 @@
             <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(2)">后序遍历</button>
             <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(3)">层次遍历</button>
             <div id="trav-intrvl-ranger" class="top-toolbar-item">
-                <h4 style="margin: 5px">遍历间隔: <label v-text="trvlParams.interval + 'ms'">500ms</label></h4>
-                <input type="range" min="100" max="1500" value="500" step="100" v-model.number="trvlParams.interval">
+                <h4 style="margin: 5px">遍历间隔: <label v-text="commonParams.interval + 'ms'">500ms</label></h4>
+                <input type="range" min="100" max="1500" value="500" step="100" v-model.number="commonParams.interval">
             </div>
         </div>
         <!-- Left Toolbar -->
@@ -52,8 +52,8 @@
                 @remove-one="onRemoveOne" @intr-update="onIntrUpdate">
             </binnode>
             <!-- External Tree Nodes -->
-            <extr-binnode v-for="(node, ind) in structInfo.extrNodes" :node="node" :key="'extNode' + ind"
-                @extr-insert="onExtrInsert">
+            <extr-binnode v-show="showExtr" v-for="(node, ind) in structInfo.extrNodes" :node="node"
+                :key="'extNode' + ind" @extr-insert="onExtrInsert">
             </extr-binnode>
             <!-- Internal Tree Edges -->
             <div class="left-edge" v-for="e in structInfo.edges[0]"
@@ -62,9 +62,9 @@
                 :style="{'left': e[0]+'px', 'top': e[1]+'px', 'width': e[2]+'px', 'height': e[3]+'px'}"></div>
 
             <!-- External Tree Edges -->
-            <div class="left-edge extr-edge" v-for="e in structInfo.extrEdges[0]"
+            <div v-show="showExtr" class="left-edge extr-edge" v-for="e in structInfo.extrEdges[0]"
                 :style="{'left': e[0]+'px', 'top': e[1]+'px', 'width': e[2]+'px', 'height': e[3]+'px'}"></div>
-            <div class="right-edge extr-edge" v-for="e in structInfo.extrEdges[1]"
+            <div v-show="showExtr" class="right-edge extr-edge" v-for="e in structInfo.extrEdges[1]"
                 :style="{'left': e[0]+'px', 'top': e[1]+'px', 'width': e[2]+'px', 'height': e[3]+'px'}"></div>
         </div>
     </div>

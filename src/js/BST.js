@@ -40,14 +40,21 @@ export class BST extends BinTree {
         return x;
     }
     // BST binary search, only go left when strictly smaller
-    search(e) {
-        let v = this._root;
-        this._hot = null;
+    searchIn(v, e) {
         while (v && v.data != e) {
             this._hot = v;
             v = (e < v.data) ? v.lc : v.rc;
         }
         return v;
+    }
+    // General BST search from root
+    search(e) {
+        this._hot = null;
+        return this.searchIn(this._root, e);
+    }
+    staticSearch(e) {
+        this._hot = null;
+        return this.searchIn(this._root, e);
     }
     insert(e) {
         let v = this.search(e);
@@ -73,7 +80,7 @@ export class BST extends BinTree {
             x.data = w.data;
             x = w.rc;
         }
-        this._hot = w.parent;
+        this._hot = w.parent; // important
         // bi-connect x(successor) and _hot
         if (x)
             x.parent = this._hot;
@@ -94,9 +101,9 @@ export class BST extends BinTree {
         this.update_height_above(this._hot);
         return true;
     }
-    // A sample binary search tree
+    // A sample binary search tree, Maybe called by derived class! Use new this()
     static genSampleTree() {
-        let tree = new BST(Math.ceil(Math.random() * 10) + 15); // 15 ~ 25
+        let tree = new this(Math.ceil(Math.random() * 10) + 15); // 15 ~ 25
         let N = Math.random() < 0.8 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 8);
         for (let i = 0; i < N; i++) {
             tree.insert(Math.ceil(Math.random() * 20));
@@ -108,7 +115,7 @@ export class BST extends BinTree {
         let sequence = this.inorderTraversal(tree.root());
         let res = true;
         let mis = null;
-        for (let i = 0; i < sequence.length; i++)
+        for (let i = 0; i < sequence.length - 1; i++) // BugFixed0305
             if (sequence[i].data >= sequence[i + 1].data) {
                 res = false;
                 mis = sequence[i];

@@ -1,18 +1,19 @@
-import Vue from "./js/vue"
+import Vue from "./js/vue.min"
 import "./components/components"
 
 var vm = new Vue({
     el: "#TreePlayground",
     data: {
-        availTreeTypes: { "BinTree": true, "BST": true, "AVL": true, "Splay": false, "RedBlack": false },
+        availTreeTypes: { "BinTree": true, "BST": true, "AVL": true, "Splay": true, "RedBlack": false },
         commonParams: {
-            treeScale: 100,
-            curTreeType: "BinTree",
+            curTreeType: "BinTree", // Important : Always use as `this.curTreeType`.
+            treeScale: 100, // in %
+            interval: 500   // in ms
         },
         messages: {
             left: "", right: ""
         },
-        treeClassMap: { "BinTree": BinTree, "BST": BST, "AVL": AVL },
+        treeClassMap: { "BinTree": BinTree, "BST": BST, "AVL": AVL, "Splay": Splay },
         trees: { "BinTree": null, "BST": null, "AVL": null, "Splay": null, "RedBlack": null },
         structInfo: {
             nodes: [],
@@ -20,61 +21,74 @@ var vm = new Vue({
             edges: [[], []],
             extrEdges: [[], []],
         },
-        topSequence: [],
-        trvlParams: {
-            interval: 500,
-            lock: false
+        locks: {    // TODO : seperate trvlLock and searchLock. this can wait.
+            trvlLock: false,
+            splayLock: false
         },
+        topSequence: [],
         BSTParams: {
             allowExtrInsert: false,
         },
         alertTag: 0
     },
     methods: {
+        // Init, called when change curTreeType & first mounted
         init() {
-            this.alertAsync("Init " + this.curTreeType);
+            this.alertAsync("Init " + this.curTreeType, 100, false);
             if (localStorage["temp" + this.curTreeType]) {
-                console.log("Recover tree from localStorage.")
-                let jsonTreeObj = JSON.retrocycle(JSON.parse(localStorage["temp" + this.curTreeType]));
-                this.tree = this.curTreeClass.buildFromTreeJsonObj(jsonTreeObj);
+                this.alertAsync("Read localStorage.", 100, false)
+                try {
+                    let jsonTreeObj = JSON.retrocycle(JSON.parse(localStorage["temp" + this.curTreeType]));
+                    this.tree = this.curTreeClass.buildFromTreeJsonObj(jsonTreeObj);
+                } catch (err) {
+                    this.alertAsync("Error reading localStorage.")
+                    this.loadSampleTree();
+                }
             }
             else {
-                console.log("Load default tree.")
+                this.alertAsync("Load default tree.", 100, false)
                 this.loadSampleTree();
             }
-            this.reset();
+            this.reset(false);
         },
-        reset() {
-            console.log("Reset");
-            this.messages = { left: "", right: "" };
-            this.topSequence = [];
+        // Reset, clear all messages and lock. Will call update() inside.
+        reset(all = true) {
+            if (all) {
+                this.messages = { left: "", right: "" };
+                this.topSequence = [];
+            }
+            this.alertAsync("Reset", 150, false);
+            this.isDragging = false;
+            for (let lock in this.locks) this.locks[lock] = false;
             this.update();
         },
+        // Update, update tree structure ONLY! Then save to LocalStorage. Please Always call explicitly!!!
         update() {
             console.log("Update");
-            this.trvlParams.lock = false;
             this.structInfo = this.tree.calStructInfo();
             // Save to localStorage
             localStorage["temp" + this.curTreeType] = JSON.stringify(JSON.decycle(this.tree));
             localStorage.commonParams = JSON.stringify(this.commonParams);
         },
-
-        saveToHistory() { },
-        loadFromHistory() { },
+        // Generate new sample.
         loadSampleTree() {
             this.tree = this.curTreeClass.genSampleTree();
         },
-        alertAsync(message, time = 1500) {
-            this.messages.right = message;
-            let tag = ++this.alertTag;
-            setTimeout((e = tag) => {
-                if (e === this.alertTag) this.messages.right = "";
-            }, time);
+        // non-blocking message box
+        alertAsync(message, time = 1500, forceAlert = true) {
+            if (this.messages.right === "" || forceAlert) {
+                this.messages.right = message;
+                let tag = ++this.alertTag;
+                setTimeout((e = tag) => {
+                    if (e === this.alertTag) this.messages.right = "";
+                }, time);
+            } else setTimeout(() => { this.alertAsync(message, time, false) }, 100);
         },
+        // Traversal and Display in Async way.
         traversal(method) {
-            if (this.trvlParams.lock) return false;
+            if (this.locks.trvlLock) return false;
             this.update();
-            this.trvlParams.lock = true;
+            this.locks.trvlLock = true;
             let sequence;
             if (method === 0)
                 sequence = BinTree.preorderTraversal(this.tree.root());
@@ -88,35 +102,37 @@ var vm = new Vue({
             this.topSequence = [];
             this.messages.left = method == 0 ? "先序遍历" : (method == 1 ? "中序遍历" :
                 (method == 2 ? "后续遍历" : (method == 3 ? "层次遍历" : "")));
-            this._printSequenceAsyc(sequence, () => { this.trvlParams.lock = false; this.messages.left = "" });
+            this._printSequenceAsyc(sequence, () => { this.locks.trvlLock = false; this.messages.left = "" });
         },
+        // Print sequence Async & Recur, and push to `topSequence`
         _printSequenceAsyc(sequence, callback) {
             if (sequence.length == 0) {
                 setTimeout(() => {
                     this.update();
-                }, 2 * this.trvlParams.interval);
+                }, 2 * this.commonParams.interval);
                 if (typeof callback === "function") callback();
                 return;
             }
-            if (!this.trvlParams.lock) return false;
+            if (!this.locks.trvlLock) return false;
             let x = sequence.shift();
             this.topSequence.push(x.data);
             x.active = true;
             setTimeout(() => {
                 x.active = false;
-                if (this.trvlParams.lock) x.visited = true;
+                if (this.locks.trvlLock) x.visited = true;
                 this._printSequenceAsyc(sequence, callback);
-            }, this.trvlParams.interval);
+            }, this.commonParams.interval);
         },
-
-        // Events Handlers
+        /****************************************/
+        /*           Events Handlers            */
+        /****************************************/
         onIntrUpdate(args) {  // Internal node requests for value update
             this.update();
             let node = args[0];
             let updation = args[1];
             let successMessage = `Change ${node.data} to ${updation}`;
             if (this.curTreeType !== "BinTree") {
-                if (this.tree.search(updation)) {
+                if (this.tree.staticSearch(updation)) {
                     this.alertAsync(`${updation} Exists!`);
                     return false;
                 }
@@ -138,7 +154,7 @@ var vm = new Vue({
                 return false;
             }
             if (curTreeType !== "BinTree") {
-                if (this.tree.search(insertion)) {  // Decline duplicate
+                if (this.tree.staticSearch(insertion)) {  // Decline duplicate
                     this.alertAsync(`${insertion} Exists!`);
                     return false;
                 }
@@ -159,13 +175,242 @@ var vm = new Vue({
                 retNode = this.tree.insertAsRC(node.parent, insertion, updateH);
 
             if (curTreeType === "AVL") {
-                this.tree.search(insertion);    // locate _hot
+                this.tree.staticSearch(insertion);    // locate _hot
                 this.tree.solveInsertUnbalance();   // TODO: change to async
             }
             this.update();
-            console.log(retNode);
             retNode.active = true;  // Caution: Mark recent active
             this.messages.left = `Insert ${insertion}`;
+        },
+        onRemoveBelow(node) {  // Remove whole subtree
+            this.tree.removeBelow(node);
+            this.update();
+            this.alertAsync(`Remove Below ${node.data}`);
+        },
+        onRemoveOne(node) {  // Remove one node
+            this.tree.removeAt(node);
+            this.tree._size--;
+            if (this.curTreeType === "AVL") // BugFixed0305 : _hot already at position after removeAt
+                this.tree.solveRemoveUnbalance();
+            else if (0) { }
+            this.update();
+            this.alertAsync(`Remove ${node.data}`);
+        },
+        // Proper Rebuild
+        onTopBuild(sequence) {
+            if (this.curTreeType !== "BinTree")
+                this.alertAsync("请自行保证合法性, 不合法的树会造成操作异常.", 2500);
+            this.tree.buildFromBinSequence(sequence);
+            this.update();
+            this.messages.left = "真二叉树层次序列构建";
+            this.curTreeClass.checkValidity(this.tree, (res, message) => {
+                if (!res) this.alertAsync(message, 3000);
+            })
+        },
+        // Insert `topSequence` by calling async
+        onTopInsert(sequence) {
+            console.log("Insert by sequence");
+            this.update();
+            this.topSequence = sequence;
+            this.insertSequnceAsync();
+        },
+        // Insert `topSequence` Async & Recur
+        insertSequnceAsync() {
+            while (this.topSequence.length > 0 && this.topSequence[0] === null) this.topSequence.shift();
+            if (this.topSequence.length === 0) { this.locks.trvlLock = false; return false; }
+            let num = this.topSequence.shift();
+            this.messages.left = `Insert ${num}`;
+            this.locks.trvlLock = true;
+            this.tree._hot = null; // Important: reset _hot before search
+            this.searchAsync(this.tree.root(), num, (res, nodeOrHot) => {
+                let recentNode = null;
+
+                // Deal with Splay
+                if (this.curTreeType === "Splay") { // Caution & Important & TODO : May need change
+                    if (res) { this.alertAsync(`${num} Exists`); recentNode = nodeOrHot; }
+                    this.alertAsync(nodeOrHot ? `Splay at ${nodeOrHot.data}` : "", 2000);
+
+                    // Wait & Splay & Insert in callback
+                    setTimeout(() => {
+                        this.locks.splayLock = true;
+                        this.splayAsync(nodeOrHot, (rootOrNull) => {
+                            if (!res) {
+                                if (rootOrNull === undefined) return false; // `splayLock` has been reset.
+                                this.alertAsync(`${num} Inserted`);
+                                if (rootOrNull === null) recentNode = this.tree.insertAsRoot(num);
+                                else recentNode = this.tree.insertSplitRoot(num);  // Splay ONLY!!!
+                            }
+                            /* ----------------------------------- SAME BLOCK 0000 ------------------------------------------------- */
+                            this.update();
+                            if (this.topSequence.length === 0) {
+                                recentNode.active = true;  // Caution: Mark recent active
+                                this.locks.trvlLock = false; return false;
+                            } else this.insertSequnceAsync();
+                            /* ----------------------------------------------------------------------------------------------------- */
+                        });
+                    }, this.commonParams.interval);
+                }
+                // Deal with Other 
+                else {
+                    if (res) { this.alertAsync(`${num} Exists`); recentNode = nodeOrHot; }
+                    else {
+                        recentNode = this.tree.insert(num);
+                        this.alertAsync(`${num} Inserted`);
+                    }
+                    setTimeout(() => {
+                        /* ------------------------------------- SAME BLOCK 0000 ----------------------------------------------- */
+                        this.update();
+                        if (this.topSequence.length === 0) {
+                            recentNode.active = true;  // Caution: Mark recent active
+                            this.locks.trvlLock = false; return false;
+                        } else this.insertSequnceAsync();
+                        /* ----------------------------------------------------------------------------------------------------- */
+                    }, this.commonParams.interval);
+                }
+            })
+        },
+        // Search value
+        onTopSearch(num) {
+            this.update();
+            this.locks.trvlLock = true;
+            this.messages.left = `Search ${num}`;
+
+            this.tree._hot = null;  // Important: reset _hot before search
+            this.searchAsync(this.tree.root(), num, (res, nodeOrHot) => {
+                if (res) this.alertAsync(`${num} Found`);
+                else Math.random() < 0.5 ? this.alertAsync(`${num} Not Found`) : this.alertAsync(`${num} 404`);
+                if (this.curTreeType === "Splay") {  // Exception & Important : Splay
+                    this.alertAsync(nodeOrHot ? `Splay at ${nodeOrHot.data}` : "", 2000);
+                    setTimeout(() => {
+                        this.locks.splayLock = true;
+                        this.splayAsync(nodeOrHot);
+                    }, this.commonParams.interval);
+                }
+            });
+        },
+        // Search Async & Recur.  Notice: callback target if found else _hot
+        searchAsync(node, num, callback) {
+            if (!this.locks.trvlLock || !node) {
+                this.locks.trvlLock = false;
+                if (typeof callback === "function") callback(false, this.tree._hot);
+                return false;
+            }
+            node.active = true;
+            if (num === node.data) {
+                this.locks.trvlLock = false; {
+                    if (typeof callback === "function") callback(true, node);
+                    return true;
+                }
+            } else {
+                this.tree._hot = node;  // Important: set _hot
+                setTimeout(() => {
+                    node.active = false;
+                    node.visited = true;
+                    if (num < node.data) node = node.lc;
+                    else node = node.rc;
+                    this.searchAsync(node, num, callback);
+                }, this.commonParams.interval);
+            }
+        },
+        // Splay Async & Recur
+        splayAsync(v, callback) {
+            if (!v) {
+                this.locks.splayLock = false;
+                if (typeof callback === "function") callback(null);
+                return false;
+            }
+            if (!this.locks.splayLock) {
+                if (typeof callback === "function") callback(undefined);
+                return false;
+            }
+            let p, g;
+            if ((p = v.parent) && (g = p.parent)) {
+                this.tree.splayDoubleLayer(v, p, g);
+            } else if (p = v.parent) {
+                this.tree.splaySingleLayer(v, p);
+                v.parent = null; // Important!!! Missing will cause dead loop.
+            }
+            if (!v.parent) {
+                this.tree._root = v;
+                this.update();
+                v.active = true;
+                this.locks.splayLock = false;
+                setTimeout(() => {
+                    if (typeof callback === "function") callback(v);
+                }, this.commonParams.interval);
+            } else {
+                this.update();
+                v.active = true;
+                setTimeout(() => {
+                    this.splayAsync(v, callback);
+                }, this.commonParams.interval);
+            }
+        },
+        onTopHelp(message) {
+            this.alertAsync(message, 5000);
+        },
+        // Proper Binary Tree Sequence
+        onTopProper() {
+            let sequence = BinTree.properTraversal(this.tree.root());
+            for (let i = 0; i < sequence.length; i++) sequence[i] = sequence[i] ? sequence[i].data : null;
+            let last = sequence.length - 1;
+            while (sequence[last] === null) last--;
+            sequence.splice(last + 1);
+            this.topSequence = sequence;
+        },
+        /****************************************/
+        /*               Dragger                */
+        /****************************************/
+        onTreeMouseDown(event) {
+            console.log("Start dragging")
+            this.treeXY = [event.target.offsetLeft, event.target.offsetTop];
+            switch (event.type) {
+                case "mousedown": this.mouseXY = [event.x, event.y]; break;
+                case "touchstart":
+                    this.mouseXY = [event.touches[0].clientX, event.touches[0].clientY];
+                    break;
+                default: return;
+            }
+            this.isDragging = true;
+        },
+        onTPMouseMove: function (event) {
+            if (this.isDragging) {
+                let newXY;
+                switch (event.type) {
+                    case "mousemove": newXY = [event.x, event.y]; break;
+                    case "touchmove":
+                        newXY = [event.touches[0].clientX, event.touches[0].clientY];
+                        break;
+                    default: return;
+                }
+                this.$refs.tree.style.left = this.treeXY[0] + newXY[0] - this.mouseXY[0] + "px";
+                this.$refs.tree.style.top = this.treeXY[1] + newXY[1] - this.mouseXY[1] + "px";
+            }
+        },
+        onTreeMouseLeave(e) {
+            console.log("End dragging")
+            this.isDragging = false;
+        },
+        /****************************************/
+        /*              Validators              */
+        /****************************************/
+        assertNumber(x) {
+            if (typeof x === "string") x = x.trim();
+            if (x === "") return null;
+            x = Number(x);
+            if (isNaN(x)) return null;
+            if (x > 666666666666) return 666666666666;
+            if (x < -52013141516) return -52013141516;
+            return x;
+        },
+        strToArr(str) {
+            str = str.trim();
+            if (str === "") return null;
+            let arr = str.split(/,|，/);
+            for (let i = 0; i < arr.length; i++) {
+                arr[i] = this.assertNumber(arr[i]);
+            }
+            return arr;
         },
         checkNodeOrder(node, newV) {
             let pred, succ;
@@ -187,150 +432,6 @@ var vm = new Vue({
             }
             return true;
         },
-        // Remove whole subtree
-        onRemoveBelow(node) {
-            this.tree.removeBelow(node);
-            this.update();
-            this.alertAsync(`Remove Below ${node.data}`);
-        },
-        // Remove one node
-        onRemoveOne(node) {
-            this.tree.removeAt(node);
-            this.tree._size--;
-            if (this.curTreeType === "AVL") // BugFixed0305 : _hot already at position after removeAt
-                this.tree.solveRemoveUnbalance();
-            else if (0) { }
-            this.update();
-            this.alertAsync(`Remove ${node.data}`);
-        },
-        // Proper Rebuild
-        onTopBuild(sequence) {
-            if (this.curTreeType !== "BinTree")
-                this.alertAsync("请自行保证合法性, 不合法的树会造成操作异常.", 2500);
-            this.tree.buildFromBinSequence(sequence);
-            this.update();
-            this.messages.left = "真二叉树层次序列构建";
-            this.curTreeClass.checkValidity(this.tree, (res, message) => {
-                if (!res) this.alertAsync(message, 3000);
-            })
-        },
-        // Insert sequence
-        onTopInsert(sequence) {
-            console.log("Insert by sequence");
-            this.update();
-            this.topSequence = sequence;
-            this.insertAsync();
-        },
-        insertAsync() {
-            while (this.topSequence.length > 0 && this.topSequence[0] === null) this.topSequence.shift();
-            if (this.topSequence.length === 0) { this.trvlParams.lock = false; return false; }
-            let num = this.topSequence.shift();
-            this.messages.left = `Insert ${num}`;
-            this.trvlParams.lock = true;
-            this.searchAsync(this.tree.root(), num, (res, node) => {
-                let recentNode = null;
-                if (res) { this.alertAsync(`${num} Exists`); recentNode = node; }
-                else { recentNode = this.tree.insert(num); this.alertAsync(`${num} Inserted`); }
-                this.update();
-                if (this.topSequence.length === 0) { // Caution: Add another quit check, to fasten last recent active! 
-                    recentNode.active = true;  // Caution: Mark recent active
-                    this.trvlParams.lock = false; return false;
-                } else this.insertAsync();
-            })
-        },
-        // Search value
-        onTopSearch(num) {
-            this.update();
-            this.trvlParams.lock = true;
-            this.messages.left = `Search ${num}`;
-            this.searchAsync(this.tree.root(), num, (res) => {
-                if (res) this.alertAsync("Found");
-                else Math.random() < 0.5 ? this.alertAsync("Not Found") : this.alertAsync("404");
-            });
-        },
-        onTopHelp(message) {
-            this.alertAsync(message, 5000);
-        },
-        // Proper Binary Tree Sequence
-        onTopProper() {
-            let sequence = BinTree.properTraversal(this.tree.root());
-            for (let i = 0; i < sequence.length; i++) sequence[i] = sequence[i] ? sequence[i].data : null;
-            let last = sequence.length - 1;
-            while (sequence[last] === null) last--;
-            sequence.splice(last + 1);
-            this.topSequence = sequence;
-        },
-        searchAsync(node, num, callback) {
-            if (!this.trvlParams.lock || !node) {
-                this.trvlParams.lock = false;
-                if (typeof callback === "function") callback(false);
-                return false;
-            }
-            node.active = true;
-            if (num === node.data) {
-                this.trvlParams.lock = false; {
-                    if (typeof callback === "function") callback(true, node);
-                    return true;
-                }
-            } else {
-                setTimeout(() => {
-                    node.active = false;
-                    node.visited = true;
-                    if (num < node.data) node = node.lc;
-                    else node = node.rc;
-                    this.searchAsync(node, num, callback);
-                }, this.trvlParams.interval);
-            }
-        },
-        // Drag tree
-        onTreeMouseDown(event) {
-            console.log("Start drag")
-            this.treeXY = [event.target.offsetLeft, event.target.offsetTop];
-            switch (event.type) {
-                case "mousedown": this.mouseXY = [event.x, event.y]; break;
-                case "touchstart":
-                    this.mouseXY = [event.touches[0].clientX, event.touches[0].clientY];
-                    break;
-                default: return;
-            }
-            this.is_moving = true;
-        },
-        onTPMouseMove: function (event) {
-            if (this.is_moving) {
-                let newXY;
-                switch (event.type) {
-                    case "mousemove": newXY = [event.x, event.y]; break;
-                    case "touchmove":
-                        newXY = [event.touches[0].clientX, event.touches[0].clientY];
-                        break;
-                    default: return;
-                }
-                this.$refs.tree.style.left = this.treeXY[0] + newXY[0] - this.mouseXY[0] + "px";
-                this.$refs.tree.style.top = this.treeXY[1] + newXY[1] - this.mouseXY[1] + "px";
-            }
-        },
-        onTreeMouseLeave(e) {
-            console.log("mouse leave")
-            this.is_moving = false;
-        },
-        // Validators
-        assertNumber(x) {
-            if (typeof x === "string") x = x.trim();
-            if (x === "") return null;
-            x = Number(x);
-            if (isNaN(x)) return null;
-            if (x > 666666666666) return 666666666666;
-            return x;
-        },
-        strToArr(str) {
-            str = str.trim();
-            if (str === "") return null;
-            let arr = str.split(/,|，/);
-            for (let i = 0; i < arr.length; i++) {
-                arr[i] = this.assertNumber(arr[i]);
-            }
-            return arr;
-        },
     },
     computed: {
         tree: {
@@ -341,7 +442,7 @@ var vm = new Vue({
         },
         curTreeType: {
             get() { return this.commonParams.curTreeType; },
-            set(newV) { this.commonParams.curTreeType = newV; }
+            set(newV) { this.commonParams.curTreeType = newV; this.init(); } // Important!!!
         },
         treeScale: {
             get() { return this.commonParams.treeScale; },
@@ -354,6 +455,9 @@ var vm = new Vue({
         adjustScale() {
             let scale = this.treeScale / 100;
             return `transform:scale(${scale})`;
+        },
+        showExtr() {
+            return true;
         }
     },
     watch: {
@@ -362,10 +466,6 @@ var vm = new Vue({
                 console.log("Detect Change in tree.");
             },
             deep: true,
-        },
-        // Init tree object when tree type changes.
-        curTreeType() {
-            this.init();
         },
         commonParams: {
             handler() {

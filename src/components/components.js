@@ -1,4 +1,4 @@
-import Vue from "../js/vue"
+import Vue from "../js/vue.min"
 
 
 // Input Component with Self-ajusted-width 
@@ -12,7 +12,7 @@ Vue.component('binnode-input', {
         <div>
             <input ref="input" class="binnode-input" :style="{'width': width + 'px' }" :value="value"
                 @input="$emit('input', $event.target.value)" @blur="$emit('blur')" @focus="onFocus">
-            <span ref="widthIndicator" style="display: inline-block; visibility: hidden; position: absolute; padding: 10px">{{ value }}</span>
+            <span ref="widthIndicator" style="display: inline-block; visibility: hidden; position: absolute;">{{ value }}</span>
         </div>
     `,
     methods: {
@@ -40,7 +40,8 @@ Vue.component('binnode', {
         return { showInput: false, updation: this.node.data }
     },
     template:
-        `<div class="binnode intr-binnode" :style="{'left': node.x + 'px', 'top': node.y + 'px'}" @click="divOnClick">
+        `<div class="binnode intr-binnode" :style="{'left': node.x + 'px', 'top': node.y + 'px'}" :title="'height: ' + node.height"
+                @click="divOnClick">
             <span v-show="!showInput" style="display: inline-block; width: 100%; height: 100%;">{{ node.data }}</span>
             <label v-show="showRemoveOne" class="node-delete-btn node-upper-btn" title="remove one" 
                 @click.stop="$emit('remove-one', node)">&times;</label>
@@ -72,13 +73,13 @@ Vue.component('binnode', {
         }
     },
     computed: {
-        showRemoveBelow() {
-            var curTreeType = this.$parent.commonParams.curTreeType;
+        showRemoveBelow() { // Only BinTree or BST or Root!
+            let curTreeType = this.$parent.commonParams.curTreeType;
             return curTreeType === "BinTree" || curTreeType === "BST" || !this.node.parent;
         },
-        showRemoveOne() {
-            var curTreeType = this.$parent.commonParams.curTreeType;
-            return curTreeType !== "BinTree";
+        showRemoveOne() {  // Except BinTree and Splay!
+            let curTreeType = this.$parent.commonParams.curTreeType;
+            return curTreeType !== "BinTree" && curTreeType !== "Splay";
         }
     }
 });

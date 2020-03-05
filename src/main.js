@@ -3,6 +3,7 @@ import "./js/BST";
 import "./js/BinNode";
 import "./js/BinTree";
 import "./js/AVL";
+import "./js/Splay";
 import "./js/cycle.js";
 import "./css/index.css";
 import "./css/button.css";

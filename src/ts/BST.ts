@@ -44,15 +44,25 @@ export class BST<T> extends BinTree<T> {
     }
 
     // BST binary search, only go left when strictly smaller
-    public search(e: T): BinNode<T> {
-        let v = this._root;
-        this._hot = null;
+    protected searchIn(v: BinNode<T>, e: T) {
         while (v && v.data != e) {
             this._hot = v;
             v = (e < v.data) ? v.lc : v.rc;
         }
         return v;
     }
+
+    // General BST search from root
+    public search(e: T): BinNode<T> {
+        this._hot = null;
+        return this.searchIn(this._root, e);
+    }
+
+    public staticSearch(e: T): BinNode<T> { // final
+        this._hot = null;
+        return this.searchIn(this._root, e);
+    }
+
     public insert(e: T): BinNode<T> {
         let v: BinNode<T> = this.search(e);
         if (v) return v;
@@ -74,7 +84,7 @@ export class BST<T> extends BinTree<T> {
             x.data = w.data;
             x = w.rc;
         }
-        this._hot = w.parent;
+        this._hot = w.parent; // important
         // bi-connect x(successor) and _hot
         if (x) x.parent = this._hot;
         if (!this._hot) this._root = x;
@@ -94,9 +104,9 @@ export class BST<T> extends BinTree<T> {
         return true;
     }
 
-    // A sample binary search tree
+    // A sample binary search tree, Maybe called by derived class! Use new this()
     static genSampleTree(): BST<number> {
-        let tree: BST<number> = new BST(Math.ceil(Math.random() * 10) + 15); // 15 ~ 25
+        let tree: BST<number> = new this(Math.ceil(Math.random() * 10) + 15); // 15 ~ 25
         let N: number = Math.random() < 0.8 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 8);
 
         for (let i: number = 0; i < N; i++) {
@@ -110,7 +120,7 @@ export class BST<T> extends BinTree<T> {
         let sequence: Array<BinNode<T>> = this.inorderTraversal(tree.root());
         let res: boolean = true;
         let mis: BinNode<T> = null;
-        for (let i = 0; i < sequence.length; i++)
+        for (let i = 0; i < sequence.length - 1; i++)   // BugFixed0305
             if (sequence[i].data >= sequence[i + 1].data) { res = false; mis = sequence[i]; break; }
 
         let message: string = (mis === null) ? "" : `节点${mis.data}处不满足顺序性!`;

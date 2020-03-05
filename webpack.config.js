@@ -11,7 +11,7 @@ module.exports = {
     mode: "none",
     plugins: [
         new VueLoaderPlugin(),
-        // new HtmlWebpackPlugin()
+        // new HtmlWebpackPlugin(),
     ],
     module: {
         rules: [
