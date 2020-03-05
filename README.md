@@ -5,10 +5,16 @@ To run the program, you only need to download contents in folder 'dist'.
 
 No compatibility testing. Functions are only guaranteed in Chrome.
 
-若要运行程序, 只需要下载文件夹"dist"中的内容即可.
+若要运行程序, 只需要下载文件夹"dist"中的内容即可(项目容量很小, 也可全部下载).
 
 没有测试兼容性, 只能保证chorme浏览器下正常运行.
 
+感谢
+[@Wasted-waste](https://github.com/Wasted-waste),
+[@B5DX](https://github.com/B5DX),
+[@lijingwei233](https://github.com/lijingwei233),
+[@baijiangying](https://github.com/baijiangying),
+等同学对调试的帮助的建议
 
 ## Objective
 I create this project for the purpose of helping those who are learning BBST in Data Structure course.

@@ -42,6 +42,7 @@ var vm = new Vue({
                 console.log("Load default tree.")
                 this.loadSampleTree();
             }
+            this.reset();
         },
         reset() {
             console.log("Reset");
@@ -62,9 +63,8 @@ var vm = new Vue({
         loadFromHistory() { },
         loadSampleTree() {
             this.tree = this.curTreeClass.genSampleTree();
-            this.update();
         },
-        alertAsync(message, time = 1000) {
+        alertAsync(message, time = 1500) {
             this.messages.right = message;
             let tag = ++this.alertTag;
             setTimeout((e = tag) => {
@@ -111,48 +111,36 @@ var vm = new Vue({
 
         // Events Handlers
         onIntrUpdate(args) {  // Internal node requests for value update
-            console.log("onIntrUpdate");
             let node = args[0];
             let updation = args[1];
+            let successMessage = `Change ${node.data} to ${updation}`;
             if (this.curTreeType !== "BinTree") {
                 if (this.tree.search(updation)) {
-                    alert("Already exists!");
-                    return false;
-                } else if (BinNode.isLC(node) && updation > node.parent.data ||
-                    BinNode.isRC(node) && updation < node.parent.data ||
-                    node.lc && updation < node.lc.data ||
-                    node.rc && updation > node.rc.data) {
-                    alert("Must maintain order.");
+                    this.alertAsync(`${updation} Exists!`);
                     return false;
                 }
+                if (!this.checkNodeOrder(node, updation)) return false;
             }
             node.data = updation;
             this.update();
-        },
+            this.messages.left = successMessage;
+        },  // TODO: active newly updated node. Update before and after every action.
         onExtrInsert(args) {  // External node requests for value insertion
-            console.log("onExtrInsert");
             let node = args[0];
             let insertion = args[1];
             let curTreeType = this.curTreeType;
 
             if (curTreeType === "Splay") {
-                alert("Can't insert at external nodes in SplayTree.");
+                this.alertAsync("Can't insert at external nodes in SplayTree.", 3000);
                 return false;
             }
             if (curTreeType !== "BinTree") {
                 if (this.tree.search(insertion)) {  // Decline duplicate
-                    alert("Already exists!");
+                    this.alertAsync(`${insertion} Exists!`);
                     return false;
                 }
-                // pred and succ of parent
-                let pred, succ;
-                if (node.isLC === true && insertion > node.parent.data ||
-                    node.isLC === true && (pred = node.parent.pred()) && insertion < pred.data ||
-                    node.isLC === false && insertion < node.parent.data ||
-                    node.isLC === false && (succ = node.parent.succ()) && insertion > succ.data) {
-                    alert("Must maintain order.");
-                    return false;
-                }
+                // check new order
+                if (!this.checkNodeOrder(node, insertion)) return false;
             }
             var updateH;
             if (curTreeType === "BinTree" || curTreeType === "BST")
@@ -169,15 +157,28 @@ var vm = new Vue({
 
             if (curTreeType === "AVL") {
                 this.tree.search(insertion);    // locate _hot
-                this.tree.solveInsertUnbalance();
+                this.tree.solveInsertUnbalance();   // TODO: change to async
             }
             this.update();
+            this.messages.left = `Insert ${insertion}`;
+        },
+        checkNodeOrder(node, newV) {
+            let pred, succ;
+            let isLC = node.isLC || BinNode.isLC(node);
+            if (isLC === true && newV > node.parent.data ||
+                isLC === true && (pred = node.parent.pred()) && newV < pred.data ||
+                isLC === false && newV < node.parent.data ||
+                isLC === false && (succ = node.parent.succ()) && newV > succ.data ||
+                node.lc && newV < node.lc.data || node.rc && newV > node.rc.data) {
+                this.alertAsync("Must maintain order.", 2500);
+                return false;
+            } return true;
         },
         // Remove whole subtree
         onRemoveBelow(node) {
             this.tree.removeBelow(node);
             this.update();
-            this.alertAsync(`Remove Below ${node.data}`, 1000);
+            this.alertAsync(`Remove Below ${node.data}`);
         },
         // Remove one node
         onRemoveOne(node) {
@@ -189,7 +190,7 @@ var vm = new Vue({
             }
             else if (0) { }
             this.update();
-            this.alertAsync(`Remove ${node.data}`, 1000);
+            this.alertAsync(`Remove ${node.data}`);
         },
         // Proper Rebuild
         onTopBuild(sequence) {
@@ -198,6 +199,10 @@ var vm = new Vue({
             this.tree.buildFromBinSequence(sequence);
             this.update();
             this.messages.left = "真二叉树层次序列构建";
+
+            this.curTreeClass.checkValidity(this.tree, (res, message) => {
+                if (!res) this.alertAsync(message, 3000);
+            })
         },
         // Insert sequence
         onTopInsert(sequence) {
@@ -228,6 +233,18 @@ var vm = new Vue({
                 if (res) this.alertAsync("Found");
                 else Math.random() < 0.5 ? this.alertAsync("Not Found") : this.alertAsync("404");
             });
+        },
+        onTopHelp(message) {
+            this.alertAsync(message, 5000);
+        },
+        // Proper Binary Tree Sequence
+        onTopProper() {
+            let sequence = BinTree.properTraversal(this.tree.root());
+            for (let i = 0; i < sequence.length; i++) sequence[i] = sequence[i] ? sequence[i].data : null;
+            let last = sequence.length - 1;
+            while (sequence[last] === null) last--;
+            sequence.splice(last + 1);
+            this.topSequence = sequence;
         },
         searchAsync(node, num, callback) {
             if (!this.trvlParams.lock || !node) {
@@ -293,7 +310,7 @@ var vm = new Vue({
         },
         strToArr(str) {
             str = str.trim();
-            if (str === "") return false;
+            if (str === "") return null;
             let arr = str.split(/,|，/);
             for (let i = 0; i < arr.length; i++) {
                 arr[i] = this.assertNumber(arr[i]);
@@ -306,7 +323,6 @@ var vm = new Vue({
             get() { return this.trees[this.curTreeType]; },
             set(newTree) {
                 this.trees[this.curTreeType] = newTree;
-                this.update();
             }
         },
         curTreeType: {

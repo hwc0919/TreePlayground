@@ -96,14 +96,28 @@ export class BST extends BinTree {
     }
     // A sample binary search tree
     static genSampleTree() {
-        let tree = new BST(10);
-        let a = tree.insertAsLC(tree.root(), 5);
-        tree.insertAsLC(a, 2);
-        tree.insertAsRC(a, 7);
-        a = tree.insertAsRC(tree.root(), 16);
-        tree.insertAsLC(a, 12);
-        tree.insertAsRC(a, 20);
+        let tree = new BST(Math.ceil(Math.random() * 10) + 15); // 15 ~ 25
+        let N = Math.random() < 0.8 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 8);
+        for (let i = 0; i < N; i++) {
+            tree.insert(Math.ceil(Math.random() * 20));
+            tree.insert(Math.ceil(Math.random() * 20) + 20);
+        }
         return tree;
+    }
+    static checkValidity(tree, callback) {
+        let sequence = this.inorderTraversal(tree.root());
+        let res = true;
+        let mis = null;
+        for (let i = 0; i < sequence.length; i++)
+            if (sequence[i].data >= sequence[i + 1].data) {
+                res = false;
+                mis = sequence[i];
+                break;
+            }
+        let message = (mis === null) ? "" : `节点${mis.data}处不满足顺序性!`;
+        if (typeof callback === "function")
+            callback(res, message);
+        return res;
     }
 }
 window['BST'] = BST;

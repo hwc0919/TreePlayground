@@ -104,6 +104,7 @@ export class BinTree<T> {
         if (rc) rc.parent = x;
     }
 
+    // Calculate coordinates of nodes and edges! Core Function! Edit with caution!
     public calStructInfo(): ITreeStructInfo<T> {
         let nodes = [];
         let edges = [[], []];
@@ -250,8 +251,10 @@ export class BinTree<T> {
         let Q: Deque<BinNode<T>> = new Deque([this._root]);
         while (ind < sequence.length && !Q.empty()) {
             let node = Q.shift();
-            if (sequence[ind] != null) Q.push(this.insertAsLC(node, sequence[ind++]));
-            if (sequence[ind] != null) Q.push(this.insertAsRC(node, sequence[ind++]));
+            if (sequence[ind] != null) Q.push(this.insertAsLC(node, sequence[ind]));
+            ind++;
+            if (sequence[ind] != null) Q.push(this.insertAsRC(node, sequence[ind]));
+            ind++;
         }
     }
 
@@ -269,7 +272,6 @@ export class BinTree<T> {
         }
         return sequence;
     }
-
     static inorderTraversal<T>(x: BinNode<T>): Array<BinNode<T>> {
         let sequence = [];
         let stk: Array<BinNode<T>> = [];
@@ -284,7 +286,6 @@ export class BinTree<T> {
         }
         return sequence;
     }
-
     static postorderTraversal<T>(x: BinNode<T>): Array<BinNode<T>> {
         let sequence = [];
         let stk: Array<BinNode<T>> = [x];
@@ -302,8 +303,6 @@ export class BinTree<T> {
         }
         return sequence;
     }
-
-
     static levelTraversal<T>(x: BinNode<T>): Array<BinNode<T>> {
         let sequence: Array<BinNode<T>> = [];
         let Q: Deque<BinNode<T>> = new Deque([x]);
@@ -315,17 +314,36 @@ export class BinTree<T> {
         }
         return sequence;
     }
+    static properTraversal<T>(x: BinNode<T>): Array<BinNode<T>> {
+        let sequence: Array<BinNode<T>> = [];
+        let Q: Deque<BinNode<T>> = new Deque([x]);
+        while (!Q.empty()) {
+            x = Q.shift();
+            sequence.push(x);
+            if (x) { Q.push(x.lc); Q.push(x.rc); }
+        }
+        return sequence;
+    }
 
     // A sample binary tree
     static genSampleTree(): BinTree<number> {
-        let tree: BinTree<number> = new BinTree(1);
-        let a: BinNode<number> = tree.insertAsLC(tree.root(), 2);
-        tree.insertAsLC(a, 3);
-        tree.insertAsRC(a, 4);
-        a = tree.insertAsRC(tree.root(), 5);
-        tree.insertAsLC(a, 6);
-        tree.insertAsRC(a, 7);
+        let tree: BinTree<number> = new BinTree(Math.ceil(Math.random() * 10));
+        let nodes: Array<BinNode<number>> = [tree.root()];
+        let N: number = Math.random() < 0.8 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 8);
+
+        while (N--) {
+            let ind: number = Math.floor(Math.random() * nodes.length);
+            let node: BinNode<number> = nodes[ind];
+            if (!node.lc) nodes.push(tree.insertAsLC(node, Math.ceil(Math.random() * 20)));
+            if (!node.rc) nodes.push(tree.insertAsRC(node, Math.ceil(Math.random() * 20)));
+            nodes.splice(ind, 1);
+        }
         return tree;
+    }
+
+    static checkValidity<T>(tree: BinTree<T>, callback: Function): boolean {
+        if (typeof callback === "function") callback(true);
+        return true;
     }
 }
 

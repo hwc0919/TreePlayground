@@ -1,5 +1,6 @@
 import { BinTree } from "./BinTree"
 import { BinNode } from "./BinNode"
+import { Deque } from "./Deque";
 
 
 export class BST<T> extends BinTree<T> {
@@ -95,14 +96,26 @@ export class BST<T> extends BinTree<T> {
 
     // A sample binary search tree
     static genSampleTree(): BST<number> {
-        let tree = new BST(10);
-        let a: BinNode<number> = tree.insertAsLC(tree.root(), 5);
-        tree.insertAsLC(a, 2);
-        tree.insertAsRC(a, 7);
-        a = tree.insertAsRC(tree.root(), 16);
-        tree.insertAsLC(a, 12);
-        tree.insertAsRC(a, 20);
+        let tree: BST<number> = new BST(Math.ceil(Math.random() * 10) + 15); // 15 ~ 25
+        let N: number = Math.random() < 0.8 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 8);
+
+        for (let i: number = 0; i < N; i++) {
+            tree.insert(Math.ceil(Math.random() * 20));
+            tree.insert(Math.ceil(Math.random() * 20) + 20);
+        }
         return tree;
+    }
+
+    static checkValidity<T>(tree: BST<T>, callback: Function): boolean {
+        let sequence: Array<BinNode<T>> = this.inorderTraversal(tree.root());
+        let res: boolean = true;
+        let mis: BinNode<T> = null;
+        for (let i = 0; i < sequence.length; i++)
+            if (sequence[i].data >= sequence[i + 1].data) { res = false; mis = sequence[i]; break; }
+
+        let message: string = (mis === null) ? "" : `节点${mis.data}处不满足顺序性!`;
+        if (typeof callback === "function") callback(res, message);
+        return res;
     }
 }
 

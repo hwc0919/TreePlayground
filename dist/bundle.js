@@ -269,14 +269,28 @@ class BST extends _BinTree__WEBPACK_IMPORTED_MODULE_0__["BinTree"] {
     }
     // A sample binary search tree
     static genSampleTree() {
-        let tree = new BST(10);
-        let a = tree.insertAsLC(tree.root(), 5);
-        tree.insertAsLC(a, 2);
-        tree.insertAsRC(a, 7);
-        a = tree.insertAsRC(tree.root(), 16);
-        tree.insertAsLC(a, 12);
-        tree.insertAsRC(a, 20);
+        let tree = new BST(Math.ceil(Math.random() * 10) + 15); // 15 ~ 25
+        let N = Math.random() < 0.8 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 8);
+        for (let i = 0; i < N; i++) {
+            tree.insert(Math.ceil(Math.random() * 20));
+            tree.insert(Math.ceil(Math.random() * 20) + 20);
+        }
         return tree;
+    }
+    static checkValidity(tree, callback) {
+        let sequence = this.inorderTraversal(tree.root());
+        let res = true;
+        let mis = null;
+        for (let i = 0; i < sequence.length; i++)
+            if (sequence[i].data >= sequence[i + 1].data) {
+                res = false;
+                mis = sequence[i];
+                break;
+            }
+        let message = (mis === null) ? "" : `节点${mis.data}处不满足顺序性!`;
+        if (typeof callback === "function")
+            callback(res, message);
+        return res;
     }
 }
 window['BST'] = BST;
@@ -371,6 +385,7 @@ class BinTree {
         if (rc)
             rc.parent = x;
     }
+    // Calculate coordinates of nodes and edges! Core Function! Edit with caution!
     calStructInfo() {
         let nodes = [];
         let edges = [[], []];
@@ -520,9 +535,11 @@ class BinTree {
         while (ind < sequence.length && !Q.empty()) {
             let node = Q.shift();
             if (sequence[ind] != null)
-                Q.push(this.insertAsLC(node, sequence[ind++]));
+                Q.push(this.insertAsLC(node, sequence[ind]));
+            ind++;
             if (sequence[ind] != null)
-                Q.push(this.insertAsRC(node, sequence[ind++]));
+                Q.push(this.insertAsRC(node, sequence[ind]));
+            ind++;
         }
     }
     // preorder Traversal and store sequence in an array.
@@ -586,16 +603,39 @@ class BinTree {
         }
         return sequence;
     }
+    static properTraversal(x) {
+        let sequence = [];
+        let Q = new _Deque__WEBPACK_IMPORTED_MODULE_0__["Deque"]([x]);
+        while (!Q.empty()) {
+            x = Q.shift();
+            sequence.push(x);
+            if (x) {
+                Q.push(x.lc);
+                Q.push(x.rc);
+            }
+        }
+        return sequence;
+    }
     // A sample binary tree
     static genSampleTree() {
-        let tree = new BinTree(1);
-        let a = tree.insertAsLC(tree.root(), 2);
-        tree.insertAsLC(a, 3);
-        tree.insertAsRC(a, 4);
-        a = tree.insertAsRC(tree.root(), 5);
-        tree.insertAsLC(a, 6);
-        tree.insertAsRC(a, 7);
+        let tree = new BinTree(Math.ceil(Math.random() * 10));
+        let nodes = [tree.root()];
+        let N = Math.random() < 0.8 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 8);
+        while (N--) {
+            let ind = Math.floor(Math.random() * nodes.length);
+            let node = nodes[ind];
+            if (!node.lc)
+                nodes.push(tree.insertAsLC(node, Math.ceil(Math.random() * 20)));
+            if (!node.rc)
+                nodes.push(tree.insertAsRC(node, Math.ceil(Math.random() * 20)));
+            nodes.splice(ind, 1);
+        }
         return tree;
+    }
+    static checkValidity(tree, callback) {
+        if (typeof callback === "function")
+            callback(true);
+        return true;
     }
 }
 window['BinTree'] = BinTree;
@@ -766,9 +806,34 @@ class AVL extends _BST__WEBPACK_IMPORTED_MODULE_0__["BST"] {
     }
     static genSampleTree() {
         let tree = new AVL();
-        for (let i = 1; i < 20; i += 3)
-            tree.insert(i);
+        let N = 5 + (Math.random() < 0.5 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 10));
+        for (let i = 0; i < N; i++)
+            tree.insert(Math.ceil(Math.random() * 30));
         return tree;
+    }
+    static checkValidity(tree, callback) {
+        let sequence = this.inorderTraversal(tree.root());
+        let res = true;
+        let mis = null;
+        for (let i = 0; i < sequence.length - 1; i++)
+            if (sequence[i].data >= sequence[i + 1].data) {
+                res = false;
+                mis = sequence[i];
+                break;
+            }
+        let message = (mis === null) ? "" : `节点${mis.data}处不满足顺序性!`;
+        if (res) { // check AVL
+            for (let i = 0; i < sequence.length; i++)
+                if (!this.avlBalanced(sequence[i])) {
+                    res = false;
+                    mis = sequence[i];
+                    break;
+                }
+            message = (mis === null) ? message : `节点${mis.data}处不满足AVL平衡!`;
+        }
+        if (typeof callback === "function")
+            callback(res, message);
+        return res;
     }
 }
 window["AVL"] = AVL;
@@ -1403,7 +1468,7 @@ module.exports = exports;
 var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(11);
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
-exports.push([module.i, ".binnode {\r\n    display: inline-block;\r\n    white-space: nowrap;\r\n    position: absolute;\r\n    min-width: var(--normal-outer-w);\r\n    height: var(--normal-outer-h);\r\n    line-height: var(--normal-inner-h);\r\n    padding: 7px;\r\n    border-width: var(--normal-bdwidth);\r\n    border-style: solid;\r\n    border-radius: 10px;\r\n    border-color: var(--normal-bdcolor);\r\n    /* 居中 */\r\n    transform: translate(-50%, -50%);\r\n    font-family: \"Arial\", \"Microsoft YaHei\", \"黑体\", \"宋体\", sans-serif;\r\n    font-size: var(--normal-font-size);\r\n    font-weight: bold;\r\n    text-align: center;\r\n    text-shadow: var(--normal-numcolor);\r\n    background-color: var(--normal-bgcolor);\r\n    color: var(--normal-numcolor);\r\n    z-index: 1;\r\n}\r\n\r\n.extr-binnode {\r\n    z-index: 0;\r\n    opacity: 0.1;\r\n}\r\n\r\n.extr-binnode:hover {\r\n    opacity: 0.5;\r\n    z-index: 10;\r\n}\r\n\r\n.binnode-input {\r\n    min-width: var(--normal-inner-w);\r\n    height: var(--normal-inner-h);\r\n    border: none;\r\n    outline: none;\r\n    text-align: center;\r\n    line-height: var(--normal-inner-h);\r\n    font-size: var(--normal-font-size);\r\n}\r\n\r\n.active-node {\r\n    color: red !important;\r\n    border-color: red !important;\r\n}\r\n\r\n.visited-node {\r\n    color: gray !important;\r\n    border-color: gray !important;\r\n}\r\n\r\n.node-upper-btn {\r\n    position: absolute;\r\n    top: -20px;\r\n    font-size: 19px;\r\n    line-height: 20px;\r\n    width: 15px;\r\n    height: 20px;\r\n    text-align: center;\r\n    color: grey;\r\n    opacity: 0;\r\n    cursor: pointer;\r\n    z-index: 3;\r\n}\r\n\r\n.binnode:hover .node-upper-btn {\r\n    opacity: 0.5;\r\n}\r\n\r\n.subtree-delete-btn {\r\n    right: 0px;\r\n}\r\n\r\n.subtree-delete-btn:hover {\r\n    opacity: 1 !important;\r\n    color: red;\r\n}\r\n\r\n.node-delete-btn {\r\n    left: 0px;\r\n}\r\n\r\n.node-delete-btn:hover {\r\n    opacity: 1 !important;\r\n    color: blue;\r\n}\r\n\r\n.node-upper-btn:active {\r\n    text-shadow: 0 0 1px;\r\n}\r\n\r\n#trvl-sequence {\r\n    position: absolute;\r\n    top: -140px;\r\n    transform: translate(-50%, -50%);\r\n    color: gray;\r\n    border-color: gray;\r\n}\r\n\r\n.top-build-btn {\r\n    left: 0;\r\n}\r\n.top-build-btn:hover {\r\n    color: red;\r\n    opacity: 1 !important;\r\n}\r\n\r\n.top-insert-btn {\r\n    left: 50%;\r\n    transform: translateX(-50%);\r\n}\r\n\r\n.top-insert-btn:hover {\r\n    color: blue;\r\n    opacity: 1 !important;\r\n}\r\n\r\n.top-search-btn {\r\n    right: 0;\r\n}\r\n\r\n.top-search-btn:hover {\r\n    color: black;\r\n    opacity: 1 !important;\r\n}", ""]);
+exports.push([module.i, ".binnode {\r\n    display: inline-block;\r\n    white-space: nowrap;\r\n    position: absolute;\r\n    min-width: var(--normal-outer-w);\r\n    height: var(--normal-outer-h);\r\n    line-height: var(--normal-inner-h);\r\n    padding: 7px;\r\n    border-width: var(--normal-bdwidth);\r\n    border-style: solid;\r\n    border-radius: 10px;\r\n    border-color: var(--normal-bdcolor);\r\n    /* 居中 */\r\n    transform: translate(-50%, -50%);\r\n    font-family: \"Arial\", \"Microsoft YaHei\", \"黑体\", \"宋体\", sans-serif;\r\n    font-size: var(--normal-font-size);\r\n    font-weight: bold;\r\n    text-align: center;\r\n    text-shadow: var(--normal-numcolor);\r\n    background-color: var(--normal-bgcolor);\r\n    color: var(--normal-numcolor);\r\n    z-index: 1;\r\n}\r\n\r\n.extr-binnode {\r\n    z-index: 0;\r\n    opacity: 0.1;\r\n}\r\n\r\n.extr-binnode:hover {\r\n    opacity: 0.5;\r\n    z-index: 10;\r\n}\r\n\r\n.binnode-input {\r\n    min-width: var(--normal-inner-w);\r\n    height: var(--normal-inner-h);\r\n    border: none;\r\n    outline: none;\r\n    text-align: center;\r\n    line-height: var(--normal-inner-h);\r\n    font-size: var(--normal-font-size);\r\n}\r\n\r\n.active-node {\r\n    color: red !important;\r\n    border-color: red !important;\r\n}\r\n\r\n.visited-node {\r\n    color: gray !important;\r\n    border-color: gray !important;\r\n}\r\n\r\n.node-upper-btn, .node-left-btn {\r\n    position: absolute;\r\n    top: -20px;\r\n    font-size: 19px;\r\n    line-height: 20px;\r\n    width: 15px;\r\n    height: 20px;\r\n    text-align: center;\r\n    color: grey;\r\n    opacity: 0;\r\n    cursor: pointer;\r\n    z-index: 3;\r\n}\r\n\r\n.binnode:hover .node-upper-btn, .binnode:hover .node-left-btn {\r\n    opacity: 0.5;\r\n}\r\n\r\n.subtree-delete-btn {\r\n    right: 0px;\r\n}\r\n\r\n.subtree-delete-btn:hover {\r\n    opacity: 1 !important;\r\n    color: red;\r\n}\r\n\r\n.node-delete-btn {\r\n    left: 0px;\r\n}\r\n\r\n.node-delete-btn:hover {\r\n    opacity: 1 !important;\r\n    color: blue;\r\n}\r\n\r\n.node-upper-btn:active, .node-left-btn:active {\r\n    text-shadow: 0 0 1px;\r\n}\r\n\r\n#trvl-sequence {\r\n    position: absolute;\r\n    top: -140px;\r\n    transform: translate(-50%, -50%);\r\n    color: gray;\r\n    border-color: gray;\r\n}\r\n\r\n.top-proper-btn {\r\n    left: -20px;\r\n}\r\n\r\n.top-proper-btn:hover {\r\n    opacity: 1 !important;\r\n}\r\n\r\n.top-build-btn {\r\n    left: 0;\r\n}\r\n\r\n.top-build-btn:hover {\r\n    color: red;\r\n    opacity: 1 !important;\r\n}\r\n\r\n.top-insert-btn {\r\n    left: 50%;\r\n    transform: translateX(-50%);\r\n}\r\n\r\n.top-insert-btn:hover {\r\n    color: blue;\r\n    opacity: 1 !important;\r\n}\r\n\r\n.top-search-btn {\r\n    right: 0;\r\n}\r\n\r\n.top-search-btn:hover {\r\n    color: black;\r\n    opacity: 1 !important;\r\n}\r\n\r\n.node-left-btn {\r\n    left: -20px;\r\n}\r\n\r\n.top-help-btn {\r\n    top: 10px;\r\n}\r\n\r\n.top-help-btn:hover {\r\n    color: blue;\r\n    opacity: 1 !important;\r\n}", ""]);
 // Exports
 module.exports = exports;
 
@@ -1513,6 +1578,7 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
                 console.log("Load default tree.")
                 this.loadSampleTree();
             }
+            this.reset();
         },
         reset() {
             console.log("Reset");
@@ -1533,9 +1599,8 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
         loadFromHistory() { },
         loadSampleTree() {
             this.tree = this.curTreeClass.genSampleTree();
-            this.update();
         },
-        alertAsync(message, time = 1000) {
+        alertAsync(message, time = 1500) {
             this.messages.right = message;
             let tag = ++this.alertTag;
             setTimeout((e = tag) => {
@@ -1582,48 +1647,36 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
 
         // Events Handlers
         onIntrUpdate(args) {  // Internal node requests for value update
-            console.log("onIntrUpdate");
             let node = args[0];
             let updation = args[1];
+            let successMessage = `Change ${node.data} to ${updation}`;
             if (this.curTreeType !== "BinTree") {
                 if (this.tree.search(updation)) {
-                    alert("Already exists!");
-                    return false;
-                } else if (BinNode.isLC(node) && updation > node.parent.data ||
-                    BinNode.isRC(node) && updation < node.parent.data ||
-                    node.lc && updation < node.lc.data ||
-                    node.rc && updation > node.rc.data) {
-                    alert("Must maintain order.");
+                    this.alertAsync(`${updation} Exists!`);
                     return false;
                 }
+                if (!this.checkNodeOrder(node, updation)) return false;
             }
             node.data = updation;
             this.update();
-        },
+            this.messages.left = successMessage;
+        },  // TODO: active newly updated node. Update before and after every action.
         onExtrInsert(args) {  // External node requests for value insertion
-            console.log("onExtrInsert");
             let node = args[0];
             let insertion = args[1];
             let curTreeType = this.curTreeType;
 
             if (curTreeType === "Splay") {
-                alert("Can't insert at external nodes in SplayTree.");
+                this.alertAsync("Can't insert at external nodes in SplayTree.", 3000);
                 return false;
             }
             if (curTreeType !== "BinTree") {
                 if (this.tree.search(insertion)) {  // Decline duplicate
-                    alert("Already exists!");
+                    this.alertAsync(`${insertion} Exists!`);
                     return false;
                 }
-                // pred and succ of parent
-                let pred, succ;
-                if (node.isLC === true && insertion > node.parent.data ||
-                    node.isLC === true && (pred = node.parent.pred()) && insertion < pred.data ||
-                    node.isLC === false && insertion < node.parent.data ||
-                    node.isLC === false && (succ = node.parent.succ()) && insertion > succ.data) {
-                    alert("Must maintain order.");
-                    return false;
-                }
+                // check new order
+                if (!this.checkNodeOrder(node, insertion)) return false;
             }
             var updateH;
             if (curTreeType === "BinTree" || curTreeType === "BST")
@@ -1640,15 +1693,28 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
 
             if (curTreeType === "AVL") {
                 this.tree.search(insertion);    // locate _hot
-                this.tree.solveInsertUnbalance();
+                this.tree.solveInsertUnbalance();   // TODO: change to async
             }
             this.update();
+            this.messages.left = `Insert ${insertion}`;
+        },
+        checkNodeOrder(node, newV) {
+            let pred, succ;
+            let isLC = node.isLC || BinNode.isLC(node);
+            if (isLC === true && newV > node.parent.data ||
+                isLC === true && (pred = node.parent.pred()) && newV < pred.data ||
+                isLC === false && newV < node.parent.data ||
+                isLC === false && (succ = node.parent.succ()) && newV > succ.data ||
+                node.lc && newV < node.lc.data || node.rc && newV > node.rc.data) {
+                this.alertAsync("Must maintain order.", 2500);
+                return false;
+            } return true;
         },
         // Remove whole subtree
         onRemoveBelow(node) {
             this.tree.removeBelow(node);
             this.update();
-            this.alertAsync(`Remove Below ${node.data}`, 1000);
+            this.alertAsync(`Remove Below ${node.data}`);
         },
         // Remove one node
         onRemoveOne(node) {
@@ -1660,7 +1726,7 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
             }
             else if (0) {}
             this.update();
-            this.alertAsync(`Remove ${node.data}`, 1000);
+            this.alertAsync(`Remove ${node.data}`);
         },
         // Proper Rebuild
         onTopBuild(sequence) {
@@ -1669,6 +1735,10 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
             this.tree.buildFromBinSequence(sequence);
             this.update();
             this.messages.left = "真二叉树层次序列构建";
+
+            this.curTreeClass.checkValidity(this.tree, (res, message) => {
+                if (!res) this.alertAsync(message, 3000);
+            })
         },
         // Insert sequence
         onTopInsert(sequence) {
@@ -1699,6 +1769,18 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
                 if (res) this.alertAsync("Found");
                 else Math.random() < 0.5 ? this.alertAsync("Not Found") : this.alertAsync("404");
             });
+        },
+        onTopHelp(message) {
+            this.alertAsync(message, 5000);
+        },
+        // Proper Binary Tree Sequence
+        onTopProper() {
+            let sequence = BinTree.properTraversal(this.tree.root());
+            for (let i = 0; i < sequence.length; i++) sequence[i] = sequence[i] ? sequence[i].data : null;
+            let last = sequence.length - 1;
+            while (sequence[last] === null) last--;
+            sequence.splice(last + 1);
+            this.topSequence = sequence;
         },
         searchAsync(node, num, callback) {
             if (!this.trvlParams.lock || !node) {
@@ -1764,7 +1846,7 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
         },
         strToArr(str) {
             str = str.trim();
-            if (str === "") return false;
+            if (str === "") return null;
             let arr = str.split(/,|，/);
             for (let i = 0; i < arr.length; i++) {
                 arr[i] = this.assertNumber(arr[i]);
@@ -1777,7 +1859,6 @@ var vm = new _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a({
             get() { return this.trees[this.curTreeType]; },
             set(newTree) {
                 this.trees[this.curTreeType] = newTree;
-                this.update();
             }
         },
         curTreeType: {
@@ -14281,12 +14362,12 @@ process.umask = function() { return 0; };
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _js_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(18);
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var _js_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(18);
 /* harmony import */ var _js_vue__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_js_vue__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _js_BinNode__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(5);
 
 
 
+// Input Component with Self-ajusted-width 
 _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('binnode-input', {
     data: function () {
         return {
@@ -14310,12 +14391,15 @@ _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('binnode-input', {
     },
     watch: {
         value() {
-            this.width = this.$refs.widthIndicator.offsetWidth;
+            process.nextTick(() => {
+                this.width = this.$refs.widthIndicator.offsetWidth;
+            })
         }
     }
 })
 
 
+// Internal BinNode
 _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('binnode', {
     props: ['node'],
     data() {
@@ -14373,7 +14457,7 @@ _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('extr-binnode', {
     props: ['node'],
     template:
         `<div class="binnode extr-binnode" :style="{'left': node.x + 'px', 'top': node.y + 'px'}" @click="divOnClick">
-            <binnode-input ref="input" v-show="showInput" v-model="insertion" @blur.native="showInput = false" 
+            <binnode-input ref="input" v-show="showInput" v-model="insertion" @blur="showInput = false" 
                 @keyup.enter.native="emitExtrInsert">
             </binnode-input>
         </div>
@@ -14388,18 +14472,24 @@ _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('extr-binnode', {
         divOnClick() {
             if (this.showInput === true) return false;
             this.showInput = true;
-            setTimeout(() => {
+            process.nextTick(() => {
                 this.$refs.input.forceFocus();
-            }, 1);
+            })
         }
     }
 });
 
-{/*  */ }
 
+// Top Funtion Node
 _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('top-binnode', {
     data() {
-        return { sequence: this.data.toString(), showInput: false };
+        return {
+            sequence: this.data.toString(), showInput: false, helpInd: -1,
+            helpMessages: ["B: 真二叉树构建, 逗号分隔. 例如 1,,2,,3 对应 {1: [null, 2: [null, 3]]}",
+                "I: (回车)输入序列依次插入, 逗号分隔. 上限为666..666(具体几个不告诉你)",
+                "S: 输入单个数值进行搜索",
+                "P: 生成真二叉树层次遍历序列(复制下来就可以随时重建啦)"]
+        };
     },
     props: ['data'],
     template:
@@ -14409,6 +14499,8 @@ _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('top-binnode', {
                 @click.stop="emitTopBuild"><i>B</i></label>
             <label v-show="showTopInsert" class="top-insert-btn node-upper-btn" title="按次序插入" @click.stop="emitTopInsert"><i>I</i></label>
             <label v-show="showTopSearch" class="top-search-btn node-upper-btn" title="查找单个数值" @click.stop="emitTopSearch"><i>S</i></label>
+            <label class="top-help-btn node-left-btn" title="help" @click.stop="emitTopHelp"><i>?</i></label>
+            <label class="top-proper-btn node-upper-btn" title="生成真二叉序列" @click.stop="$emit('top-proper')"><i>P</i></label>
             <binnode-input ref="input" v-show="showInput" v-model="sequence" @blur="showInput=false" @keyup.enter.native="emitTopInsert">
             </binnode-input>
         </div>`,
@@ -14416,25 +14508,25 @@ _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('top-binnode', {
         divOnClick() {
             if (this.showInput === true) return false;
             this.showInput = true;
-            setTimeout(() => {
+            process.nextTick(() => {
                 this.$refs.input.forceFocus();
-            }, 1);
+            })
         },
         emitTopBuild() {
-            if (this.$parent.tree && this.$parent.tree.root())
-                if (!confirm("Overwrite current tree?")) return false;
-
+            if (this.sequence === "") return false;
             let sequence = this.$parent.strToArr(this.sequence);
-            this.sequence = sequence.toString();
-
-            if (sequence[0] === null) {
+            if (!sequence || sequence[0] === null) {
                 alert("Empty Root!");
                 return false;
             }
+            if (this.$parent.tree && this.$parent.tree.root())
+                if (!confirm("Overwrite current tree?")) return false;
+            this.sequence = sequence.toString();
             this.$emit('top-build', sequence);
         },
         emitTopInsert() {
             let sequence = this.$parent.strToArr(this.sequence);
+            if (!sequence || sequence.length === 0) return false;
             this.sequence = sequence.toString();
             this.$emit('top-insert', sequence);
         },
@@ -14443,6 +14535,14 @@ _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('top-binnode', {
             if (num === null) return false;
             this.sequence = num.toString();
             this.$emit('top-search', num);
+        },
+        emitTopHelp() {
+            this.helpInd = ++this.helpInd % this.helpMessages.length;
+            let enableHelp = [this.showTopBuild, this.showTopInsert, this.showTopSearch, true]
+            let failSafe = 0;
+            while (!enableHelp[this.helpInd] && failSafe++ < 5)
+                this.helpInd = ++this.helpInd % this.helpMessages.length;
+            if (enableHelp[this.helpInd]) this.$emit('top-help', this.helpMessages[this.helpInd]);
         }
     },
     computed: {
@@ -14462,6 +14562,7 @@ _js_vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('top-binnode', {
         }
     }
 });
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(22)))
 
 /***/ })
 /******/ ]);

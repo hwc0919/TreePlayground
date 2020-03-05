@@ -50,9 +50,34 @@ class AVL extends BST {
     }
     static genSampleTree() {
         let tree = new AVL();
-        for (let i = 1; i < 20; i += 3)
-            tree.insert(i);
+        let N = 5 + (Math.random() < 0.5 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 10));
+        for (let i = 0; i < N; i++)
+            tree.insert(Math.ceil(Math.random() * 30));
         return tree;
+    }
+    static checkValidity(tree, callback) {
+        let sequence = this.inorderTraversal(tree.root());
+        let res = true;
+        let mis = null;
+        for (let i = 0; i < sequence.length - 1; i++)
+            if (sequence[i].data >= sequence[i + 1].data) {
+                res = false;
+                mis = sequence[i];
+                break;
+            }
+        let message = (mis === null) ? "" : `节点${mis.data}处不满足顺序性!`;
+        if (res) { // check AVL
+            for (let i = 0; i < sequence.length; i++)
+                if (!this.avlBalanced(sequence[i])) {
+                    res = false;
+                    mis = sequence[i];
+                    break;
+                }
+            message = (mis === null) ? message : `节点${mis.data}处不满足AVL平衡!`;
+        }
+        if (typeof callback === "function")
+            callback(res, message);
+        return res;
     }
 }
 window["AVL"] = AVL;

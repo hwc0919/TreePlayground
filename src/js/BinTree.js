@@ -78,6 +78,7 @@ export class BinTree {
         if (rc)
             rc.parent = x;
     }
+    // Calculate coordinates of nodes and edges! Core Function! Edit with caution!
     calStructInfo() {
         let nodes = [];
         let edges = [[], []];
@@ -227,9 +228,11 @@ export class BinTree {
         while (ind < sequence.length && !Q.empty()) {
             let node = Q.shift();
             if (sequence[ind] != null)
-                Q.push(this.insertAsLC(node, sequence[ind++]));
+                Q.push(this.insertAsLC(node, sequence[ind]));
+            ind++;
             if (sequence[ind] != null)
-                Q.push(this.insertAsRC(node, sequence[ind++]));
+                Q.push(this.insertAsRC(node, sequence[ind]));
+            ind++;
         }
     }
     // preorder Traversal and store sequence in an array.
@@ -293,16 +296,39 @@ export class BinTree {
         }
         return sequence;
     }
+    static properTraversal(x) {
+        let sequence = [];
+        let Q = new Deque([x]);
+        while (!Q.empty()) {
+            x = Q.shift();
+            sequence.push(x);
+            if (x) {
+                Q.push(x.lc);
+                Q.push(x.rc);
+            }
+        }
+        return sequence;
+    }
     // A sample binary tree
     static genSampleTree() {
-        let tree = new BinTree(1);
-        let a = tree.insertAsLC(tree.root(), 2);
-        tree.insertAsLC(a, 3);
-        tree.insertAsRC(a, 4);
-        a = tree.insertAsRC(tree.root(), 5);
-        tree.insertAsLC(a, 6);
-        tree.insertAsRC(a, 7);
+        let tree = new BinTree(Math.ceil(Math.random() * 10));
+        let nodes = [tree.root()];
+        let N = Math.random() < 0.8 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 8);
+        while (N--) {
+            let ind = Math.floor(Math.random() * nodes.length);
+            let node = nodes[ind];
+            if (!node.lc)
+                nodes.push(tree.insertAsLC(node, Math.ceil(Math.random() * 20)));
+            if (!node.rc)
+                nodes.push(tree.insertAsRC(node, Math.ceil(Math.random() * 20)));
+            nodes.splice(ind, 1);
+        }
         return tree;
+    }
+    static checkValidity(tree, callback) {
+        if (typeof callback === "function")
+            callback(true);
+        return true;
     }
 }
 window['BinTree'] = BinTree;

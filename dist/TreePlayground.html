@@ -14,7 +14,7 @@
     <div id="TreePlayground" @mousemove='onTPMouseMove($event)' @touchmove='onTPMouseMove($event)'>
         <!-- Top Toolbar -->
         <div class="top-toolbar">
-            <button class="btn btn-primary top-toolbar-item" type="button" @click="loadSampleTree">Sample</button>
+            <button class="btn btn-primary top-toolbar-item" type="button" @click="loadSampleTree(); update()">Sample</button>
             <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(0)">先序遍历</button>
             <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(1)">中序遍历</button>
             <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(2)">后序遍历</button>
@@ -38,22 +38,22 @@
         </div>
         <!-- Tree Visualization Part -->
         <div class="tree" ref="tree" :style="adjustScale" style="transform-origin: top;"
-            @mousedown.self="onTreeMouseDown($event)" @mouseup.self="onTreeMouseLeave($event)"
-            @touchstart.self="onTreeMouseDown($event)" @touchend.self="onTreeMouseLeave($event)">
+            @mousedown.self="onTreeMouseDown" @mouseup.self="onTreeMouseLeave"
+            @touchstart.self="onTreeMouseDown" @touchend.self="onTreeMouseLeave">
             <!-- Top Functional Node -->
             <top-binnode id="trvl-sequence" :data="topSequence" @top-build="onTopBuild" @top-insert="onTopInsert"
-                @top-search="onTopSearch"></top-binnode>
+                @top-search="onTopSearch" @top-help="onTopHelp" @top-proper="onTopProper"></top-binnode>
             <div class="left-message">{{ messages.left }}</div>
             <div class="right-message">{{ messages.right }}</div>
             <!-- Internal Tree Nodes -->
             <binnode v-for="(node, ind) in structInfo.nodes" :node="node" :key="'node' + ind"
                 :class="{'active-node': node.active, 'visited-node': node.visited}"
-                @remove-below="onRemoveBelow($event)" @remove-one="onRemoveOne($event)"
-                @intr-update="onIntrUpdate($event)">
+                @remove-below="onRemoveBelow" @remove-one="onRemoveOne"
+                @intr-update="onIntrUpdate">
             </binnode>
             <!-- External Tree Nodes -->
             <extr-binnode v-for="(node, ind) in structInfo.extrNodes" :node="node" :key="'extNode' + ind"
-                @extr-insert="onExtrInsert($event)">
+                @extr-insert="onExtrInsert">
             </extr-binnode>
             <!-- Internal Tree Edges -->
             <div class="left-edge" v-for="e in structInfo.edges[0]"
