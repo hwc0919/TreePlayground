@@ -1,5 +1,10 @@
 import Vue from "../node_modules/vue/dist/vue.min"
 import "./components/components"
+import { BinNode } from "./js/BinNode"
+import { BinTree } from "./js/BinTree"
+import { BST } from "./js/BST"
+import { AVL } from "./js/AVL"
+import { Splay } from "./js/Splay"
 
 var vm = new Vue({
     el: "#TreePlayground",
@@ -23,7 +28,7 @@ var vm = new Vue({
         },
         locks: {    // TODO : seperate trvlLock and searchLock. this can wait.
             trvlLock: false,
-            splayLock: false
+            rotateLock: false
         },
         topSequence: [],
         BSTParams: {
@@ -213,29 +218,29 @@ var vm = new Vue({
         // Remove one node
         onRemoveOne(node) {
             if (this.isAnyLocked()) return false;
-            this.messages.left = `Remove ${node.data}`;
+            this.showMessage(`Remove ${node.data}`);
             if ("Splay" === this.curTreeType) {  // Exception : Deal with Splay
                 this.alertAsync(`Step 1: Splay ${node.data}`, -1);
                 node.active = true;
                 setTimeout(() => {
-                    this.locks.splayLock = true;
+                    this.locks.rotateLock = true;
                     this.splayAsync(node, (rootOrNull) => {
                         if (rootOrNull === undefined) return false;
                         if (rootOrNull === null) throw "Error in RemoveOne";
                         let v = rootOrNull;
                         let tree = this.tree;
                         tree._size--;
-                        if (!v.rc || !v.rc) {
+                        if (!v.rc || !v.rc) {  // Splay Simple Situation
                             if (!v.rc) { if (tree._root = v.lc) tree._root.parent = null; }
                             else { if (tree._root = v.rc) tree._root.parent = null; }
                             this.alertAsync(`Final: remove ${node.data}`, 2500);
                             this.update();
-                        } else {
+                        } else {  // Splay Complex Situation
                             node.active = false; node.deprecated = true;
                             this.locks.trvlLock = true;
                             this.alertAsync(`Step 2: Elevate Succ of ${node.data}`, -1);
                             this.searchAsync(v.rc, v.data, (_, hot) => {
-                                this.locks.splayLock = true;
+                                this.locks.rotateLock = true;
                                 this.splayAsync(hot, (newRoot) => {
                                     this.alertAsync(`Step 3: Finally remove ${node.data}`, 2500);
                                     tree.reAttachAsLC(newRoot, v.lc);
@@ -246,12 +251,77 @@ var vm = new Vue({
                     })
                 }, this.commonParams.interval);
             } else {  // Deal with other trees
-                this.tree.removeAt(node);
-                this.tree._size--;
-                if ("AVL" === this.curTreeType) // BugFixed0305 : _hot already at position after removeAt
-                    this.tree.solveRemoveUnbalance();
-                this.update();
+                if (!node.lc || !node.rc) { // Other Trees: Simple Situation
+                    this.tree.removeAt(node); this.tree._size--;
+                    this.alertAsync(`${node.data} Removed.`, 2500);
+                    this.update();
+                    if ("AVL" === this.curTreeType) {
+                        this.alertAsync(`${node.data} Removed, solve AVL Unbalance`, -1);
+                        setTimeout(() => {
+                            this.locks.rotateLock = true;
+                            this.avlRmRotateAsync(this.tree._hot, () => {
+                                this.alertAsync(`AVL Balanced again.`);
+                                this.update();
+                            });
+                        }, this.commonParams.interval);
+                    }
+                } else { // Other Trees: Complex situation
+                    // RM Step 1: Find Succ
+                    this.alertAsync(`Step 1: Find Succ`, -1);
+                    let succ = node.succ();
+                    node.deprecated = true;
+                    this.locks.trvlLock = true; // TODO : change to srchLock
+                    this.searchAsync(node, succ.data, () => { // assert res === true
+                        this.alertAsync(`Step 2: Swap with Succ`, -1);
+                        this.update();
+                        node.deprecated = true; succ.active = true;
+                        setTimeout(() => {
+                            // RM Step 2: Swap
+                            let t = node.data; node.data = succ.data; succ.data = t;
+                            node.deprecated = false; succ.active = false;
+                            node.active = true; succ.deprecated = true;
+                            // RM Step 3: Remove
+                            this.alertAsync(`Step 3: Remove ${t}`, 2500);
+                            setTimeout(() => {
+                                this.tree.removeAt(succ);
+                                this.update();
+                                if ("AVL" === this.curTreeType) {
+                                    this.alertAsync(`Step 4: Solve AVL Unbalance`, -1);
+                                    setTimeout(() => {
+                                        this.locks.rotateLock = true;
+                                        this.avlRmRotateAsync(this.tree._hot, () => {
+                                            this.alertAsync(`AVL Balanced again.`);
+                                            this.update();
+                                        });
+                                    }, this.commonParams.interval);
+                                }
+                            }, this.commonParams.interval);
+                        }, this.commonParams.interval);
+                    })
+                }
             }
+        },
+        // Async version of AVL.solveRemoveUnbalance
+        avlRmRotateAsync(node, callback) { // Important: SET rotateLock BEFORE START
+            if (!node || !this.locks.rotateLock || "AVL" !== this.curTreeType) {
+                this.locks.rotateLock = false;
+                if (typeof callback == "function") callback();
+                return;
+            }
+            node.active = true;
+            setTimeout(() => {
+                let interval = this.commonParams.interval;
+                if (!AVL.avlBalanced(node))
+                    this.tree.rotateAt(BinNode.tallerChild(BinNode.tallerChild(node)));
+                else interval = 0;
+                this.tree.update_height(node);
+                this.update();
+                node.active = true;
+                setTimeout(() => {
+                    node.active = false;
+                    this.avlRmRotateAsync(node.parent, callback);
+                }, interval);
+            }, this.commonParams.interval)
         },
         // Proper Rebuild
         onTopBuild(sequence) {
@@ -289,10 +359,10 @@ var vm = new Vue({
                     this.alertAsync(nodeOrHot ? `Step 2: Splay at ${nodeOrHot.data}` : "", -1);
                     // Wait & Splay & Insert in callback
                     setTimeout(() => {
-                        this.locks.splayLock = true;
+                        this.locks.rotateLock = true;
                         this.splayAsync(nodeOrHot, (rootOrNull) => {
                             if (!res) {
-                                if (rootOrNull === undefined) return false; // `splayLock` has been reset.
+                                if (rootOrNull === undefined) return false; // `rotateLock` has been reset.
                                 this.alertAsync(`Final: ${num} Inserted`, 2500);
                                 if (rootOrNull === null) recentNode = this.tree.insertAsRoot(num);
                                 else recentNode = this.tree.insertSplitRoot(num);  // Splay ONLY!!!
@@ -343,14 +413,14 @@ var vm = new Vue({
                 if (this.curTreeType === "Splay") {  // Exception & Important : Splay
                     this.alertAsync(nodeOrHot ? `Splay at ${nodeOrHot.data}` : "", 2000);
                     setTimeout(() => {
-                        this.locks.splayLock = true;
+                        this.locks.rotateLock = true;
                         this.splayAsync(nodeOrHot);
                     }, this.commonParams.interval);
                 }
             });
         },
-        // Search Async & Recur.  Callback: (true, target) if found else (false, _hot)
-        searchAsync(node, num, callback) {
+        // Search Async & Recur. Callback: (true, target) if found else (false, _hot)
+        searchAsync(node, num, callback) { // Important: SET LOCK BEFORE START! 
             if (!this.locks.trvlLock || !node) {
                 this.locks.trvlLock = false;
                 if (typeof callback === "function") callback(false, this.tree._hot);
@@ -374,13 +444,13 @@ var vm = new Vue({
             }
         },
         // Splay Async & Recur. Callback: (null) if !v, (undefined) if locked, (_root) if success
-        splayAsync(v, callback) {
+        splayAsync(v, callback) { // Important: SET `rotateLock` BEFORE START! 
             if (!v) {
-                this.locks.splayLock = false;
+                this.locks.rotateLock = false;
                 if (typeof callback === "function") callback(null);
                 return false;
             }
-            if (!this.locks.splayLock) {
+            if (!this.locks.rotateLock) {
                 if (typeof callback === "function") callback(undefined);
                 return false;
             }
@@ -395,7 +465,7 @@ var vm = new Vue({
                 this.tree._root = v;
                 this.update();
                 v.active = true;
-                this.locks.splayLock = false;
+                this.locks.rotateLock = false;
                 setTimeout(() => {
                     if (typeof callback === "function") callback(v);
                 }, this.commonParams.interval);

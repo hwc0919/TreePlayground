@@ -1,6 +1,6 @@
 import { BinNode } from "./BinNode";
 import { BST } from "./BST";
-class Splay extends BST {
+export class Splay extends BST {
     splay(v) {
         if (!v)
             return null;

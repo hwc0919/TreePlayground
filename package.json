@@ -12,11 +12,11 @@
     "url": "git+https://github.com/hwc0919/TreePlayground.git"
   },
   "author": "nitromelon",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/hwc0919/TreePlayground/issues"
   },
-  "homepage": "https://github.com/hwc0919/TreePlayground#readme",
+  "homepage": "https://github.com/hwc0919/TreePlayground",
   "devDependencies": {
     "css-loader": "^3.4.2",
     "style-loader": "^1.1.3",

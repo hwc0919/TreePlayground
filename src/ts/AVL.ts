@@ -1,7 +1,7 @@
 import { BST } from "./BST"
 import { BinNode } from "./BinNode"
 
-class AVL<T> extends BST<T> {
+export class AVL<T> extends BST<T> {
 
     static avlBalanced<T>(x: BinNode<T>): boolean {
         let balFac: number = BinNode.stature(x.lc) - BinNode.stature(x.rc);

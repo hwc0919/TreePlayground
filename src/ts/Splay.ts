@@ -1,7 +1,7 @@
 import { BinNode } from "./BinNode";
 import { BST } from "./BST";
 
-class Splay<T> extends BST<T> {
+export class Splay<T> extends BST<T> {
     protected splay(v: BinNode<T>): BinNode<T> {
         if (!v) return null;
         let p: BinNode<T>, g: BinNode<T>;

@@ -90,6 +90,17 @@ export class BinTree {
             extrNodes.push({ x: 0, y: 0, isRoot: true });
             return structInfo;
         }
+        // 常数设置:
+        let spacingX = 80;
+        if (this._size > 20)
+            spacingX = 70;
+        else if (this._size > 40)
+            spacingX = 65;
+        let spacingY = 80;
+        if (this._root.height > 10)
+            spacingY = 70;
+        else if (this._root.height > 20)
+            spacingY = 60;
         // 逐层遍历
         this._root.y = 0;
         this._root.active = false;
@@ -100,7 +111,7 @@ export class BinTree {
             levels.push([]);
             for (let j = 0; j < levels[i].length; j++) {
                 let node = levels[i][j];
-                let levelY = 80 * (i + 1);
+                let levelY = spacingY * (i + 1);
                 // 为外部节点添加一个外部节点孩子
                 if (node.lc === undefined) {
                     levels[i + 1].push({ x: node.x, y: levelY, parent: node });
@@ -108,7 +119,7 @@ export class BinTree {
                 }
                 node.active = false;
                 node.visited = false;
-                let deltaX = (node.data.toString().length - 1) * 6;
+                let deltaX = Math.max(0, node.data.toString().length - 2) * 6;
                 // 为内部节点添加两个孩子
                 if (node.lc) {
                     node.lc.x = node.x - deltaX;
@@ -141,7 +152,7 @@ export class BinTree {
         for (let j = 1; j < lastLevel.length; j++) {
             deltaL = deltaR;
             deltaR = j < lastLevel.length - 1 ? lastLevel[j + 1].x - lastLevel[j].x : 0;
-            lastLevel[j].x = lastLevel[j - 1].x + 80;
+            lastLevel[j].x = lastLevel[j - 1].x + spacingX;
             // if (lastLevel[j - 1].parent == lastLevel[j].parent) { lastLevel[j].x += deltaL }
             if (deltaL > 0) {
                 lastLevel[j].x += deltaL;
@@ -178,12 +189,12 @@ export class BinTree {
                 // 仅当父亲是内部节点时添加边
                 let jParent = curLevel[j].parent;
                 if (j < curLevel.length - 1 && jParent == curLevel[j + 1].parent) {
-                    let leftEdge = [curLevel[j].x, jParent.y, jParent.x - curLevel[j].x, 51];
+                    let leftEdge = [curLevel[j].x, jParent.y, jParent.x - curLevel[j].x, spacingY - 29];
                     if (curLevel[j].lc === undefined)
                         extrEdges[0].push(leftEdge);
                     else
                         edges[0].push(leftEdge);
-                    let rightEdge = [jParent.x, jParent.y, curLevel[j + 1].x - jParent.x, 51];
+                    let rightEdge = [jParent.x, jParent.y, curLevel[j + 1].x - jParent.x, spacingY - 29];
                     if (curLevel[j + 1].lc === undefined)
                         extrEdges[1].push(rightEdge);
                     else
