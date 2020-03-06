@@ -1,4 +1,4 @@
-import Vue from "./js/vue.min"
+import Vue from "../node_modules/vue/dist/vue.min"
 import "./components/components"
 
 var vm = new Vue({
@@ -74,19 +74,21 @@ var vm = new Vue({
         loadSampleTree() {
             this.tree = this.curTreeClass.genSampleTree();
         },
-        // non-blocking message box
+        // non-blocking message box. `time` < 0 means forever.
         alertAsync(message, time = 1500, forceAlert = true) {
             if (this.messages.right === "" || forceAlert) {
                 this.messages.right = message;
                 let tag = ++this.alertTag;
-                setTimeout((e = tag) => {
-                    if (e === this.alertTag) this.messages.right = "";
-                }, time);
+                if (time > 0) {
+                    setTimeout((e = tag) => {
+                        if (e === this.alertTag) this.messages.right = "";
+                    }, time);
+                }
             } else setTimeout(() => { this.alertAsync(message, time, false) }, 100);
         },
         // Traversal and Display in Async way.
         traversal(method) {
-            if (this.locks.trvlLock) return false;
+            if (this.isAnyLocked()) return false;
             this.update();
             this.locks.trvlLock = true;
             let sequence;
@@ -126,7 +128,9 @@ var vm = new Vue({
         /****************************************/
         /*           Events Handlers            */
         /****************************************/
-        onIntrUpdate(args) {  // Internal node requests for value update
+        // Internal node requests for value update
+        onIntrUpdate(args) {
+            if (this.isAnyLocked()) return false;
             this.update();
             let node = args[0];
             let updation = args[1];
@@ -142,11 +146,13 @@ var vm = new Vue({
             this.update();
             this.messages.left = successMessage;
             node.active = true;   // Caution: Mark recent active
-        },  // TODO: active newly updated node. Update before and after every action.
-        onExtrInsert(args) {  // External node requests for value insertion
+        },
+        // External node requests for value insertion
+        onExtrInsert(args) {
             this.update();
             let node = args[0];
             let insertion = args[1];
+            let callback = args[2];
             let curTreeType = this.curTreeType;
 
             if (curTreeType === "Splay") {
@@ -181,20 +187,57 @@ var vm = new Vue({
             this.update();
             retNode.active = true;  // Caution: Mark recent active
             this.messages.left = `Insert ${insertion}`;
+            if (typeof callback === "function") callback(true);
         },
-        onRemoveBelow(node) {  // Remove whole subtree
+        // Remove whole subtree
+        onRemoveBelow(node) {
+            if (this.isAnyLocked()) return false;
             this.tree.removeBelow(node);
             this.update();
             this.alertAsync(`Remove Below ${node.data}`);
         },
-        onRemoveOne(node) {  // Remove one node
-            this.tree.removeAt(node);
-            this.tree._size--;
-            if (this.curTreeType === "AVL") // BugFixed0305 : _hot already at position after removeAt
-                this.tree.solveRemoveUnbalance();
-            else if (0) { }
-            this.update();
-            this.alertAsync(`Remove ${node.data}`);
+        // Remove one node
+        onRemoveOne(node) {
+            if (this.isAnyLocked()) return false;
+            this.messages.left = `Remove ${node.data}`;
+            if ("Splay" === this.curTreeType) {  // Exception : Deal with Splay
+                this.alertAsync(`Step 1: Splay ${node.data}`, -1);
+                node.active = true;
+                setTimeout(() => {
+                    this.locks.splayLock = true;
+                    this.splayAsync(node, (rootOrNull) => {
+                        if (rootOrNull === undefined) return false;
+                        if (rootOrNull === null) throw "Error in RemoveOne";
+                        let v = rootOrNull;
+                        let tree = this.tree;
+                        tree._size--;
+                        if (!v.rc || !v.rc) {
+                            if (!v.rc) { if (tree._root = v.lc) tree._root.parent = null; }
+                            else { if (tree._root = v.rc) tree._root.parent = null; }
+                            this.alertAsync(`Final: remove ${node.data}`, 2500);
+                            this.update();
+                        } else {
+                            node.active = false; node.deprecated = true;
+                            this.locks.trvlLock = true;
+                            this.alertAsync(`Step 2: Elevate Succ of ${node.data}`, -1);
+                            this.searchAsync(v.rc, v.data, (_, hot) => {
+                                this.locks.splayLock = true;
+                                this.splayAsync(hot, (newRoot) => {
+                                    this.alertAsync(`Step 3: Finally remove ${node.data}`, 2500);
+                                    tree.reAttachAsLC(newRoot, v.lc);
+                                    this.update();
+                                })
+                            })
+                        }
+                    })
+                }, this.commonParams.interval);
+            } else {  // Deal with other trees
+                this.tree.removeAt(node);
+                this.tree._size--;
+                if ("AVL" === this.curTreeType) // BugFixed0305 : _hot already at position after removeAt
+                    this.tree.solveRemoveUnbalance();
+                this.update();
+            }
         },
         // Proper Rebuild
         onTopBuild(sequence) {
@@ -203,12 +246,14 @@ var vm = new Vue({
             this.tree.buildFromBinSequence(sequence);
             this.update();
             this.messages.left = "真二叉树层次序列构建";
-            this.curTreeClass.checkValidity(this.tree, (res, message) => {
-                if (!res) this.alertAsync(message, 3000);
-            })
+            let res = this.curTreeClass.checkValidity(this.tree);
+            if (!res[0]) this.alertAsync(res[1], 2500);
         },
         // Insert `topSequence` by calling async
         onTopInsert(sequence) {
+            if (this.isAnyLocked()) return false;
+            // if (this.isAnyLocked) return false;
+            if ("BinTree" === this.curTreeType) { this.alertAsync("BinTree can't insert."); return false; }
             console.log("Insert by sequence");
             this.update();
             this.topSequence = sequence;
@@ -220,57 +265,59 @@ var vm = new Vue({
             if (this.topSequence.length === 0) { this.locks.trvlLock = false; return false; }
             let num = this.topSequence.shift();
             this.messages.left = `Insert ${num}`;
+            this.alertAsync(`Step 1: Search ${num}`, -1);
             this.locks.trvlLock = true;
             this.tree._hot = null; // Important: reset _hot before search
             this.searchAsync(this.tree.root(), num, (res, nodeOrHot) => {
                 let recentNode = null;
-
-                // Deal with Splay
-                if (this.curTreeType === "Splay") { // Caution & Important & TODO : May need change
-                    if (res) { this.alertAsync(`${num} Exists`); recentNode = nodeOrHot; }
-                    this.alertAsync(nodeOrHot ? `Splay at ${nodeOrHot.data}` : "", 2000);
-
+                // Exception : Deal with Splay
+                if ("Splay" === this.curTreeType) { // Caution & Important & TODO : May need change
+                    this.alertAsync(nodeOrHot ? `Step 2: Splay at ${nodeOrHot.data}` : "", -1);
                     // Wait & Splay & Insert in callback
                     setTimeout(() => {
                         this.locks.splayLock = true;
                         this.splayAsync(nodeOrHot, (rootOrNull) => {
                             if (!res) {
                                 if (rootOrNull === undefined) return false; // `splayLock` has been reset.
-                                this.alertAsync(`${num} Inserted`);
+                                this.alertAsync(`Final: ${num} Inserted`, 2500);
                                 if (rootOrNull === null) recentNode = this.tree.insertAsRoot(num);
                                 else recentNode = this.tree.insertSplitRoot(num);  // Splay ONLY!!!
                             }
+                            else { this.alertAsync(`${num} Exists`); recentNode = nodeOrHot; }
                             /* ----------------------------------- SAME BLOCK 0000 ------------------------------------------------- */
-                            this.update();
-                            if (this.topSequence.length === 0) {
-                                recentNode.active = true;  // Caution: Mark recent active
-                                this.locks.trvlLock = false; return false;
-                            } else this.insertSequnceAsync();
+                            setTimeout(() => {
+                                this.update();
+                                if (this.topSequence.length === 0) {
+                                    recentNode.active = true;  // Caution: Mark recent active
+                                    this.locks.trvlLock = false; return false;
+                                } else this.insertSequnceAsync();
+                            }, this.commonParams.interval);
                             /* ----------------------------------------------------------------------------------------------------- */
                         });
                     }, this.commonParams.interval);
                 }
-                // Deal with Other 
+                // Deal with Other trees
                 else {
                     if (res) { this.alertAsync(`${num} Exists`); recentNode = nodeOrHot; }
                     else {
                         recentNode = this.tree.insert(num);
-                        this.alertAsync(`${num} Inserted`);
+                        this.alertAsync(`Final: ${num} Inserted`, 2500);
                     }
+                    /* ------------------------------------- SAME BLOCK 0000 ----------------------------------------------- */
                     setTimeout(() => {
-                        /* ------------------------------------- SAME BLOCK 0000 ----------------------------------------------- */
                         this.update();
                         if (this.topSequence.length === 0) {
                             recentNode.active = true;  // Caution: Mark recent active
                             this.locks.trvlLock = false; return false;
                         } else this.insertSequnceAsync();
-                        /* ----------------------------------------------------------------------------------------------------- */
                     }, this.commonParams.interval);
+                    /* ----------------------------------------------------------------------------------------------------- */
                 }
             })
         },
         // Search value
         onTopSearch(num) {
+            if (this.isAnyLocked()) return false;
             this.update();
             this.locks.trvlLock = true;
             this.messages.left = `Search ${num}`;
@@ -288,7 +335,7 @@ var vm = new Vue({
                 }
             });
         },
-        // Search Async & Recur.  Notice: callback target if found else _hot
+        // Search Async & Recur.  Callback: (true, target) if found else (false, _hot)
         searchAsync(node, num, callback) {
             if (!this.locks.trvlLock || !node) {
                 this.locks.trvlLock = false;
@@ -312,7 +359,7 @@ var vm = new Vue({
                 }, this.commonParams.interval);
             }
         },
-        // Splay Async & Recur
+        // Splay Async & Recur. Callback: (null) if !v, (undefined) if locked, (_root) if success
         splayAsync(v, callback) {
             if (!v) {
                 this.locks.splayLock = false;
@@ -346,6 +393,7 @@ var vm = new Vue({
                 }, this.commonParams.interval);
             }
         },
+        // Show help message.
         onTopHelp(message) {
             this.alertAsync(message, 5000);
         },
@@ -411,6 +459,12 @@ var vm = new Vue({
                 arr[i] = this.assertNumber(arr[i]);
             }
             return arr;
+        },
+        isAnyLocked() {
+            for (let lock in this.locks) {
+                if (this.locks[lock]) { alert("In Operation! Dont do this again!"); return true; }
+            }
+            return false;
         },
         checkNodeOrder(node, newV) {
             let pred, succ;

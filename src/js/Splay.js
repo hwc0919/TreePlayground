@@ -91,7 +91,27 @@ class Splay extends BST {
         return this._root = v;
     }
     remove(e) {
-        return false;
+        if (!this._root || e != this.search(e).data)
+            return false;
+        let v = this._root;
+        if (!v.rc) {
+            if (this._root = v.lc)
+                this._root.parent = null;
+        }
+        else if (!v.lc) {
+            if (this._root = v.rc)
+                this._root.parent = null;
+        }
+        else {
+            this._root = v.rc;
+            this._root.parent = null;
+            this.search(e);
+            this.reAttachAsLC(this._root, v.lc);
+        }
+        this._size--;
+        if (this._root)
+            this.update_height(this._root);
+        return true;
     }
 }
 window['Splay'] = Splay;

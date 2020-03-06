@@ -60,20 +60,18 @@ class AVL<T> extends BST<T> {
         return tree;
     }
 
-    static checkValidity<T>(tree: AVL<T>, callback: Function): boolean {
+    static checkValidity<T>(tree: AVL<T>): Array<any> {
+        let res = BST.checkValidity(tree);
+        if (!res[0]) return res;
+
+        let status: boolean = true;
         let sequence: Array<BinNode<T>> = this.inorderTraversal(tree.root());
-        let res: boolean = true;
         let mis: BinNode<T> = null;
-        for (let i = 0; i < sequence.length - 1; i++)
-            if (sequence[i].data >= sequence[i + 1].data) { res = false; mis = sequence[i]; break; }
-        let message: string = (mis === null) ? "" : `节点${mis.data}处不满足顺序性!`;
-        if (res) {  // check AVL
-            for (let i = 0; i < sequence.length; i++)
-                if (!this.avlBalanced(sequence[i])) { res = false; mis = sequence[i]; break; }
-            message = (mis === null) ? message : `节点${mis.data}处不满足AVL平衡!`;
-        }
-        if (typeof callback === "function") callback(res, message);
-        return res;
+        for (let i = 0; i < sequence.length; i++)
+            if (!this.avlBalanced(sequence[i])) { status = false; mis = sequence[i]; break; }
+
+        let message: string = (mis === null) ? "" : `节点${mis.data}处不满足AVL平衡!`;
+        return [status, message];
     }
 }
 

@@ -1,5 +1,4 @@
-import Vue from "../js/vue.min"
-
+import Vue from "../../node_modules/vue/dist/vue.min"
 
 // Input Component with Self-ajusted-width 
 Vue.component('binnode-input', {
@@ -73,13 +72,16 @@ Vue.component('binnode', {
         }
     },
     computed: {
+        /* **************************************** */
+        /* ************ Remove Buttons ************ */
+        /* **************************************** */
         showRemoveBelow() { // Only BinTree or BST or Root!
             let curTreeType = this.$parent.commonParams.curTreeType;
             return curTreeType === "BinTree" || curTreeType === "BST" || !this.node.parent;
         },
         showRemoveOne() {  // Except BinTree and Splay!
             let curTreeType = this.$parent.commonParams.curTreeType;
-            return curTreeType !== "BinTree" && curTreeType !== "Splay";
+            return curTreeType !== "BinTree";
         }
     }
 });
@@ -101,8 +103,10 @@ Vue.component('extr-binnode', {
         emitExtrInsert() {
             let insertion = this.$parent.assertNumber(this.insertion);
             if (insertion == null) return false;
-            this.$emit('extr-insert', [this.node, insertion]);
-            this.insertion = "";
+            this.$emit('extr-insert', [this.node, insertion,
+            (res) => {
+                if (res) this.insertion = "";
+            }]);
         },
         divOnClick() {
             if (this.showInput === true) return false;

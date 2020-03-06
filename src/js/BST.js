@@ -111,20 +111,35 @@ export class BST extends BinTree {
         }
         return tree;
     }
-    static checkValidity(tree, callback) {
+    static checkUnique(sequence) {
+        if (sequence.length === 0)
+            return true;
+        let curData = sequence[0].data.toString();
+        let hashMap = { curData: true };
+        for (let i = 0; i < sequence.length - 1; i++) {
+            curData = sequence[i + 1].data.toString();
+            if (hashMap[curData])
+                return false;
+            hashMap[curData] = true;
+        }
+        return true;
+    }
+    static checkValidity(tree) {
         let sequence = this.inorderTraversal(tree.root());
-        let res = true;
+        let status = true;
         let mis = null;
-        for (let i = 0; i < sequence.length - 1; i++) // BugFixed0305
+        let message;
+        if (!this.checkUnique(sequence))
+            message = "WARNING: 当前实现禁止重复值!";
+        for (let i = 0; i < sequence.length - 1; i++) { // BugFixed0305
             if (sequence[i].data >= sequence[i + 1].data) {
-                res = false;
+                status = false;
                 mis = sequence[i];
                 break;
             }
-        let message = (mis === null) ? "" : `节点${mis.data}处不满足顺序性!`;
-        if (typeof callback === "function")
-            callback(res, message);
-        return res;
+        }
+        message = (mis === null) ? "" : `WARNING: 节点${mis.data}处不满足顺序性!`;
+        return [status, message];
     }
 }
 window['BST'] = BST;

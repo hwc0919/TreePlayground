@@ -1,5 +1,5 @@
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
-// const HtmlWebpackPlugin = require('html-webpack-plugin');
+const BabiliPlugin = require("babili-webpack-plugin")
 
 module.exports = {
     entry: [__dirname + "/src/main.js"],
@@ -11,7 +11,7 @@ module.exports = {
     mode: "none",
     plugins: [
         new VueLoaderPlugin(),
-        // new HtmlWebpackPlugin(),
+        new BabiliPlugin()
     ],
     module: {
         rules: [

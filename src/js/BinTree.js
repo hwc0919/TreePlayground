@@ -325,10 +325,8 @@ export class BinTree {
         }
         return tree;
     }
-    static checkValidity(tree, callback) {
-        if (typeof callback === "function")
-            callback(true);
-        return true;
+    static checkValidity(tree) {
+        return [true, ""];
     }
 }
 window['BinTree'] = BinTree;

@@ -68,6 +68,8 @@
 .left-toolbar #tree-scale-ranger input {
     transform: rotate(-90deg);
     transform-origin: bottom;
+    position: relative;
+    left: -5px;
     display: block;
     /* margin-bottom: 60px; */
 }

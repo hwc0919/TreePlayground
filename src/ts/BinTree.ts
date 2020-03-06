@@ -341,9 +341,8 @@ export class BinTree<T> {
         return tree;
     }
 
-    static checkValidity<T>(tree: BinTree<T>, callback: Function): boolean {
-        if (typeof callback === "function") callback(true);
-        return true;
+    static checkValidity<T>(tree: BinTree<T>): Array<any> {
+        return [true, ""];
     }
 }
 

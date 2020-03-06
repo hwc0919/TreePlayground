@@ -85,10 +85,28 @@ class Splay<T> extends BST<T> {
         return this._root = v;
     }
 
-    public remove(e: T): boolean {
-        return false;
+    public remove(e: T): boolean {  // NEVER USED.
+        if (!this._root || e != this.search(e).data) return false;
+        let v: BinNode<T> = this._root;
+
+        if (!v.rc) {
+            if (this._root = v.lc) this._root.parent = null;
+        } else if (!v.lc) {
+            if (this._root = v.rc) this._root.parent = null;
+        } else {
+            this._root = v.rc;
+            this._root.parent = null;
+            this.search(e);
+            this.reAttachAsLC(this._root, v.lc);
+        }
+        this._size--;
+        if (this._root) this.update_height(this._root);
+        return true;
     }
 
+
+    // static genSampleTree() inherited from BST<T>
+    // static checkValidity() inherited from BST<T>
 
 }
 

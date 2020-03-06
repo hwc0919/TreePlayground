@@ -1,11 +1,11 @@
 # TreePlayground
 A tool to generate, visualize and manipulate various kind of tree structures.
 
-To run the program, you only need to download contents in folder 'dist'.
+To run the program, you only need to download contents in folder 'dist', or Visit http://192.144.210.149/
 
 No compatibility testing. Functions are only guaranteed in Chrome.
 
-若要运行程序, 只需要下载文件夹"dist"中的内容即可(项目容量很小, 也可全部下载).
+若要运行程序, 只需要下载文件夹"dist"中的内容即可本地运行. 也可直接访问 http://192.144.210.149/
 
 没有测试兼容性, 只能保证chorme浏览器下正常运行.
 

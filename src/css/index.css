@@ -1,7 +1,6 @@
 @import "./toolbars.css";
 @import "./binnodes.css";
 @import "./edges.css";
-
 * {
     padding: 0;
     margin: 0;
@@ -31,14 +30,16 @@ html, body {
     --normal-inner-w: 40px;
     --normal-outer-w: 60px;
     --normal-font-size: 25px;
-    --normal-numcolor: rgb(55, 66, 250);
-    --normal-bdcolor: rgb(55, 66, 250);
-    --normal-bgcolor: white;
-    --normal-edgecolor: black;
     --normal-bdwidth: 3px;
     --normal-edgewidth: 3px;
+    --normal-numcolor: rgba(30, 144, 255, 1.0);
+    --normal-bdcolor: rgba(30, 144, 255, 1.0);
+    --normal-bgcolor: white;
+    --normal-edgecolor: rgba(87, 96, 111,1.0);
+    --active-color: rgba(253, 121, 168, 1.0);
+    --visited-color: gray;
+    --deprecated-color: rgba(253, 203, 110, 1.0);
 }
-
 
 #TreePlayground {
     position: relative;
@@ -81,7 +82,7 @@ html, body {
     opacity: 0.5;
 }
 
-.tree:hover::before  {
+.tree:hover::before {
     opacity: 1;
 }
 

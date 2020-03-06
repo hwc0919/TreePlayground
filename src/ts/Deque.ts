@@ -33,6 +33,6 @@ export class Deque<T> {
         }
         return this._elem_out.pop();
     }
-}
+};
 
 window['Deque'] = Deque;

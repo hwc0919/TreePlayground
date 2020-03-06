@@ -11,6 +11,9 @@
 </head>
 
 <body>
+    <div id="header" style="position: fixed; left: 0; top: 0;">
+        <p style="color: gray">请使用chrome浏览器</p>
+    </div>
     <div id="TreePlayground" @mousemove='onTPMouseMove($event)' @touchmove='onTPMouseMove($event)'>
         <!-- Top Toolbar -->
         <div class="top-toolbar">
@@ -48,8 +51,8 @@
             <div class="right-message">{{ messages.right }}</div>
             <!-- Internal Tree Nodes -->
             <binnode v-for="(node, ind) in structInfo.nodes" :node="node" :key="'node' + ind"
-                :class="{'active-node': node.active, 'visited-node': node.visited}" @remove-below="onRemoveBelow"
-                @remove-one="onRemoveOne" @intr-update="onIntrUpdate">
+                :class="{'active-node': node.active, 'visited-node': node.visited, 'deprecated-node': node.deprecated}"
+                @remove-below="onRemoveBelow" @remove-one="onRemoveOne" @intr-update="onIntrUpdate">
             </binnode>
             <!-- External Tree Nodes -->
             <extr-binnode v-show="showExtr" v-for="(node, ind) in structInfo.extrNodes" :node="node"
@@ -71,6 +74,7 @@
     <div id="footer" style="position: fixed; left: 0; bottom: 0;">Copyright @ 2020 NitroMelon
         <a href="https://github.com/hwc0919/TreePlayground" target="_blank">Source Code</a>
         <a href="https://github.com/hwc0919/TreePlayground/issues" target="_blank">Bug report</a>
+        喜欢的话<a href="https://github.com/hwc0919/TreePlayground/stargazers" target="_blank">&nearhk;给个赞</a>哦
     </div>
     <script src="./bundle.js"></script>
 </body>
