@@ -16,6 +16,12 @@ No compatibility testing. Functions are only guaranteed in Chrome.
 [@baijiangying](https://github.com/baijiangying),
 等同学对调试的帮助和建议
 
+## Overview
+![image](https://raw.githubusercontent.com/wiki/hwc0919/TreePlayground/recommend1.png)
+![image](https://raw.githubusercontent.com/wiki/hwc0919/TreePlayground/recommend2.png)
+![image](https://raw.githubusercontent.com/wiki/hwc0919/TreePlayground/recommend3.png)
+![image](https://raw.githubusercontent.com/wiki/hwc0919/TreePlayground/recommend4.png)
+
 ## Objective
 本项目旨在帮助学习数据结构课程搜索树相关章节的同学(在此强烈推荐清华大学邓俊辉老师的数据结构课, 可在[学堂在线](https://next.xuetangx.com/)免费学习).
 
