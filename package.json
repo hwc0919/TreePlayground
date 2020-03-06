@@ -19,7 +19,6 @@
   "homepage": "https://github.com/hwc0919/TreePlayground#readme",
   "devDependencies": {
     "css-loader": "^3.4.2",
-    "html-webpack-plugin": "^3.2.0",
     "style-loader": "^1.1.3",
     "vue": "^2.6.11",
     "vue-loader": "^15.9.0",

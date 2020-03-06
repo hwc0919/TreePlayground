@@ -29,7 +29,8 @@ var vm = new Vue({
         BSTParams: {
             allowExtrInsert: false,
         },
-        alertTag: 0
+        alertTag: 0,
+        messageTag: 0
     },
     methods: {
         // Init, called when change curTreeType & first mounted
@@ -72,9 +73,10 @@ var vm = new Vue({
         },
         // Generate new sample.
         loadSampleTree() {
+            this.showMessage(`Load Sample ${this.curTreeType}`, 1000);
             this.tree = this.curTreeClass.genSampleTree();
         },
-        // non-blocking message box. `time` < 0 means forever.
+        // non-blocking message box on the right side. `time` <= 0 means forever.
         alertAsync(message, time = 1500, forceAlert = true) {
             if (this.messages.right === "" || forceAlert) {
                 this.messages.right = message;
@@ -85,6 +87,18 @@ var vm = new Vue({
                     }, time);
                 }
             } else setTimeout(() => { this.alertAsync(message, time, false) }, 100);
+        },
+        // Show message on left side. Similar to `alertAsync()` but default forever
+        showMessage(message, time = -1, forceAlert = true) {
+            if (this.messages.left === "" || forceAlert) {
+                this.messages.left = message;
+                let tag = ++this.messageTag;
+                if (time > 0) {
+                    setTimeout((e = tag) => {
+                        if (e === this.messageTag) this.messages.left = "";
+                    }, time);
+                }
+            } else setTimeout(() => { this.showMessage(message, time, false) }, 100);
         },
         // Traversal and Display in Async way.
         traversal(method) {

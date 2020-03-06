@@ -7,7 +7,7 @@ module.exports = {
         filename: "bundle.js"//打包后输出文件的文件名
     },
     watch: true,
-    mode: "none",
+    mode: "production",
     plugins: [
         new VueLoaderPlugin(),
     ],
