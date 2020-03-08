@@ -3,10 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="author" content="NitroMelon">
-    <meta name="school" content="Tsinghua University">
+    <meta name="institution" content="Tsinghua University">
     <meta name="git" content="https://github.com/hwc0919/TreePlayground">
+    <meta name="website" content="https://192.144.210.149/">
+    <link rel="Shortcut Icon" href="/favicon.ico">
     <title>TreePlayground - NitroMelon</title>
 </head>
 
@@ -14,7 +16,8 @@
     <div id="header" style="position: fixed; left: 5px; top: 5px;">
         <p style="color: gray">Recommend Chrome on PC</p>
     </div>
-    <div id="TreePlayground" @mousemove='onTPMouseMove($event)' @touchmove='onTPMouseMove($event)'>
+    <div id="TreePlayground" @mousemove='onTPMouseMove($event)' @touchmove='onTPMouseMove($event)'
+        @mouseup="onTreeMouseLeave" @touchend="onTreeMouseLeave">
         <!-- Top Toolbar -->
         <div class="top-toolbar">
             <button class="btn btn-primary top-toolbar-item" type="button"
@@ -23,27 +26,27 @@
             <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(1)">中序遍历</button>
             <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(2)">后序遍历</button>
             <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(3)">层次遍历</button>
-            <div id="trav-intrvl-ranger" class="top-toolbar-item">
-                <h4 style="margin: 5px">遍历间隔: <label v-text="commonParams.interval + 'ms'">500ms</label></h4>
+            <span id="interval-ranger" class="top-toolbar-item">
+                <span style="margin: 5px">间隔: <label v-text="commonParams.interval + 'ms'">500ms</label></span>
                 <input type="range" min="100" max="1500" value="500" step="100" v-model.number="commonParams.interval">
-            </div>
+            </span>
         </div>
         <!-- Left Toolbar -->
         <div class="left-toolbar">
-            <button class="btn btn-default" type="button" @click="reset">Reset</button>
-            <select id="tree-type-selector" v-model="curTreeType">
+            <button class="btn btn-default left-toolbar-item" type="button" @click="reset">Reset</button>
+            <select id="tree-type-selector" class="left-toolbar-item" v-model="curTreeType">
                 <option v-for="status, ttype in availTreeTypes" v-text="ttype" :value="ttype" :disabled="!status">
                 </option>
             </select>
-            <div id="tree-scale-ranger">
-                <input type="range" min="50" max="150" value="100" v-model.number="treeScale">
+            <div id="tree-scale-ranger" class="left-toolbar-item">
                 <h4>Scale: <label v-text="commonParams.treeScale + '%'"></h4>
+                <input type="range" min="20" max="180" value="100" v-model.number="treeScale">
             </div>
         </div>
         <!-- Tree Visualization Part -->
-        <div class="tree" ref="tree" :style="adjustScale" style="transform-origin: top;"
-            @mousedown.self="onTreeMouseDown" @mouseup.self="onTreeMouseLeave" @touchstart.self="onTreeMouseDown"
-            @touchend.self="onTreeMouseLeave">
+        <div class="tree" ref="tree" :style="adjustScale" style="transform-origin: top;">
+            <div class="tree-dragging-btn" @mousedown.self="onTreeMouseDown" @touchstart.self.prevent="onTreeMouseDown">
+            </div>
             <!-- Top Functional Node -->
             <top-binnode id="trvl-sequence" :data="topSequence" @top-build="onTopBuild" @top-insert="onTopInsert"
                 @top-search="onTopSearch" @top-help="onTopHelp" @top-proper="onTopProper"></top-binnode>

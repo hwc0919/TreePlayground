@@ -21,7 +21,8 @@
 html, body {
     width: 100%;
     height: 100%;
-    min-width: 600px;
+    min-width: 300px;
+    position: relative;
 }
 
 :root {
@@ -35,7 +36,7 @@ html, body {
     --normal-numcolor: rgba(30, 144, 255, 1.0);
     --normal-bdcolor: rgba(30, 144, 255, 1.0);
     --normal-bgcolor: white;
-    --normal-edgecolor: rgba(87, 96, 111,1.0);
+    --normal-edgecolor: rgba(87, 96, 111, 1.0);
     --active-color: rgba(253, 121, 168, 1.0);
     --visited-color: gray;
     --deprecated-color: rgba(253, 203, 110, 1.0);
@@ -43,7 +44,6 @@ html, body {
 
 #TreePlayground {
     position: relative;
-    padding: 10px 50px;
     width: 100%;
     height: 100%;
 }
@@ -53,41 +53,58 @@ html, body {
     width: 50px;
     left: 50%;
     top: 300px;
+    z-index: 10;
 }
 
-.tree::before {
-    content: "";
+.tree-dragging-btn {
     display: block;
-    width: 30px !important;
-    height: 30px !important;
-    border: 2px dashed black !important;
-    border-radius: 30% !important;
-    position: relative;
+    width: 35px;
+    height: 35px;
+    border: 2px dashed black;
+    border-radius: 30%;
+    position: absolute;
     top: -80px;
     transform: translate(-50%, -50%);
+    transform-origin: 50% 80px;
     cursor: move;
     opacity: 0.5;
-    z-index: 1000;
 }
 
-.tree::after {
+.tree-dragging-btn::after {
     content: "";
     display: block;
     width: 0px;
-    height: 34px;
+    height: 31px;
     border: 2px solid black;
     position: relative;
-    top: -80px;
-    transform: translate(-50%, -50%);
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
     opacity: 0.5;
 }
 
-.tree:hover::before {
+@keyframes shake {
+    10% {
+        transform: translate(-50%, -50%) rotate(-5deg);
+    }
+    20% {
+        transform: translate(-50%, -50%) rotate(5deg);
+    }
+    40% {
+        transform: translate(-50%, -50%) rotate(-3deg);
+    }
+    60% {
+        transform: translate(-50%, -50%) rotate(3deg);
+    }
+}
+
+.tree-dragging-btn:hover {
+    animation: shake 1s;
     opacity: 1;
 }
 
-.tree:active::before {
-    border-width: 3px;
+.tree-dragging-btn:active {
+    /* border-width: 3px; */
 }
 
 .left-message {
@@ -106,4 +123,33 @@ html, body {
     font-size: 24px;
     color: gray;
     white-space: nowrap;
+}
+
+#footer {
+    font-size: 14px;
+    z-index: -100;
+    color: gray;
+}
+
+/* Pad */
+
+@media screen and (max-width: 768px) {
+    .tree {
+        top: 350px;
+    }
+    .tree-dragging-btn {
+        width: 50px;
+        height: 50px;
+    }
+    .tree-dragging-btn::after {
+        height: 25px;
+    }
+}
+
+/* Horizontally */
+
+@media screen and (max-height: 500px) {
+    .tree {
+        top: 200px;
+    }
 }

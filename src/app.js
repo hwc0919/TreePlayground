@@ -6,12 +6,12 @@ import { BST } from "./js/BST"
 import { AVL } from "./js/AVL"
 import { Splay } from "./js/Splay"
 
-var vm = new Vue({
+var tp = new Vue({
     el: "#TreePlayground",
     data: {
         availTreeTypes: { "BinTree": true, "BST": true, "AVL": true, "Splay": true, "RedBlack": false },
         commonParams: {
-            curTreeType: "BinTree", // Important : Always use as `this.curTreeType`.
+            curTreeType: "BST", // Important : Always use as `this.curTreeType`.
             treeScale: 100, // in %
             interval: 500   // in ms
         },
@@ -223,6 +223,7 @@ var vm = new Vue({
                 this.alertAsync(`Step 1: Splay ${node.data}`, -1);
                 node.active = true;
                 setTimeout(() => {
+                    // Splay RM Step 1
                     this.locks.rotateLock = true;
                     this.splayAsync(node, (rootOrNull) => {
                         if (rootOrNull === undefined) return false;
@@ -230,18 +231,19 @@ var vm = new Vue({
                         let v = rootOrNull;
                         let tree = this.tree;
                         tree._size--;
-                        if (!v.rc || !v.rc) {  // Splay Simple Situation
+                        if (!v.rc || !v.rc) {  // Splay RM Step 2a
                             if (!v.rc) { if (tree._root = v.lc) tree._root.parent = null; }
                             else { if (tree._root = v.rc) tree._root.parent = null; }
                             this.alertAsync(`Final: remove ${node.data}`, 2500);
                             this.update();
-                        } else {  // Splay Complex Situation
+                        } else {  // Splay RM Step 2b
                             node.active = false; node.deprecated = true;
                             this.locks.trvlLock = true;
                             this.alertAsync(`Step 2: Elevate Succ of ${node.data}`, -1);
                             this.searchAsync(v.rc, v.data, (_, hot) => {
                                 this.locks.rotateLock = true;
                                 this.splayAsync(hot, (newRoot) => {
+                                    // Splay RM Step 3
                                     this.alertAsync(`Step 3: Finally remove ${node.data}`, 2500);
                                     tree.reAttachAsLC(newRoot, v.lc);
                                     this.update();
@@ -272,11 +274,11 @@ var vm = new Vue({
                     node.deprecated = true;
                     this.locks.trvlLock = true; // TODO : change to srchLock
                     this.searchAsync(node, succ.data, () => { // assert res === true
+                        // RM Step 2: Swap with Succ
                         this.alertAsync(`Step 2: Swap with Succ`, -1);
                         this.update();
                         node.deprecated = true; succ.active = true;
                         setTimeout(() => {
-                            // RM Step 2: Swap
                             let t = node.data; node.data = succ.data; succ.data = t;
                             node.deprecated = false; succ.active = false;
                             node.active = true; succ.deprecated = true;
@@ -285,8 +287,10 @@ var vm = new Vue({
                             setTimeout(() => {
                                 this.tree.removeAt(succ);
                                 this.update();
+                                // RM Step 4 : AVL reBalance
                                 if ("AVL" === this.curTreeType) {
-                                    this.alertAsync(`Step 4: Solve AVL Unbalance`, -1);
+                                    this.alertAsync(`Step 4: AVL reBalance`, -1);
+                                    if (this.tree._hot) this.tree._hot.active = true;
                                     setTimeout(() => {
                                         this.locks.rotateLock = true;
                                         this.avlRmRotateAsync(this.tree._hot, () => {
@@ -494,10 +498,13 @@ var vm = new Vue({
         /*               Dragger                */
         /****************************************/
         onTreeMouseDown(event) {
+            if (event.button !== 0 && event.type !== "touchstart") {
+                this.isDragging = false; return false;
+            }
             console.log("Start dragging")
-            this.treeXY = [event.target.offsetLeft, event.target.offsetTop];
+            this.treeXY = [this.$refs.tree.offsetLeft, this.$refs.tree.offsetTop];
             switch (event.type) {
-                case "mousedown": this.mouseXY = [event.x, event.y]; break;
+                case "mousedown": this.mouseXY = [event.clientX, event.clientY]; break;
                 case "touchstart":
                     this.mouseXY = [event.touches[0].clientX, event.touches[0].clientY];
                     break;
@@ -509,7 +516,7 @@ var vm = new Vue({
             if (this.isDragging) {
                 let newXY;
                 switch (event.type) {
-                    case "mousemove": newXY = [event.x, event.y]; break;
+                    case "mousemove": newXY = [event.clientX, event.clientY]; break;
                     case "touchmove":
                         newXY = [event.touches[0].clientX, event.touches[0].clientY];
                         break;
@@ -520,8 +527,10 @@ var vm = new Vue({
             }
         },
         onTreeMouseLeave(e) {
-            console.log("End dragging")
-            this.isDragging = false;
+            if (this.isDragging) {
+                console.log("End dragging")
+                this.isDragging = false;
+            }
         },
         /****************************************/
         /*              Validators              */
@@ -580,13 +589,12 @@ var vm = new Vue({
         },
         curTreeType: {
             get() { return this.commonParams.curTreeType; },
-            set(newV) { this.commonParams.curTreeType = newV; this.init(); } // Important!!!
+            set(newV) { this.commonParams.curTreeType = newV; this.init(); } // Important
         },
         treeScale: {
             get() { return this.commonParams.treeScale; },
             set(newV) { this.commonParams.treeScale = newV; }
         },
-
         curTreeClass() {
             return this.treeClassMap[this.curTreeType];
         },
@@ -596,7 +604,7 @@ var vm = new Vue({
         },
         showExtr() {
             return true;
-        }
+        },
     },
     watch: {
         tree: {
@@ -609,14 +617,14 @@ var vm = new Vue({
             handler() {
                 localStorage.commonParams = JSON.stringify(this.commonParams);
             }, deep: true
-        }
+        },
     },
     mounted() {
         try { this.commonParams = JSON.parse(localStorage.commonParams); }
         catch (err) { }
-        if (this.availTreeTypes[this.curTreeType] == undefined) this.curTreeType = "BinTree";
+        if (this.availTreeTypes[this.curTreeType] == undefined) this.curTreeType = "BST";
         this.init();
     },
 });
 
-window.vm = vm;
+window.tp = tp;

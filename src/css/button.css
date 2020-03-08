@@ -10,7 +10,8 @@
 
 .btn:active {
     transform: scale(0.99);
-}  
+    transform-origin: left;
+}
 
 .btn-default:hover {
     box-shadow: 0 0 1px 1px gray;

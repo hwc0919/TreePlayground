@@ -103,11 +103,12 @@ export class BST extends BinTree {
     }
     // A sample binary search tree, Maybe called by derived class! Use new this()
     static genSampleTree() {
-        let tree = new this(Math.ceil(Math.random() * 10) + 15); // 15 ~ 25
-        let N = Math.random() < 0.8 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 8);
+        let N = Math.random() < 0.5 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 15);
+        let rootV = Math.ceil(Math.random() * 30 + N);
+        let tree = new this(rootV);
         for (let i = 0; i < N; i++) {
-            tree.insert(Math.ceil(Math.random() * 20));
-            tree.insert(Math.ceil(Math.random() * 20) + 20);
+            tree.insert(rootV - Math.ceil(Math.random() * rootV));
+            tree.insert(rootV + Math.ceil(Math.random() * rootV));
         }
         return tree;
     }

@@ -71,6 +71,11 @@
     z-index: 3;
 }
 
+.binnode:hover {
+    text-shadow: 0px 0px 1px;
+    box-shadow: 0 0 5px;
+}
+
 .binnode:hover .node-upper-btn, .binnode:hover .node-left-btn {
     opacity: 0.5;
 }

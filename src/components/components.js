@@ -39,9 +39,8 @@ Vue.component('binnode', {
         return { showInput: false, updation: this.node.data }
     },
     template:
-        `<div class="binnode intr-binnode" :style="{'left': node.x + 'px', 'top': node.y + 'px'}" :title="'height: ' + node.height"
-                @click="divOnClick">
-            <span v-show="!showInput" style="display: inline-block; width: 100%; height: 100%;">{{ node.data }}</span>
+        `<div class="binnode intr-binnode" :style="{'left': node.x + 'px', 'top': node.y + 'px'}" @click="divOnClick">
+            <span v-show="!showInput" :title="title" style="display: inline-block; width: 100%; height: 100%;">{{ node.data }}</span>
             <label v-show="showRemoveOne" class="node-delete-btn node-upper-btn" title="remove one" 
                 @click.stop="$emit('remove-one', node)">&times;</label>
             <label v-show="showRemoveBelow" class="subtree-delete-btn node-upper-btn" title="remove below"
@@ -72,6 +71,9 @@ Vue.component('binnode', {
         }
     },
     computed: {
+        title() {
+            return `height: ${this.node.height}\nsize: ${this.node.size()}\nnpl:${this.node.npl}`
+        },
         /* **************************************** */
         /* ************ Remove Buttons ************ */
         /* **************************************** */

@@ -50,9 +50,9 @@ export class AVL extends BST {
     }
     static genSampleTree() {
         let tree = new AVL();
-        let N = 5 + (Math.random() < 0.5 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 10));
+        let N = 5 + (Math.random() < 0.5 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 15));
         for (let i = 0; i < N; i++)
-            tree.insert(Math.ceil(Math.random() * 30));
+            tree.insert(Math.ceil(Math.random() * 5 * N));
         return tree;
     }
     static checkValidity(tree) {

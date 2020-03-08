@@ -335,15 +335,15 @@ export class BinTree<T> {
 
     // A sample binary tree
     static genSampleTree(): BinTree<number> {
-        let tree: BinTree<number> = new BinTree(Math.ceil(Math.random() * 10));
+        let tree: BinTree<number> = new BinTree(Math.ceil(Math.random() * 20));
         let nodes: Array<BinNode<number>> = [tree.root()];
-        let N: number = Math.random() < 0.8 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 8);
+        let N: number = Math.random() < 0.5 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 15);
 
-        while (N--) {
+        for (let i: number = 0; i < N; i++) {
             let ind: number = Math.floor(Math.random() * nodes.length);
             let node: BinNode<number> = nodes[ind];
-            if (!node.lc) nodes.push(tree.insertAsLC(node, Math.ceil(Math.random() * 20)));
-            if (!node.rc) nodes.push(tree.insertAsRC(node, Math.ceil(Math.random() * 20)));
+            if (!node.lc) nodes.push(tree.insertAsLC(node, Math.ceil(Math.random() * 5 * N)));
+            if (!node.rc) nodes.push(tree.insertAsRC(node, Math.ceil(Math.random() * 5 * N)));
             nodes.splice(ind, 1);
         }
         return tree;

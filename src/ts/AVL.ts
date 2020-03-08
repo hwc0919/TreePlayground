@@ -55,8 +55,8 @@ export class AVL<T> extends BST<T> {
 
     static genSampleTree(): AVL<number> {
         let tree: AVL<number> = new AVL();
-        let N: number = 5 + (Math.random() < 0.5 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 10));
-        for (let i: number = 0; i < N; i++) tree.insert(Math.ceil(Math.random() * 30));
+        let N: number = 5 + (Math.random() < 0.5 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 15));
+        for (let i: number = 0; i < N; i++) tree.insert(Math.ceil(Math.random() * 5 * N));
         return tree;
     }
 

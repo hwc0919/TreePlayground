@@ -322,16 +322,16 @@ export class BinTree {
     }
     // A sample binary tree
     static genSampleTree() {
-        let tree = new BinTree(Math.ceil(Math.random() * 10));
+        let tree = new BinTree(Math.ceil(Math.random() * 20));
         let nodes = [tree.root()];
-        let N = Math.random() < 0.8 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 8);
-        while (N--) {
+        let N = Math.random() < 0.5 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 15);
+        for (let i = 0; i < N; i++) {
             let ind = Math.floor(Math.random() * nodes.length);
             let node = nodes[ind];
             if (!node.lc)
-                nodes.push(tree.insertAsLC(node, Math.ceil(Math.random() * 20)));
+                nodes.push(tree.insertAsLC(node, Math.ceil(Math.random() * 5 * N)));
             if (!node.rc)
-                nodes.push(tree.insertAsRC(node, Math.ceil(Math.random() * 20)));
+                nodes.push(tree.insertAsRC(node, Math.ceil(Math.random() * 5 * N)));
             nodes.splice(ind, 1);
         }
         return tree;
