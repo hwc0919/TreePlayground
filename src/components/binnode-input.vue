@@ -1,34 +1,35 @@
+<!-- Binnode Input -->
 <template>
-    <input class="binnode-input" :style="{'width': width + 'px'}" :value="value"
-        v-on:input="$emit('input', $event.target.value)">
+    <div>
+        <input ref="input" class="binnode-input" :style="{'width': width + 'px' }" :value="value"
+            @input="$emit('input', $event.target.value)" @blur="$emit('blur')" @focus="onFocus">
+        <span ref="widthIndicator"
+            style="display: inline-block; visibility: hidden; position: absolute;">{{ value }}</span>
+    </div>
 </template>
 
 <script>
-    module.export = {
+    export default {
+        props: ['value'],
         data: function () {
             return {
                 width: 40
             }
         },
-        props: ['value'],
         methods: {
+            forceFocus() {
+                this.$refs.input.focus();
+            },
+            onFocus() {
+                this.width = this.$refs.widthIndicator.offsetWidth;
+            },
         },
         watch: {
             value() {
-                this.width = this.value.toString().length * 16;
+                process.nextTick(() => {
+                    this.width = this.$refs.widthIndicator.offsetWidth;
+                })
             }
         }
     }
 </script>
-
-<style scoped>
-    .binnode-input {
-        min-width: var(--normal-inner-w);
-        height: var(--normal-inner-h);
-        border: none;
-        outline: none;
-        text-align: center;
-        line-height: var(--normal-inner-h);
-        font-size: var(--normal-font-size);
-    }
-</style>

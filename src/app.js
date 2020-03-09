@@ -1,5 +1,7 @@
 import Vue from "../node_modules/vue/dist/vue.min"
-import "./components/components"
+import IntrBinnode from "./components/binnode.vue"
+import ExtrBinnode from "./components/extr-binnode.vue"
+import TopBinnode from "./components/top-binnode.vue"
 import { BinNode } from "./js/BinNode"
 import { BinTree } from "./js/BinTree"
 import { BST } from "./js/BST"
@@ -36,6 +38,11 @@ var tp = new Vue({
         },
         alertTag: 0,
         messageTag: 0
+    },
+    components: {
+        'binnode': IntrBinnode,
+        'extr-binnode': ExtrBinnode,
+        'top-binnode': TopBinnode
     },
     methods: {
         // Init, called when change curTreeType & first mounted
@@ -144,9 +151,11 @@ var tp = new Vue({
                 this._printSequenceAsyc(sequence, callback);
             }, this.commonParams.interval);
         },
+
         /****************************************/
         /*           Events Handlers            */
         /****************************************/
+
         // Internal node requests for value update
         onIntrUpdate(args) {
             if (this.isAnyLocked()) return false;
@@ -494,6 +503,7 @@ var tp = new Vue({
             sequence.splice(last + 1);
             this.topSequence = sequence;
         },
+
         /****************************************/
         /*               Dragger                */
         /****************************************/
@@ -512,7 +522,7 @@ var tp = new Vue({
             }
             this.isDragging = true;
         },
-        onTPMouseMove: function (event) {
+        onTPMouseMove(event) {
             if (this.isDragging) {
                 let newXY;
                 switch (event.type) {
@@ -526,12 +536,13 @@ var tp = new Vue({
                 this.$refs.tree.style.top = this.treeXY[1] + newXY[1] - this.mouseXY[1] + "px";
             }
         },
-        onTreeMouseLeave(e) {
+        onTPMouseUp(e) {
             if (this.isDragging) {
                 console.log("End dragging")
                 this.isDragging = false;
             }
         },
+
         /****************************************/
         /*              Validators              */
         /****************************************/
