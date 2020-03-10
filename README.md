@@ -1,18 +1,18 @@
 # TreePlayground
 A tool to generate, visualize and manipulate various kind of tree structures.
 
-To run the program, you only need to download contents in folder 'docs', or Visit github-page of this project.<br/>
-(http://192.144.210.149/ will no longer serve shortly)
+Just visit https://hwc0919.github.io/TreePlayground/index and enjoy yourself.<br/>
+(My personal server http://tree.nitromelon.com/ or http://192.144.210.149 may be shutdown shortly)
+Or download contents in folder 'docs' to run offline.<br/>
 
-Program can run perfectly on Chrome and Firefox. Windows Edge is only functional when exploring online.
-
+Program can run perfectly on Chrome and Firefox. Windows Edge is only functional when exploring online.<br/>
 V1.4.4 made adaption for mobile devices, but still not recommended to use mobile phone for this program.
 
-若要运行程序, 只需要下载文件夹"docs"中的内容即可本地运行. 也可直接访问本项目的github-page.<br/>
-(http://192.144.210.149/ 即将停止服务)
+可直接访问 https://hwc0919.github.io/TreePlayground/index <br/>
+(个人服务器 http://tree.nitromelon.com/ 或 http://192.144.210.149/ 可能即将关闭)<br/>
+也可以下载文件夹"docs"中的内容本地运行.
 
-Chorme和Firefox浏览器可以正常运行. Edge浏览器可以在线运行.
-
+Chorme和Firefox浏览器可以正常运行. Edge浏览器可以在线运行.<br/>
 V1.4.4适配了移动端页面, 但仍不推荐在手机上运行.
 
 感谢
