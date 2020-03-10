@@ -1,13 +1,19 @@
 # TreePlayground
 A tool to generate, visualize and manipulate various kind of tree structures.
 
-To run the program, you only need to download contents in folder 'dist', or Visit http://192.144.210.149/
+To run the program, you only need to download contents in folder 'docs', or Visit github-page of this project.<br/>
+(http://192.144.210.149/ will no longer serve shortly)
 
-No compatibility testing. Functions are only guaranteed in Chrome.
+Program can run perfectly on Chrome and Firefox. Windows Edge is only functional when exploring online.
 
-若要运行程序, 只需要下载文件夹"dist"中的内容即可本地运行. 也可直接访问 http://192.144.210.149/
+V1.4.4 made adaption for mobile devices, but still not recommended to use mobile phone for this program.
 
-没有测试兼容性, 只能保证chorme浏览器下正常运行.
+若要运行程序, 只需要下载文件夹"docs"中的内容即可本地运行. 也可直接访问本项目的github-page.<br/>
+(http://192.144.210.149/ 即将停止服务)
+
+Chorme和Firefox浏览器可以正常运行. Edge浏览器可以在线运行.
+
+V1.4.4适配了移动端页面, 但仍不推荐在手机上运行.
 
 感谢
 [@Wasted-waste](https://github.com/Wasted-waste),

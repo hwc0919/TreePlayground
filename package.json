@@ -1,6 +1,6 @@
 {
   "name": "tree-playground",
-  "version": "1.0.0",
+  "version": "1.4.4",
   "description": "A tool to generate, visualize and manipulate various kind of tree structures.",
   "main": "",
   "scripts": {

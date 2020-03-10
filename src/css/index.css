@@ -46,6 +46,7 @@ html, body {
     position: relative;
     width: 100%;
     height: 100%;
+    z-index: 0;
 }
 
 .tree {
@@ -103,10 +104,6 @@ html, body {
     opacity: 1;
 }
 
-.tree-dragging-btn:active {
-    /* border-width: 3px; */
-}
-
 .left-message {
     position: absolute;
     right: 93px;
@@ -127,7 +124,7 @@ html, body {
 
 #footer {
     font-size: 14px;
-    z-index: -100;
+    z-index: 1;
     color: gray;
 }
 
@@ -146,10 +143,19 @@ html, body {
     }
 }
 
+@media screen and (max-width: 376px) {
+    #footer, #header {
+        font-size: 10px;
+    }
+}
+
 /* Horizontally */
 
 @media screen and (max-height: 500px) {
     .tree {
         top: 200px;
+    }
+    #footer, #header {
+        font-size: 10px;
     }
 }
