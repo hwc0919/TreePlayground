@@ -50,7 +50,7 @@
         computed: {
             title() {
                 if (this.$parent.curTreeType === "RedBlack")
-                    return `blackH: ${this.node.blackH + 1}\nsize: ${this.node.size()}`
+                    return `blackH: ${this.node.height + 1}\nsize: ${this.node.size()}`
                 return `height: ${this.node.height}\nsize: ${this.node.size()}`
                 // return `npl:${this.node.npl}\nsize: ${this.node.size()}`
             },

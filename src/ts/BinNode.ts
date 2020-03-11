@@ -36,14 +36,9 @@ export class TreeUtil<T> {
         return !this.isBlack(x);
     }
 
-    static statureB<T>(x: BinNode<T>): number {
-        if (x === null) return -1;
-        else return x.blackH;
-    }
-
     static isBlackUpdated<T>(x: BinNode<T>): boolean {
-        return this.statureB(x.lc) == this.statureB(x.rc) &&
-            this.statureB(x) == (this.isBlack(x) ? this.statureB(x.lc) + 1 : this.statureB(x.lc));
+        return this.stature(x.lc) == this.stature(x.rc) &&
+            this.stature(x) == (this.isBlack(x) ? this.stature(x.lc) + 1 : this.stature(x.lc));
     }
 }
 
@@ -53,7 +48,6 @@ export class BinNode<T> {
     lc: BinNode<T>;
     rc: BinNode<T>;
     height: number;
-    blackH: number;
     npl: number;
     color: RBColor;
     nid: number;
@@ -65,13 +59,12 @@ export class BinNode<T> {
     static N: number = 0;
 
     constructor(e: T = null, p: BinNode<T> = null, lc: BinNode<T> = null, rc: BinNode<T> = null,
-        height: number = 0, blackH: number = -1, npl: number = 0, c: RBColor = RBColor.Red) {
+        height: number = 0, npl: number = 0, c: RBColor = RBColor.Red) {
         this.data = e;
         this.parent = p;
         this.lc = lc;
         this.rc = rc;
         this.height = height;
-        this.blackH = blackH;
         this.npl = npl;
         this.color = c;
         this.nid = ++BinNode.N;

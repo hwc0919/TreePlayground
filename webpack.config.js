@@ -7,8 +7,8 @@ module.exports = {
         filename: "bundle.js"
     },
     watch: true,
-    mode: "development",
-    // mode: "production",
+    // mode: "development",
+    mode: "production",
     plugins: [
         new VueLoaderPlugin(),
     ],

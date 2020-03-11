@@ -1,6 +1,6 @@
 import { BST } from "./BST";
 import { RBColor, TreeUtil, BinNode } from "./BinNode";
-let statureB = TreeUtil.statureB;
+let stature = TreeUtil.stature;
 export class RedBlack extends BST {
     solveDoubleRed(x) {
         if (TreeUtil.isRoot(x)) {
@@ -74,15 +74,15 @@ export class RedBlack extends BST {
         }
     }
     updateHeight(x) {
-        x.blackH = statureB(x.lc) > statureB(x.rc) ? statureB(x.lc) : statureB(x.rc);
+        x.height = stature(x.lc) > stature(x.rc) ? stature(x.lc) : stature(x.rc);
         if (TreeUtil.isBlack(x))
-            x.blackH++;
+            x.height++;
     }
     insert(e) {
         let x = this.search(e);
         if (x)
             return x;
-        x = new BinNode(e, this._hot);
+        x = new BinNode(e, this._hot, null, null, -1);
         if (!this._root)
             this._root = x;
         else

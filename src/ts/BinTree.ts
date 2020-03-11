@@ -38,7 +38,6 @@ export class BinTree<T> {
             this._size = 1;
             this._root = new BinNode<T>(e);
             this._root.color = RBColor.Black;
-            this._root.blackH = 0;
         }
     }
 
@@ -212,10 +211,10 @@ export class BinTree<T> {
             let curLevel = levels[i];
             for (let j: number = 0; j < curLevel.length; j++) {
                 curLevel[j].x -= deltaX;
-                // if (curLevel[j].lc !== undefined) { this.updateHeight(curLevel[j]); }
+                if (curLevel[j].lc !== undefined) { this.updateHeight(curLevel[j]); }
             }
         }
-        // this.updateHeight(this._root);
+        this.updateHeight(this._root);
 
         // 添加内部边和外部边
         for (let i: number = levels.length - 1; i >= 1; i--) {
@@ -237,7 +236,7 @@ export class BinTree<T> {
         return structInfo;
     }
 
-    // Build tree from JSON object retracted from LocalStorage
+    // Build tree from JSON object retracted from LocalStorage. ! Caution: Can not update Black Height!
     static buildFromTreeJsonObj<T>(treeObj: ITreeJsonObj<T>): BinTree<T> {
         if (treeObj._root === null) return new this();
 

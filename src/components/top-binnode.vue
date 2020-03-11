@@ -74,7 +74,8 @@
         }, computed: {
             showTopSearch() { return this.$parent.curTreeType !== "BinTree"; }, showTopInsert() {
                 return this.$parent.curTreeType !== "BinTree";
-            }, showTopBuild() { return true; }
+            }, 
+            showTopBuild() { return this.$parent.curTreeType !== "RedBlack"; }
         },
         watch: {
             data() { this.sequence = this.data.toString(); }
