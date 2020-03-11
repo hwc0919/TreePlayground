@@ -38,17 +38,17 @@ export class Splay<T> extends BST<T> {
         // bi-connect (vpg) & gg
         if (gg) (g == gg.lc) ? this.reAttachAsLC(gg, v) : this.reAttachAsRC(gg, v);
         else v.parent = null;
-        this.update_height(g);
-        this.update_height(p);
-        this.update_height(v);
+        this.updateHeight(g);
+        this.updateHeight(p);
+        this.updateHeight(v);
         return v;
     }
 
     public splaySingleLayer(v: BinNode<T>, p: BinNode<T>): BinNode<T> {
         if (v == p.lc) { this.reAttachAsLC(p, v.rc); this.reAttachAsRC(v, p); }
         else { this.reAttachAsRC(p, v.lc); this.reAttachAsLC(v, p); }
-        this.update_height(p);
-        this.update_height(v);
+        this.updateHeight(p);
+        this.updateHeight(v);
         return v;
     }
 
@@ -81,7 +81,7 @@ export class Splay<T> extends BST<T> {
             this._root.lc = null
         }
         this._size++;
-        this.update_height_above(this._root);
+        this.updateHeightAbove(this._root);
         return this._root = v;
     }
 
@@ -100,7 +100,7 @@ export class Splay<T> extends BST<T> {
             this.reAttachAsLC(this._root, v.lc);
         }
         this._size--;
-        if (this._root) this.update_height(this._root);
+        if (this._root) this.updateHeight(this._root);
         return true;
     }
 

@@ -22,6 +22,18 @@
     z-index: 1;
 }
 
+.normal-color-node {
+    color: var(--normal-numcolor);
+}
+
+.red-node {
+    color: var(--red-color);
+}
+
+.black-node {
+    color: var(--black-color);
+}
+
 .extr-binnode {
     z-index: 0;
     opacity: 0.1;
@@ -43,12 +55,10 @@
 }
 
 .active-node {
-    color: var(--active-color) !important;
     border-color: var(--active-color) !important;
 }
 
 .visited-node {
-    color: var(--visited-color) !important;
     border-color: var(--visited-color) !important;
 }
 

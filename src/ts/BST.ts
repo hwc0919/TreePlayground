@@ -1,6 +1,5 @@
 import { BinTree } from "./BinTree"
-import { BinNode } from "./BinNode"
-import { Deque } from "./Deque";
+import { BinNode, TreeUtil } from "./BinNode"
 
 
 export class BST<T> extends BinTree<T> {
@@ -11,15 +10,15 @@ export class BST<T> extends BinTree<T> {
         t0: BinNode<T>, t1: BinNode<T>, t2: BinNode<T>, t3: BinNode<T>): BinNode<T> {
         this.reAttachAsLC(a, t0);
         this.reAttachAsRC(a, t1);
-        this.update_height(a);
+        this.updateHeight(a);
 
         this.reAttachAsLC(c, t2);
         this.reAttachAsRC(c, t3);
-        this.update_height(c);
+        this.updateHeight(c);
 
         this.reAttachAsLC(b, a);
         this.reAttachAsRC(b, c);
-        this.update_height(b);
+        this.updateHeight(b);
         return b;
     }
 
@@ -28,13 +27,13 @@ export class BST<T> extends BinTree<T> {
         let p: BinNode<T> = x.parent;
         let g: BinNode<T> = p.parent;
         let gp: BinNode<T> = g.parent;
-        let gIsLC: boolean = BinNode.isLC(g);
+        let gIsLC: boolean = TreeUtil.isLC(g);
 
-        if (BinNode.isLC(p)) {
-            if (BinNode.isLC(x)) x = this.connect34(x, p, g, x.lc, x.rc, p.rc, g.rc);
+        if (TreeUtil.isLC(p)) {
+            if (TreeUtil.isLC(x)) x = this.connect34(x, p, g, x.lc, x.rc, p.rc, g.rc);
             else x = this.connect34(p, x, g, p.lc, x.lc, x.rc, g.rc);
         } else {
-            if (BinNode.isLC(x)) x = this.connect34(g, x, p, g.lc, x.lc, x.rc, p.rc);
+            if (TreeUtil.isLC(x)) x = this.connect34(g, x, p, g.lc, x.lc, x.rc, p.rc);
             else x = this.connect34(g, p, x, g.lc, p.lc, x.lc, x.rc);
         }
         x.parent = gp;
@@ -71,7 +70,7 @@ export class BST<T> extends BinTree<T> {
         if (!this._root) this._root = v;
         else (e < this._hot.data) ? this._hot.lc = v : this._hot.rc = v;
 
-        this.update_height_above(v);
+        this.updateHeightAbove(v);
         return v;
     }
 
@@ -88,9 +87,8 @@ export class BST<T> extends BinTree<T> {
         // bi-connect x(successor) and _hot
         if (x) x.parent = this._hot;
         if (!this._hot) this._root = x;
-        else if (BinNode.isLC(w)) this._hot.lc = x;
+        else if (TreeUtil.isLC(w)) this._hot.lc = x;
         else this._hot.rc = x;
-
         return x;
     }
 
@@ -100,18 +98,18 @@ export class BST<T> extends BinTree<T> {
 
         this.removeAt(v);
         this._size--;
-        this.update_height_above(this._hot);
+        this.updateHeightAbove(this._hot);
         return true;
     }
 
     // A sample binary search tree, Maybe called by derived class! Use new this()
     static genSampleTree(): BST<number> {
-        let N: number = Math.random() < 0.5 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 15);
+        let N: number = Math.random() < 0.5 ? Math.ceil(Math.random() * 8) : Math.ceil(Math.random() * 30);
         let rootV: number = Math.ceil(Math.random() * 30 + N);
         let tree: BST<number> = new this(rootV);
-        for (let i : number = 0; i < N; i++) {
-            tree.insert(rootV - Math.ceil(Math.random() * rootV));
-            tree.insert(rootV + Math.ceil(Math.random() * rootV));
+        for (let i: number = 0; i < N; i++) {
+            Math.random() < 0.5 ? tree.insert(rootV - Math.ceil(Math.random() * rootV)) :
+                tree.insert(rootV + Math.ceil(Math.random() * rootV));
         }
         return tree;
     }

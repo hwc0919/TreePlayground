@@ -4,21 +4,7 @@ export var RBColor;
     RBColor[RBColor["Black"] = 1] = "Black";
 })(RBColor || (RBColor = {}));
 ;
-export class BinNode {
-    constructor(e = null, p = null, lc = null, rc = null, height = 0, npl = 0, c = RBColor.Red) {
-        this.x = 0;
-        this.y = 0;
-        this.active = false;
-        this.visited = false;
-        this.data = e;
-        this.parent = p;
-        this.lc = lc;
-        this.rc = rc;
-        this.height = height;
-        this.npl = npl;
-        this.color = c;
-        this.nid = ++BinNode.N;
-    }
+export class TreeUtil {
     static isRoot(x) {
         return !x.parent;
     }
@@ -45,6 +31,39 @@ export class BinNode {
         else
             return this.isLC(x) ? x.lc : x.rc;
     }
+    static isBlack(x) {
+        return !x || x.color == RBColor.Black;
+    }
+    static isRed(x) {
+        return !this.isBlack(x);
+    }
+    static statureB(x) {
+        if (x === null)
+            return -1;
+        else
+            return x.blackH;
+    }
+    static isBlackUpdated(x) {
+        return this.statureB(x.lc) == this.statureB(x.rc) &&
+            this.statureB(x) == (this.isBlack(x) ? this.statureB(x.lc) + 1 : this.statureB(x.lc));
+    }
+}
+export class BinNode {
+    constructor(e = null, p = null, lc = null, rc = null, height = 0, blackH = -1, npl = 0, c = RBColor.Red) {
+        this.x = 0;
+        this.y = 0;
+        this.active = false;
+        this.visited = false;
+        this.data = e;
+        this.parent = p;
+        this.lc = lc;
+        this.rc = rc;
+        this.height = height;
+        this.blackH = blackH;
+        this.npl = npl;
+        this.color = c;
+        this.nid = ++BinNode.N;
+    }
     size() {
         let s = 1;
         if (this.lc)
@@ -68,7 +87,7 @@ export class BinNode {
                 s = s.lc;
         }
         else {
-            while (BinNode.isRC(s))
+            while (TreeUtil.isRC(s))
                 s = s.parent;
             s = s.parent;
         }
@@ -83,7 +102,7 @@ export class BinNode {
                 s = s.rc;
         }
         else {
-            while (BinNode.isLC(s))
+            while (TreeUtil.isLC(s))
                 s = s.parent;
             s = s.parent;
         }

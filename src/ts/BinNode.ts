@@ -1,27 +1,15 @@
 export enum RBColor { Red, Black };
 
-export class BinNode<T> {
-    data: T;
-    parent: BinNode<T>;
-    lc: BinNode<T>;
-    rc: BinNode<T>;
-    height: number;
-    npl: number;
-    color: RBColor;
-    nid: number;
-    x: number = 0;
-    y: number = 0;
-    active: boolean = false;
-    visited: boolean = false;
-
-    static N: number = 0;
+export class TreeUtil<T> {
 
     static isRoot<T>(x: BinNode<T>): boolean {
         return !x.parent;
     }
+
     static isLC<T>(x: BinNode<T>): boolean {
         return x.parent && x === x.parent.lc;
     }
+
     static isRC<T>(x: BinNode<T>): boolean {
         return x.parent && x === x.parent.rc;
     }
@@ -40,13 +28,50 @@ export class BinNode<T> {
         else return this.isLC(x) ? x.lc : x.rc;
     }
 
+    static isBlack<T>(x: BinNode<T>): boolean {
+        return !x || x.color == RBColor.Black;
+    }
+
+    static isRed<T>(x: BinNode<T>): boolean {
+        return !this.isBlack(x);
+    }
+
+    static statureB<T>(x: BinNode<T>): number {
+        if (x === null) return -1;
+        else return x.blackH;
+    }
+
+    static isBlackUpdated<T>(x: BinNode<T>): boolean {
+        return this.statureB(x.lc) == this.statureB(x.rc) &&
+            this.statureB(x) == (this.isBlack(x) ? this.statureB(x.lc) + 1 : this.statureB(x.lc));
+    }
+}
+
+export class BinNode<T> {
+    data: T;
+    parent: BinNode<T>;
+    lc: BinNode<T>;
+    rc: BinNode<T>;
+    height: number;
+    blackH: number;
+    npl: number;
+    color: RBColor;
+    nid: number;
+    x: number = 0;
+    y: number = 0;
+    active: boolean = false;
+    visited: boolean = false;
+
+    static N: number = 0;
+
     constructor(e: T = null, p: BinNode<T> = null, lc: BinNode<T> = null, rc: BinNode<T> = null,
-        height: number = 0, npl: number = 0, c: RBColor = RBColor.Red) {
+        height: number = 0, blackH: number = -1, npl: number = 0, c: RBColor = RBColor.Red) {
         this.data = e;
         this.parent = p;
         this.lc = lc;
         this.rc = rc;
         this.height = height;
+        this.blackH = blackH;
         this.npl = npl;
         this.color = c;
         this.nid = ++BinNode.N;
@@ -72,7 +97,7 @@ export class BinNode<T> {
             s = s.rc;
             while (s.lc) s = s.lc;
         } else {
-            while (BinNode.isRC(s)) s = s.parent;
+            while (TreeUtil.isRC(s)) s = s.parent;
             s = s.parent;
         }
         return s;
@@ -85,7 +110,7 @@ export class BinNode<T> {
             s = s.lc;
             while (s.rc) s = s.rc;
         } else {
-            while (BinNode.isLC(s)) s = s.parent;
+            while (TreeUtil.isLC(s)) s = s.parent;
             s = s.parent;
         }
         return s;

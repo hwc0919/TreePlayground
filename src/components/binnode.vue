@@ -1,6 +1,8 @@
 <!-- Internal BinNode -->
 <template>
-    <div class="binnode intr-binnode" :style="{'left': node.x + 'px', 'top': node.y + 'px'}" @click="divOnClick">
+    <div class="binnode intr-binnode" :style="{'left': node.x + 'px', 'top': node.y + 'px'}"
+        :class="{'active-node': node.active, 'visited-node': node.visited, 'deprecated-node': node.deprecated}"
+        @click="divOnClick">
         <span v-show="!showInput" :title="title"
             style="display: inline-block; width: 100%; height: 100%;">{{ node.data }}</span>
         <label v-show="showRemoveOne" class="node-delete-btn node-upper-btn" title="remove one"
@@ -47,18 +49,20 @@
         },
         computed: {
             title() {
-                return `height: ${this.node.height}\nsize: ${this.node.size()}\nnpl:${this.node.npl}`
+                if (this.$parent.curTreeType === "RedBlack")
+                    return `blackH: ${this.node.blackH + 1}\nsize: ${this.node.size()}`
+                return `height: ${this.node.height}\nsize: ${this.node.size()}`
+                // return `npl:${this.node.npl}\nsize: ${this.node.size()}`
             },
             /* **************************************** */
             /* ************ Remove Buttons ************ */
             /* **************************************** */
             showRemoveBelow() { // Only BinTree or BST or Root!
-                let curTreeType = this.$parent.commonParams.curTreeType;
+                let curTreeType = this.$parent.curTreeType;
                 return curTreeType === "BinTree" || curTreeType === "BST" || !this.node.parent;
             },
             showRemoveOne() { // Except BinTree and Splay!
-                let curTreeType = this.$parent.commonParams.curTreeType;
-                return curTreeType !== "BinTree";
+                return this.$parent.curTreeType !== "BinTree";
             }
         }
     }

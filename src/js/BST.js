@@ -1,17 +1,17 @@
 import { BinTree } from "./BinTree";
-import { BinNode } from "./BinNode";
+import { BinNode, TreeUtil } from "./BinNode";
 export class BST extends BinTree {
     // 3 + 4 Reconstruction of BBST
     connect34(a, b, c, t0, t1, t2, t3) {
         this.reAttachAsLC(a, t0);
         this.reAttachAsRC(a, t1);
-        this.update_height(a);
+        this.updateHeight(a);
         this.reAttachAsLC(c, t2);
         this.reAttachAsRC(c, t3);
-        this.update_height(c);
+        this.updateHeight(c);
         this.reAttachAsLC(b, a);
         this.reAttachAsRC(b, c);
-        this.update_height(b);
+        this.updateHeight(b);
         return b;
     }
     // Rotate at the grandchild of lowest unbalanced bbst node
@@ -19,15 +19,15 @@ export class BST extends BinTree {
         let p = x.parent;
         let g = p.parent;
         let gp = g.parent;
-        let gIsLC = BinNode.isLC(g);
-        if (BinNode.isLC(p)) {
-            if (BinNode.isLC(x))
+        let gIsLC = TreeUtil.isLC(g);
+        if (TreeUtil.isLC(p)) {
+            if (TreeUtil.isLC(x))
                 x = this.connect34(x, p, g, x.lc, x.rc, p.rc, g.rc);
             else
                 x = this.connect34(p, x, g, p.lc, x.lc, x.rc, g.rc);
         }
         else {
-            if (BinNode.isLC(x))
+            if (TreeUtil.isLC(x))
                 x = this.connect34(g, x, p, g.lc, x.lc, x.rc, p.rc);
             else
                 x = this.connect34(g, p, x, g.lc, p.lc, x.lc, x.rc);
@@ -66,7 +66,7 @@ export class BST extends BinTree {
             this._root = v;
         else
             (e < this._hot.data) ? this._hot.lc = v : this._hot.rc = v;
-        this.update_height_above(v);
+        this.updateHeightAbove(v);
         return v;
     }
     removeAt(x) {
@@ -86,7 +86,7 @@ export class BST extends BinTree {
             x.parent = this._hot;
         if (!this._hot)
             this._root = x;
-        else if (BinNode.isLC(w))
+        else if (TreeUtil.isLC(w))
             this._hot.lc = x;
         else
             this._hot.rc = x;
@@ -98,17 +98,17 @@ export class BST extends BinTree {
             return false;
         this.removeAt(v);
         this._size--;
-        this.update_height_above(this._hot);
+        this.updateHeightAbove(this._hot);
         return true;
     }
     // A sample binary search tree, Maybe called by derived class! Use new this()
     static genSampleTree() {
-        let N = Math.random() < 0.5 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 15);
+        let N = Math.random() < 0.5 ? Math.ceil(Math.random() * 8) : Math.ceil(Math.random() * 30);
         let rootV = Math.ceil(Math.random() * 30 + N);
         let tree = new this(rootV);
         for (let i = 0; i < N; i++) {
-            tree.insert(rootV - Math.ceil(Math.random() * rootV));
-            tree.insert(rootV + Math.ceil(Math.random() * rootV));
+            Math.random() < 0.5 ? tree.insert(rootV - Math.ceil(Math.random() * rootV)) :
+                tree.insert(rootV + Math.ceil(Math.random() * rootV));
         }
         return tree;
     }

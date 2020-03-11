@@ -1,10 +1,10 @@
 import { BST } from "./BST"
-import { BinNode } from "./BinNode"
+import { BinNode, TreeUtil } from "./BinNode"
 
 export class AVL<T> extends BST<T> {
 
     static avlBalanced<T>(x: BinNode<T>): boolean {
-        let balFac: number = BinNode.stature(x.lc) - BinNode.stature(x.rc);
+        let balFac: number = TreeUtil.stature(x.lc) - TreeUtil.stature(x.rc);
         return -2 < balFac && balFac < 2;
     }
 
@@ -29,9 +29,9 @@ export class AVL<T> extends BST<T> {
     public solveInsertUnbalance(): void {
         for (let g: BinNode<T> = this._hot; g; g = g.parent) {
             if (!AVL.avlBalanced(g)) {
-                this.rotateAt(BinNode.tallerChild(BinNode.tallerChild(g)));
+                this.rotateAt(TreeUtil.tallerChild(TreeUtil.tallerChild(g)));
                 break;
-            } else this.update_height(g);
+            } else this.updateHeight(g);
         }
     }
 
@@ -48,8 +48,8 @@ export class AVL<T> extends BST<T> {
 
     public solveRemoveUnbalance(): void {
         for (let g: BinNode<T> = this._hot; g; g = g.parent) {
-            if (!AVL.avlBalanced(g)) this.rotateAt(BinNode.tallerChild(BinNode.tallerChild(g)));
-            this.update_height(g);
+            if (!AVL.avlBalanced(g)) this.rotateAt(TreeUtil.tallerChild(TreeUtil.tallerChild(g)));
+            this.updateHeight(g);
         }
     }
 

@@ -40,6 +40,8 @@ html, body {
     --active-color: rgba(253, 121, 168, 1.0);
     --visited-color: gray;
     --deprecated-color: rgba(253, 203, 110, 1.0);
+    --red-color: red;
+    --black-color: black;
 }
 
 #TreePlayground {

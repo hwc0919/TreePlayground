@@ -42,9 +42,9 @@ export class Splay extends BST {
             (g == gg.lc) ? this.reAttachAsLC(gg, v) : this.reAttachAsRC(gg, v);
         else
             v.parent = null;
-        this.update_height(g);
-        this.update_height(p);
-        this.update_height(v);
+        this.updateHeight(g);
+        this.updateHeight(p);
+        this.updateHeight(v);
         return v;
     }
     splaySingleLayer(v, p) {
@@ -56,8 +56,8 @@ export class Splay extends BST {
             this.reAttachAsRC(p, v.lc);
             this.reAttachAsLC(v, p);
         }
-        this.update_height(p);
-        this.update_height(v);
+        this.updateHeight(p);
+        this.updateHeight(v);
         return v;
     }
     search(e) {
@@ -87,7 +87,7 @@ export class Splay extends BST {
             this._root.lc = null;
         }
         this._size++;
-        this.update_height_above(this._root);
+        this.updateHeightAbove(this._root);
         return this._root = v;
     }
     remove(e) {
@@ -110,7 +110,7 @@ export class Splay extends BST {
         }
         this._size--;
         if (this._root)
-            this.update_height(this._root);
+            this.updateHeight(this._root);
         return true;
     }
 }

@@ -1,5 +1,5 @@
 import { Deque } from "./Deque"
-import { BinNode } from "./BinNode"
+import { BinNode, TreeUtil, RBColor } from "./BinNode"
 
 
 interface ITreeStructInfo<T> {
@@ -24,7 +24,7 @@ interface IExtrNodeObj<T> {
     lc?: BinNode<T>;
 }
 
-let stature: Function = BinNode.stature;
+let stature: Function = TreeUtil.stature;
 
 export class BinTree<T> {
     protected _root: BinNode<T>;
@@ -37,16 +37,18 @@ export class BinTree<T> {
         } else {
             this._size = 1;
             this._root = new BinNode<T>(e);
+            this._root.color = RBColor.Black;
+            this._root.blackH = 0;
         }
     }
 
-    protected update_height(x: BinNode<T>): void {
+    protected updateHeight(x: BinNode<T>): void {
         x.height = 1 + Math.max(stature(x.lc), stature(x.rc));
         x.npl = (x.lc && x.rc) ? 1 + Math.min(x.lc.npl, x.rc.npl) : 0;
     }
-    protected update_height_above(x: BinNode<T>): void {
+    protected updateHeightAbove(x: BinNode<T>): void {
         while (x) {
-            this.update_height(x);
+            this.updateHeight(x);
             x = x.parent;
         }
     }
@@ -69,7 +71,7 @@ export class BinTree<T> {
         if (p) {
             if (x == p.lc) p.lc = null;
             else p.rc = null;
-            this.update_height_above(p);
+            this.updateHeightAbove(p);
         } else  // delete root
             this._root = null;
         // update size
@@ -85,13 +87,13 @@ export class BinTree<T> {
     public insertAsLC(x: BinNode<T>, e: T, updateH: boolean = true): BinNode<T> {
         this._size++;
         x.insertAsLC(e);
-        if (updateH) this.update_height_above(x);
+        if (updateH) this.updateHeightAbove(x);
         return x.lc;
     }
     public insertAsRC(x: BinNode<T>, e: T, updateH: boolean = true): BinNode<T> {
         this._size++;
         x.insertAsRC(e);
-        if (updateH) this.update_height_above(x);
+        if (updateH) this.updateHeightAbove(x);
         return x.rc;
     }
 
@@ -129,9 +131,10 @@ export class BinTree<T> {
         this._root.y = 0;
         this._root.active = false;
         this._root.visited = false;
-        let levels: Array<Array<BinNode<T> | IExtrNodeObj<T>>> = [[this._root]];
+        let levels: Array<Array<BinNode<T>>> | any = [[this._root]];
         nodes.push(this._root);
-        for (let i: number = 0; i <= this._root.height; i++) {
+        for (let i: number = 0;; i++) {
+            let reachBottom: boolean = true;
             levels.push([]);
             for (let j: number = 0; j < levels[i].length; j++) {
                 let node: any = levels[i][j];
@@ -147,6 +150,7 @@ export class BinTree<T> {
                 let deltaX = Math.max(0, node.data.toString().length - 2) * 6;
                 // 为内部节点添加两个孩子
                 if (node.lc) {
+                    reachBottom = false;
                     node.lc.x = node.x - deltaX;
                     node.lc.y = levelY;
                     levels[i + 1].push(node.lc);
@@ -158,6 +162,7 @@ export class BinTree<T> {
                     extrNodes.push(extrNodeObj);
                 }
                 if (node.rc) {
+                    reachBottom = false;
                     node.rc.x = node.x + deltaX;
                     node.rc.y = levelY;
                     levels[i + 1].push(node.rc);
@@ -169,6 +174,7 @@ export class BinTree<T> {
                     extrNodes.push(extrNodeObj);
                 }
             }
+            if (reachBottom) break;
         }
 
         // 计算最底层横坐标
@@ -199,13 +205,17 @@ export class BinTree<T> {
             }
         }
 
-        // 调整根节点至中心
+        // 调整根节点至中心, 顺便更新高度(若不更新, 黑高度将错误)
         let deltaX = this._root.x;
         this._root.x = 0;
         for (let i: number = levels.length - 1; i >= 1; i--) {
             let curLevel = levels[i];
-            for (let j: number = 0; j < curLevel.length; j++) curLevel[j].x -= deltaX;
+            for (let j: number = 0; j < curLevel.length; j++) {
+                curLevel[j].x -= deltaX;
+                // if (curLevel[j].lc !== undefined) { this.updateHeight(curLevel[j]); }
+            }
         }
+        // this.updateHeight(this._root);
 
         // 添加内部边和外部边
         for (let i: number = levels.length - 1; i >= 1; i--) {
@@ -231,21 +241,20 @@ export class BinTree<T> {
     static buildFromTreeJsonObj<T>(treeObj: ITreeJsonObj<T>): BinTree<T> {
         if (treeObj._root === null) return new this();
 
-        let dataNode: BinNode<T> = treeObj._root;
         let tree: BinTree<T> = new this(treeObj._root.data);
-        let dataStk: Array<BinNode<T>> = [dataNode];
+        let dataStk: Array<BinNode<T>> = [treeObj._root];
         let nodeStk: Array<BinNode<T>> = [tree.root()];
-        let i = 0
+
         while (dataStk.length > 0) {
-            dataNode = dataStk.pop();
-            let node = nodeStk.pop();
+            let dataNode: BinNode<T> = dataStk.pop();
+            let node: BinNode<T> = nodeStk.pop();
             if (dataNode.lc) {
-                tree.insertAsLC(node, dataNode.lc.data);
+                (tree.insertAsLC(node, dataNode.lc.data)).color = dataNode.lc.color;
                 dataStk.push(dataNode.lc);
                 nodeStk.push(node.lc);
             }
             if (dataNode.rc) {
-                tree.insertAsRC(node, dataNode.rc.data);
+                (tree.insertAsRC(node, dataNode.rc.data)).color = dataNode.rc.color;
                 dataStk.push(dataNode.rc);
                 nodeStk.push(node.rc);
             }

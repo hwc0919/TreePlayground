@@ -1,16 +1,18 @@
 # TreePlayground
-A tool to generate, visualize and manipulate various kind of tree structures.
+## Tree Visualization Tool for Learning Data Structure and Algorithm.
 
-Just visit https://hwc0919.github.io/TreePlayground/index and enjoy yourself.<br/>
+Just visit https://hwc0919.github.io/TreePlayground/ and enjoy yourself.
+
 Or download contents in folder 'docs' to run offline.
 
 (My personal server http://192.144.210.149/ may be shutdown shortly)
 
 Program can run perfectly on Chrome and Firefox. Windows Edge is only functional when exploring online.
 
-V1.4.4 made adaption for mobile devices, but still not recommended to use mobile phone for this program.
+V1.4.4 made adaption for mobile devices, but mobile use still not recommended.
 
-可直接访问 https://hwc0919.github.io/TreePlayground/<br/>
+可直接访问 https://hwc0919.github.io/TreePlayground/
+
 也可以下载文件夹"docs"中的内容本地运行.
 
 (个人服务器 http://192.144.210.149/ 可能即将关闭)
@@ -18,6 +20,7 @@ V1.4.4 made adaption for mobile devices, but still not recommended to use mobile
 Chorme和Firefox浏览器可以正常运行. Edge浏览器可以在线运行.
 
 V1.4.4适配了移动端页面, 但仍不推荐在手机上运行.
+
 
 感谢
 [@Wasted-waste](https://github.com/Wasted-waste),
@@ -47,7 +50,7 @@ V1.4.4适配了移动端页面, 但仍不推荐在手机上运行.
 
 为实现动态性, 使用了很多异步代码, 代码的可读性收到一些影响.
 
-本人为前端新手, 对浏览器兼容性束手无策, 优化移动端界面也尚未提上日程, 应该在所有功能性代码完成之后考虑. 
+红黑树将不实现异步接口, 因为染色操作可视化效果不明显, 而且在回调模式下增加内容太繁杂, 实在没有精力.
 
 如果你发现了bug, 请在Issue里提出, 十分感谢.
 

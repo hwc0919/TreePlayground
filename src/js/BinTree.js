@@ -1,6 +1,6 @@
 import { Deque } from "./Deque";
-import { BinNode } from "./BinNode";
-let stature = BinNode.stature;
+import { BinNode, TreeUtil, RBColor } from "./BinNode";
+let stature = TreeUtil.stature;
 export class BinTree {
     constructor(e = null) {
         if (e === null) {
@@ -10,15 +10,17 @@ export class BinTree {
         else {
             this._size = 1;
             this._root = new BinNode(e);
+            this._root.color = RBColor.Black;
+            this._root.blackH = 0;
         }
     }
-    update_height(x) {
+    updateHeight(x) {
         x.height = 1 + Math.max(stature(x.lc), stature(x.rc));
         x.npl = (x.lc && x.rc) ? 1 + Math.min(x.lc.npl, x.rc.npl) : 0;
     }
-    update_height_above(x) {
+    updateHeightAbove(x) {
         while (x) {
-            this.update_height(x);
+            this.updateHeight(x);
             x = x.parent;
         }
     }
@@ -41,7 +43,7 @@ export class BinTree {
                 p.lc = null;
             else
                 p.rc = null;
-            this.update_height_above(p);
+            this.updateHeightAbove(p);
         }
         else // delete root
             this._root = null;
@@ -58,14 +60,14 @@ export class BinTree {
         this._size++;
         x.insertAsLC(e);
         if (updateH)
-            this.update_height_above(x);
+            this.updateHeightAbove(x);
         return x.lc;
     }
     insertAsRC(x, e, updateH = true) {
         this._size++;
         x.insertAsRC(e);
         if (updateH)
-            this.update_height_above(x);
+            this.updateHeightAbove(x);
         return x.rc;
     }
     reAttachAsLC(x, lc) {
@@ -107,7 +109,8 @@ export class BinTree {
         this._root.visited = false;
         let levels = [[this._root]];
         nodes.push(this._root);
-        for (let i = 0; i <= this._root.height; i++) {
+        for (let i = 0;; i++) {
+            let reachBottom = true;
             levels.push([]);
             for (let j = 0; j < levels[i].length; j++) {
                 let node = levels[i][j];
@@ -122,6 +125,7 @@ export class BinTree {
                 let deltaX = Math.max(0, node.data.toString().length - 2) * 6;
                 // 为内部节点添加两个孩子
                 if (node.lc) {
+                    reachBottom = false;
                     node.lc.x = node.x - deltaX;
                     node.lc.y = levelY;
                     levels[i + 1].push(node.lc);
@@ -133,6 +137,7 @@ export class BinTree {
                     extrNodes.push(extrNodeObj);
                 }
                 if (node.rc) {
+                    reachBottom = false;
                     node.rc.x = node.x + deltaX;
                     node.rc.y = levelY;
                     levels[i + 1].push(node.rc);
@@ -144,6 +149,8 @@ export class BinTree {
                     extrNodes.push(extrNodeObj);
                 }
             }
+            if (reachBottom)
+                break;
         }
         // 计算最底层横坐标
         let lastLevel = levels[levels.length - 1];
@@ -174,14 +181,17 @@ export class BinTree {
                 }
             }
         }
-        // 调整根节点至中心
+        // 调整根节点至中心, 顺便更新高度(若不更新, 黑高度将错误)
         let deltaX = this._root.x;
         this._root.x = 0;
         for (let i = levels.length - 1; i >= 1; i--) {
             let curLevel = levels[i];
-            for (let j = 0; j < curLevel.length; j++)
+            for (let j = 0; j < curLevel.length; j++) {
                 curLevel[j].x -= deltaX;
+                // if (curLevel[j].lc !== undefined) { this.updateHeight(curLevel[j]); }
+            }
         }
+        // this.updateHeight(this._root);
         // 添加内部边和外部边
         for (let i = levels.length - 1; i >= 1; i--) {
             let curLevel = levels[i];
@@ -211,21 +221,19 @@ export class BinTree {
     static buildFromTreeJsonObj(treeObj) {
         if (treeObj._root === null)
             return new this();
-        let dataNode = treeObj._root;
         let tree = new this(treeObj._root.data);
-        let dataStk = [dataNode];
+        let dataStk = [treeObj._root];
         let nodeStk = [tree.root()];
-        let i = 0;
         while (dataStk.length > 0) {
-            dataNode = dataStk.pop();
+            let dataNode = dataStk.pop();
             let node = nodeStk.pop();
             if (dataNode.lc) {
-                tree.insertAsLC(node, dataNode.lc.data);
+                (tree.insertAsLC(node, dataNode.lc.data)).color = dataNode.lc.color;
                 dataStk.push(dataNode.lc);
                 nodeStk.push(node.lc);
             }
             if (dataNode.rc) {
-                tree.insertAsRC(node, dataNode.rc.data);
+                (tree.insertAsRC(node, dataNode.rc.data)).color = dataNode.rc.color;
                 dataStk.push(dataNode.rc);
                 nodeStk.push(node.rc);
             }

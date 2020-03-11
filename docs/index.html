@@ -7,7 +7,6 @@
     <meta name="author" content="NitroMelon">
     <meta name="institution" content="Tsinghua University">
     <meta name="git" content="https://github.com/hwc0919/TreePlayground">
-    <meta name="website" content="https://192.144.210.149/">
     <link rel="Shortcut Icon" href="/favicon.ico">
     <title>TreePlayground - NitroMelon</title>
 </head>
@@ -50,16 +49,16 @@
             <!-- Top Functional Node -->
             <top-binnode id="trvl-sequence" :data="topSequence" @top-build="onTopBuild" @top-insert="onTopInsert"
                 @top-search="onTopSearch" @top-help="onTopHelp" @top-proper="onTopProper"></top-binnode>
-            <div class="left-message">{{ messages.left }}</div>
-            <div class="right-message">{{ messages.right }}</div>
+            <div class="left-message" v-text="messages.left">加载中...</div>
+            <div class="right-message" v-text="messages.right">Loading...</div>
             <!-- Internal Tree Nodes -->
             <binnode v-for="(node, ind) in structInfo.nodes" :node="node" :key="'node' + ind"
-                :class="{'active-node': node.active, 'visited-node': node.visited, 'deprecated-node': node.deprecated}"
-                @remove-below="onRemoveBelow" @remove-one="onRemoveOne" @intr-update="onIntrUpdate">
+                :class="nodeColorClass(node.color)" @remove-below="onRemoveBelow" @remove-one="onRemoveOne"
+                @intr-update="onIntrUpdate">
             </binnode>
             <!-- External Tree Nodes -->
-            <extr-binnode v-show="showExtr" v-for="(node, ind) in structInfo.extrNodes" :node="node"
-                :key="'extNode' + ind" @extr-insert="onExtrInsert">
+            <extr-binnode v-for="(node, ind) in structInfo.extrNodes" :node="node" :key="'extNode' + ind"
+                @extr-insert="onExtrInsert">
             </extr-binnode>
             <!-- Internal Tree Edges -->
             <div class="left-edge" v-for="e in structInfo.edges[0]"
@@ -68,16 +67,16 @@
                 :style="{'left': e[0]+'px', 'top': e[1]+'px', 'width': e[2]+'px', 'height': e[3]+'px'}"></div>
 
             <!-- External Tree Edges -->
-            <div v-show="showExtr" class="left-edge extr-edge" v-for="e in structInfo.extrEdges[0]"
+            <div class="left-edge extr-edge" v-for="e in structInfo.extrEdges[0]"
                 :style="{'left': e[0]+'px', 'top': e[1]+'px', 'width': e[2]+'px', 'height': e[3]+'px'}"></div>
-            <div v-show="showExtr" class="right-edge extr-edge" v-for="e in structInfo.extrEdges[1]"
+            <div class="right-edge extr-edge" v-for="e in structInfo.extrEdges[1]"
                 :style="{'left': e[0]+'px', 'top': e[1]+'px', 'width': e[2]+'px', 'height': e[3]+'px'}"></div>
         </div>
     </div>
-    <div id="footer" style="position: fixed; left: 5px; bottom: 5px;">Copyright @ 2020 NitroMelon
+    <div id="footer" style="position: fixed; left: 5px; bottom: 5px;">Copyleft &copy; 2020 NitroMelon
         <a href="https://github.com/hwc0919/TreePlayground" target="_blank">Source Code</a>
         <a href="https://github.com/hwc0919/TreePlayground/issues" target="_blank">Bug report</a>
-        <a href="https://github.com/hwc0919/TreePlayground/stargazers" target="_blank">&nearhk;Star</a>if you like it!
+        <a href="https://github.com/hwc0919/TreePlayground/stargazers" target="_blank">&nearhk;Star</a> if you like it!
     </div>
     <script src="./bundle.js"></script>
 </body>
