@@ -10,7 +10,7 @@ Program can run perfectly on Chrome and Firefox. Windows Edge is only functional
 
 V1.4.4 made adaption for mobile devices, but still not recommended to use mobile phone for this program.
 
-可直接访问 https://hwc0919.github.io/TreePlayground/index<br/>
+可直接访问 https://hwc0919.github.io/TreePlayground/<br/>
 也可以下载文件夹"docs"中的内容本地运行.
 
 (个人服务器 http://192.144.210.149/ 可能即将关闭)
