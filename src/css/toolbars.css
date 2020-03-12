@@ -4,13 +4,12 @@
     justify-content: center;
     align-items: center;
     margin-top: 25px;
-    height: 70px;
+    height: 50px;
     width: 100vw;
-    background-color: rgba(255, 255, 255, 0.8);
 }
 
 .top-toolbar-item {
-    margin: 5px 10px;
+    margin: 2px 10px;
 }
 
 .top-toolbar button {
@@ -33,7 +32,6 @@
 }
 
 .left-toolbar {
-    background-color: rgba(255, 255, 255, 0.8);
     position: fixed;
     display: flex;
     flex-direction: column;
@@ -42,7 +40,6 @@
     top: 150px;
     left: 50px;
     width: 100px;
-    z-index: 10;
 }
 
 .left-toolbar #tree-type-selector {
@@ -88,10 +85,10 @@
         flex-wrap: wrap;
         justify-content: left;
         width: 350px;
-        /* height: 130px; */
+        height: 80px;
         left: 50%;
-        transform: translateX(-50%);
-        transform-origin: center;
+        transform: translateX(-50%) scale(0.9);
+        transform-origin: top;
     }
     #interval-ranger {
         width: 110px;
@@ -100,9 +97,10 @@
         width: 350px;
         padding: 0;
         left: 50%;
-        top: 130px;
-        transform: translateX(-50%);
-        height: 60px;
+        top: 105px;
+        transform: translateX(-50%) scale(0.9);
+        transform-origin: top;
+        height: 50px;
         flex-direction: row;
         justify-content: left;
         align-items: center;
@@ -134,11 +132,11 @@
 /* Phone */
 @media screen and (max-width: 376px) {
     .top-toolbar {
-        width: 300px !important;
+        width: 300px;
         transform: translateX(-50%) scale(0.8);
     }
     .top-toolbar-item {
-        margin: 5px 5px;
+        margin: 0px 5px;
     }
     #interval-ranger {
         width: 100px;
@@ -146,7 +144,7 @@
     .left-toolbar {
         width: 300px;
         transform: translateX(-50%) scale(0.8);
-        top: 110px;
+        top: 90px;
     }
     .left-toolbar-item {
         margin: 5px 5px;
@@ -159,6 +157,7 @@
 /* Horizontally */
 @media screen and (max-height: 500px) {
     .left-toolbar {
+        left: 20px;
         top: 100px;
     }
     .left-toolbar #tree-scale-ranger input {

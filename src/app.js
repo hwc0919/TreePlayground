@@ -1,4 +1,5 @@
-import Vue from "../node_modules/vue/dist/vue"
+import "./js/cycle.js";
+import Vue from "../node_modules/vue/dist/vue.min"
 import IntrBinnode from "./components/binnode.vue"
 import ExtrBinnode from "./components/extr-binnode.vue"
 import TopBinnode from "./components/top-binnode.vue"
@@ -223,7 +224,7 @@ var tp = new Vue({
             if (this.isAnyLocked()) return false;
             this.tree.removeBelow(node);
             this.update();
-            this.alertAsync(`Remove Below ${node.data}`);
+            this.showMessage(`Remove Below ${node.data}`);
         },
         // Remove one node
         onRemoveOne(node) {
