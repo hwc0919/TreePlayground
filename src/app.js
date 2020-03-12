@@ -210,9 +210,10 @@ var tp = new Vue({
             else
                 retNode = this.tree.insertAsRC(node.parent, insertion, updateH);
 
-            if (curTreeType === "AVL") {
-                this.tree.staticSearch(insertion);    // locate _hot
+            if (curTreeType === "AVL") {    // Caution: _hot already in position?
                 this.tree.solveInsertUnbalance();   // TODO: change to async
+            } else if (curTreeType === "RedBlack") {
+                this.tree.solveDoubleRed(retNode);
             }
             this.update();
             retNode.active = true;  // Caution: Mark recent active
