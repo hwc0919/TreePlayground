@@ -4,8 +4,10 @@
   "description": "Tree Visualization Tool for Learning Data Structure and Algorithm.",
   "main": "./docs/index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --config webpack.config.js"
+    "test": "echo Welcome to TreePlayground. Hope you enjoy yourself!",
+    "dev": "webpack --config webpack.config.js --mode development --watch",
+    "tsc": "tsc --build tsconfig.json --watch",
+    "build": "tsc --build tsconfig.json && webpack --config webpack.config.js --mode production"
   },
   "repository": {
     "type": "git",
@@ -20,6 +22,7 @@
   "devDependencies": {
     "css-loader": "^3.4.2",
     "style-loader": "^1.1.3",
+    "typescript": "^3.8.3",
     "vue": "^2.6.11",
     "vue-loader": "^15.9.0",
     "vue-template-compiler": "^2.6.11",

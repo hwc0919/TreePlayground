@@ -9,7 +9,7 @@
 }
 
 .top-toolbar-item {
-    margin: 2px 10px;
+    margin: 1px 10px;
 }
 
 .top-toolbar button {
@@ -85,9 +85,8 @@
         flex-wrap: wrap;
         justify-content: left;
         width: 350px;
-        height: 80px;
         left: 50%;
-        transform: translateX(-50%) scale(0.9);
+        transform: translateX(-50%);
         transform-origin: top;
     }
     #interval-ranger {
@@ -97,8 +96,8 @@
         width: 350px;
         padding: 0;
         left: 50%;
-        top: 105px;
-        transform: translateX(-50%) scale(0.9);
+        top: 112px;
+        transform: translateX(-50%);
         transform-origin: top;
         height: 50px;
         flex-direction: row;
@@ -133,7 +132,6 @@
 @media screen and (max-width: 376px) {
     .top-toolbar {
         width: 300px;
-        transform: translateX(-50%) scale(0.8);
     }
     .top-toolbar-item {
         margin: 0px 5px;
@@ -143,8 +141,7 @@
     }
     .left-toolbar {
         width: 300px;
-        transform: translateX(-50%) scale(0.8);
-        top: 90px;
+        top: 106px;
     }
     .left-toolbar-item {
         margin: 5px 5px;
@@ -155,7 +152,7 @@
 }
 
 /* Horizontally */
-@media screen and (max-height: 500px) {
+@media screen and (max-height: 500px) and (min-width: 768px) {
     .left-toolbar {
         left: 20px;
         top: 100px;

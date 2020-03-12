@@ -9,9 +9,7 @@ module.exports = {
         path: __dirname + "/docs",  // for github-page
         filename: "[name].js"
     },
-    watch: true,
-    // mode: "development",
-    mode: "production",
+    mode: "none",
     plugins: [
         new VueLoaderPlugin(),
     ],

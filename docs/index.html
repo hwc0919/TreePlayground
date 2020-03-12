@@ -3,7 +3,13 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <noscript>Please enable javascript to use this tool.</noscript>
+    <script>
+        var ratio = window.devicePixelRatio;
+        if (typeof ratio === "number") var scale = 1 / ratio;
+        else var scale = 1;
+        document.write(`<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=${scale<1?0.7:1}">`);
+    </script>
     <meta name="author" content="NitroMelon">
     <meta name="institution" content="Tsinghua University">
     <meta name="git" content="https://github.com/hwc0919/TreePlayground">
@@ -28,7 +34,7 @@
             <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(3)">层次遍历</button>
             <span id="interval-ranger" class="top-toolbar-item">
                 <span style="margin: 5px">间隔: <label v-text="commonParams.interval + 'ms'">500ms</label></span>
-                <input type="range" min="100" max="1500" value="500" step="100" v-model.number="commonParams.interval">
+                <input type="range" min="0" max="1500" value="500" step="100" v-model.number="commonParams.interval">
             </span>
         </div>
         <!-- Left Toolbar -->
@@ -48,29 +54,32 @@
             <div class="tree-dragging-btn" @mousedown.self="onTreeMouseDown" @touchstart.self.prevent="onTreeMouseDown">
             </div>
             <!-- Top Functional Node -->
-            <top-binnode id="trvl-sequence" :data="topSequence" @top-build="onTopBuild" @top-insert="onTopInsert"
+            <top-binnode id="top-function-node" :data="topSequence" @top-build="onTopBuild" @top-insert="onTopInsert"
                 @top-search="onTopSearch" @top-help="onTopHelp" @top-proper="onTopProper"></top-binnode>
             <div class="left-message" v-text="messages.left">加载中...</div>
             <div class="right-message" v-text="messages.right">Loading...</div>
+
             <!-- Internal Tree Nodes -->
-            <binnode v-for="(node, ind) in structInfo.nodes" :node="node" :key="'node' + ind"
+            <binnode v-for="node, ind in structInfo.nodes" :node="node" :key="`intrNode${ind}`"
                 :class="nodeColorClass(node.color)" @remove-below="onRemoveBelow" @remove-one="onRemoveOne"
                 @intr-update="onIntrUpdate">
             </binnode>
+
             <!-- External Tree Nodes -->
-            <extr-binnode v-for="(node, ind) in structInfo.extrNodes" :node="node" :key="'extNode' + ind"
+            <extr-binnode v-for="node, ind in structInfo.extrNodes" :node="node" :key="`extrNode${ind}`"
                 @extr-insert="onExtrInsert">
             </extr-binnode>
+
             <!-- Internal Tree Edges -->
-            <div class="left-edge" v-for="e in structInfo.edges[0]"
+            <div class="left-edge" v-for="e, ind in structInfo.edges[0]" :key="`intrLeftEdge${ind}`"
                 :style="{'left': e[0]+'px', 'top': e[1]+'px', 'width': e[2]+'px', 'height': e[3]+'px'}"></div>
-            <div class="right-edge" v-for="e in structInfo.edges[1]"
+            <div class="right-edge" v-for="e, ind in structInfo.edges[1]" :key="`intrRightEdge${ind}`"
                 :style="{'left': e[0]+'px', 'top': e[1]+'px', 'width': e[2]+'px', 'height': e[3]+'px'}"></div>
 
             <!-- External Tree Edges -->
-            <div class="left-edge extr-edge" v-for="e in structInfo.extrEdges[0]"
+            <div class="left-edge extr-edge" v-for="e, ind in structInfo.extrEdges[0]" :key="`extrLeftEdge${ind}`"
                 :style="{'left': e[0]+'px', 'top': e[1]+'px', 'width': e[2]+'px', 'height': e[3]+'px'}"></div>
-            <div class="right-edge extr-edge" v-for="e in structInfo.extrEdges[1]"
+            <div class="right-edge extr-edge" v-for="e, ind in structInfo.extrEdges[1]" :key="`extrRightEdge${ind}`"
                 :style="{'left': e[0]+'px', 'top': e[1]+'px', 'width': e[2]+'px', 'height': e[3]+'px'}"></div>
         </div>
     </div>
