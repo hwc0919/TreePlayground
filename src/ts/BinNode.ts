@@ -1,4 +1,8 @@
 export enum RBColor { Red, Black };
+window['RBColor'] = RBColor;
+
+export enum NStatus { normal, active, visited, deprecated };
+window['NStatus'] = NStatus;
 
 export class TreeUtil<T> {
 
@@ -53,8 +57,7 @@ export class BinNode<T> {
     nid: number;
     x: number = 0;
     y: number = 0;
-    active: boolean = false;
-    visited: boolean = false;
+    status: NStatus = NStatus.normal;
 
     static N: number = 0;
 

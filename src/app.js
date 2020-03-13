@@ -3,7 +3,7 @@ import Vue from "../node_modules/vue/dist/vue.min"
 import IntrBinnode from "./components/binnode.vue"
 import ExtrBinnode from "./components/extr-binnode.vue"
 import TopBinnode from "./components/top-binnode.vue"
-import { BinNode, RBColor, TreeUtil } from "./js/BinNode"
+import { RBColor, NStatus, TreeUtil, BinNode } from "./js/BinNode"
 import { BinTree } from "./js/BinTree"
 import { BST } from "./js/BST"
 import { AVL } from "./js/AVL"
@@ -32,7 +32,8 @@ var tp = new Vue({
         },
         locks: {    // TODO : seperate trvlLock and searchLock. this can wait.
             trvlLock: false,
-            rotateLock: false
+            rotateLock: false,
+            srchLock: false
         },
         topSequence: [],
         BSTParams: {
@@ -146,10 +147,9 @@ var tp = new Vue({
             if (!this.locks.trvlLock) return false;
             let x = sequence.shift();
             this.topSequence.push(x.data);
-            x.active = true;
+            x.status = NStatus.active;
             setTimeout(() => {
-                x.active = false;
-                if (this.locks.trvlLock) x.visited = true;
+                x.status = NStatus.visited;
                 this._printSequenceAsyc(sequence, callback);
             }, this.commonParams.interval);
         },
@@ -175,7 +175,7 @@ var tp = new Vue({
             node.data = updation;
             this.update();
             this.messages.left = successMessage;
-            node.active = true;   // Caution: Mark recent active
+            node.status = NStatus.active;   // Caution: Mark recent active
         },
         // External node requests for value insertion
         onExtrInsert(args) {
@@ -216,7 +216,7 @@ var tp = new Vue({
                 this.tree.solveDoubleRed(retNode);
             }
             this.update();
-            retNode.active = true;  // Caution: Mark recent active
+            retNode.status = NStatus.active;  // Caution: Mark recent active
             this.messages.left = `Insert ${insertion}`;
             if (typeof callback === "function") callback(true);
         },
@@ -237,7 +237,7 @@ var tp = new Vue({
             }
             else if ("Splay" === this.curTreeType) {  // Exception : Deal with Splay
                 this.alertAsync(`Step 1: Splay ${node.data}`, -1);
-                node.active = true;
+                node.status = NStatus.active;
                 setTimeout(() => {
                     // Splay RM Step 1
                     this.locks.rotateLock = true;
@@ -253,7 +253,7 @@ var tp = new Vue({
                             this.alertAsync(`Final: remove ${node.data}`, 2500);
                             this.update();
                         } else {  // Splay RM Step 2b
-                            node.active = false; node.deprecated = true;
+                            node.status = NStatus.deprecated;
                             this.locks.trvlLock = true;
                             this.alertAsync(`Step 2: Elevate Succ of ${node.data}`, -1);
                             this._searchAsync(v.rc, v.data, (_, hot) => {
@@ -287,17 +287,18 @@ var tp = new Vue({
                     // RM Step 1: Find Succ
                     this.alertAsync(`Step 1: Find Succ`, -1);
                     let succ = node.succ();
-                    node.deprecated = true;
+                    node.status = NStatus.deprecated;
                     this.locks.trvlLock = true; // TODO : change to srchLock
                     this._searchAsync(node, succ.data, () => { // assert res === true
                         // RM Step 2: Swap with Succ
                         this.alertAsync(`Step 2: Swap with Succ`, -1);
                         this.update();
-                        node.deprecated = true; succ.active = true;
+                        node.status = NStatus.deprecated;
+                        succ.status = NStatus.active;
                         setTimeout(() => {
                             let t = node.data; node.data = succ.data; succ.data = t;
-                            node.deprecated = false; succ.active = false;
-                            node.active = true; succ.deprecated = true;
+                            node.status = NStatus.active;
+                            succ.status = NStatus.deprecated;
                             // RM Step 3: Remove
                             this.alertAsync(`Step 3: Remove ${t}`, 2500);
                             setTimeout(() => {
@@ -306,7 +307,7 @@ var tp = new Vue({
                                 // RM Step 4 : AVL reBalance
                                 if ("AVL" === this.curTreeType) {
                                     this.alertAsync(`Step 4: AVL reBalance`, -1);
-                                    if (this.tree._hot) this.tree._hot.active = true;
+                                    if (this.tree._hot) this.tree._hot.status = NStatus.active;
                                     setTimeout(() => {
                                         this.locks.rotateLock = true;
                                         this.avlRmRotateAsync(this.tree._hot, () => {
@@ -328,7 +329,7 @@ var tp = new Vue({
                 if (typeof callback == "function") callback();
                 return;
             }
-            node.active = true;
+            node.status = NStatus.active;
             setTimeout(() => {
                 let interval = this.commonParams.interval;
                 if (!AVL.avlBalanced(node))
@@ -336,9 +337,9 @@ var tp = new Vue({
                 else interval = 0;
                 this.tree.updateHeight(node);
                 this.update();
-                node.active = true;
+                node.status = NStatus.active;
                 setTimeout(() => {
-                    node.active = false;
+                    node.status = NStatus.normal;
                     this.avlRmRotateAsync(node.parent, callback);
                 }, interval);
             }, this.commonParams.interval)
@@ -392,7 +393,7 @@ var tp = new Vue({
                             setTimeout(() => {
                                 this.update();
                                 if (this.topSequence.length === 0) {
-                                    recentNode.active = true;  // Caution: Mark recent active
+                                    recentNode.status = NStatus.active;  // Caution: Mark recent active
                                     this.locks.trvlLock = false; return false;
                                 } else this.insertSequnceAsync();
                             }, this.commonParams.interval);
@@ -411,7 +412,7 @@ var tp = new Vue({
                     setTimeout(() => {
                         this.update();
                         if (this.topSequence.length === 0) {
-                            recentNode.active = true;  // Caution: Mark recent active
+                            recentNode.status = NStatus.active;  // Caution: Mark recent active
                             this.locks.trvlLock = false; return true;
                         } else this.insertSequnceAsync();
                     }, this.commonParams.interval);
@@ -446,7 +447,7 @@ var tp = new Vue({
                 if (typeof callback === "function") callback(false, this.tree._hot);
                 return false;
             }
-            node.active = true;
+            node.status = NStatus.active;
             if (num === node.data) {
                 this.locks.trvlLock = false; {
                     if (typeof callback === "function") callback(true, node);
@@ -455,8 +456,7 @@ var tp = new Vue({
             } else {
                 this.tree._hot = node;  // Important: set _hot
                 setTimeout(() => {
-                    node.active = false;
-                    node.visited = true;
+                    node.status = NStatus.visited;
                     if (num < node.data) node = node.lc;
                     else node = node.rc;
                     this._searchAsync(node, num, callback);
@@ -484,14 +484,14 @@ var tp = new Vue({
             if (!v.parent) {
                 this.tree._root = v;
                 this.update();
-                v.active = true;
+                v.status = NStatus.active;
                 this.locks.rotateLock = false;
                 setTimeout(() => {
                     if (typeof callback === "function") callback(v);
                 }, this.commonParams.interval);
             } else {
                 this.update();
-                v.active = true;
+                v.status = NStatus.active;
                 setTimeout(() => {
                     this._splayAsync(v, callback);
                 }, this.commonParams.interval);

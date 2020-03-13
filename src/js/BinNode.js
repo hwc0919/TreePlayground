@@ -4,6 +4,16 @@ export var RBColor;
     RBColor[RBColor["Black"] = 1] = "Black";
 })(RBColor || (RBColor = {}));
 ;
+window['RBColor'] = RBColor;
+export var NStatus;
+(function (NStatus) {
+    NStatus[NStatus["normal"] = 0] = "normal";
+    NStatus[NStatus["active"] = 1] = "active";
+    NStatus[NStatus["visited"] = 2] = "visited";
+    NStatus[NStatus["deprecated"] = 3] = "deprecated";
+})(NStatus || (NStatus = {}));
+;
+window['NStatus'] = NStatus;
 export class TreeUtil {
     static isRoot(x) {
         return !x.parent;
@@ -46,8 +56,7 @@ export class BinNode {
     constructor(e = null, p = null, lc = null, rc = null, height = 0, npl = 0, c = RBColor.Red) {
         this.x = 0;
         this.y = 0;
-        this.active = false;
-        this.visited = false;
+        this.status = NStatus.normal;
         this.data = e;
         this.parent = p;
         this.lc = lc;

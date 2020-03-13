@@ -1,7 +1,6 @@
 <!-- Internal BinNode -->
 <template>
-    <div class="binnode intr-binnode" :style="{'left': node.x + 'px', 'top': node.y + 'px'}"
-        :class="{'active-node': node.active, 'visited-node': node.visited, 'deprecated-node': node.deprecated}"
+    <div class="binnode intr-binnode" :style="{'left': node.x + 'px', 'top': node.y + 'px'}" :class="statusClass"
         @click="divOnClick">
         <span v-show="!showInput" :title="title"
             style="display: inline-block; width: 100%; height: 100%;">{{ node.data }}</span>
@@ -17,6 +16,7 @@
 
 <script>
     import BinnodeInput from "./binnode-input.vue";
+    import { NStatus } from "../js/BinNode";
     export default {
         props: ['node'],
         data() {
@@ -63,6 +63,14 @@
             },
             showRemoveOne() { // Except BinTree and Splay!
                 return this.$parent.curTreeType !== "BinTree";
+            },
+            statusClass() {
+                switch (this.node.status) {
+                    case NStatus.active: return "active-node";
+                    case NStatus.visited: return "visited-node";
+                    case NStatus.deprecated: return "deprecated-node";
+                    default: return null;
+                }
             }
         }
     }

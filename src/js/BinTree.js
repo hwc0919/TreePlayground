@@ -1,5 +1,5 @@
 import { Deque } from "./Deque";
-import { BinNode, TreeUtil, RBColor } from "./BinNode";
+import { NStatus, RBColor, TreeUtil, BinNode } from "./BinNode";
 let stature = TreeUtil.stature;
 export class BinTree {
     constructor(e = null) {
@@ -104,8 +104,6 @@ export class BinTree {
             spacingY = 60;
         // 逐层遍历
         this._root.y = 0;
-        this._root.active = false;
-        this._root.visited = false;
         let levels = [[this._root]];
         nodes.push(this._root);
         for (let i = 0;; i++) {
@@ -119,8 +117,7 @@ export class BinTree {
                     levels[i + 1].push({ x: node.x, y: levelY, parent: node });
                     continue;
                 }
-                node.active = false;
-                node.visited = false;
+                node.status = NStatus.normal;
                 let deltaX = Math.max(0, node.data.toString().length - 2) * 6;
                 // 为内部节点添加两个孩子
                 if (node.lc) {

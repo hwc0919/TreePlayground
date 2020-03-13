@@ -62,6 +62,34 @@ export class BST<T> extends BinTree<T> {
         return this.searchIn(this._root, e);
     }
 
+    // public searchAsync(e: T, tp: any): Promise<any> {
+    //     return new Promise((resolve, reject) => {
+    //         this._hot = null;
+    //         let node = this._root;
+    //         if (!tp.locks.srchLock || !node) {
+    //             tp.locks.srchLock = false;
+    //             resolve([false, this._hot]);
+    //             return false;
+    //         }
+    //         node.status = "active";
+    //         if (num === node.data) {
+    //             this.locks.trvlLock = false; {
+    //                 if (typeof callback === "function") callback(true, node);
+    //                 return true;
+    //             }
+    //         } else {
+    //             this.tree._hot = node;  // Important: set _hot
+    //             setTimeout(() => {
+    //                 node.active = false;
+    //                 node.visited = true;
+    //                 if (num < node.data) node = node.lc;
+    //                 else node = node.rc;
+    //                 this._searchAsync(node, num, callback);
+    //             }, this.commonParams.interval);
+    //         }
+    //     })
+    // }
+
     public insert(e: T): BinNode<T> {
         let v: BinNode<T> = this.search(e);
         if (v) return v;
