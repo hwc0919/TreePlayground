@@ -1,5 +1,6 @@
 import { BinTree } from "./BinTree"
-import { BinNode, TreeUtil } from "./BinNode"
+import { NStatus, TreeUtil, BinNode } from "./BinNode"
+
 
 
 export class BST<T> extends BinTree<T> {
@@ -62,33 +63,29 @@ export class BST<T> extends BinTree<T> {
         return this.searchIn(this._root, e);
     }
 
-    // public searchAsync(e: T, tp: any): Promise<any> {
-    //     return new Promise((resolve, reject) => {
-    //         this._hot = null;
-    //         let node = this._root;
-    //         if (!tp.locks.srchLock || !node) {
-    //             tp.locks.srchLock = false;
-    //             resolve([false, this._hot]);
-    //             return false;
-    //         }
-    //         node.status = "active";
-    //         if (num === node.data) {
-    //             this.locks.trvlLock = false; {
-    //                 if (typeof callback === "function") callback(true, node);
-    //                 return true;
-    //             }
-    //         } else {
-    //             this.tree._hot = node;  // Important: set _hot
-    //             setTimeout(() => {
-    //                 node.active = false;
-    //                 node.visited = true;
-    //                 if (num < node.data) node = node.lc;
-    //                 else node = node.rc;
-    //                 this._searchAsync(node, num, callback);
-    //             }, this.commonParams.interval);
-    //         }
-    //     })
-    // }
+    public searchAsync(e: T, tp: any): Promise<any> {
+        return new Promise(async (resolve, reject) => {
+            if (!tp.opLock) { reject(); return false; }
+            this._hot = null;
+            let node = this._root;
+
+            while (node && e != node.data) {
+                if (!tp.opLock) { reject(); return false; }
+                node.status = NStatus.active;
+                this._hot = node;
+                node = await new Promise((res) => {
+                    setTimeout(() => {
+                        node.status = NStatus.visited;
+                        res(e < node.data ? node.lc : node.rc);
+                    }, tp.commonParams.interval);
+                })
+            }
+            if (!tp.opLock) { reject(); return false; }
+            if (node) { node.status = NStatus.active; resolve([true, node]); }
+            else resolve([false, this._hot]);
+            return true;
+        })
+    }
 
     public insert(e: T): BinNode<T> {
         let v: BinNode<T> = this.search(e);
@@ -100,6 +97,25 @@ export class BST<T> extends BinTree<T> {
 
         this.updateHeightAbove(v);
         return v;
+    }
+
+    public insertAsync(e: T, tp: any): Promise<any> {
+        return new Promise(async (resolve, reject) => {
+            if (!tp.opLock) { reject(); return false; }
+            let srchRes = await this.searchAsync(e, tp).catch(() => { });
+
+            if (!tp.opLock) { reject(); return false; }
+            if (!srchRes) { reject(); return false; }
+            let [found, nodeOrHot] = srchRes;
+            if (found) { resolve([false, nodeOrHot]); return false; }
+            let v = new BinNode<T>(e, this._hot);
+            this._size++;
+            if (!this._root) this._root = v;
+            else (e < this._hot.data) ? this._hot.lc = v : this._hot.rc = v;
+
+            this.updateHeightAbove(v);
+            resolve([true, v]);
+        })
     }
 
     public removeAt(x: BinNode<T>): BinNode<T> {

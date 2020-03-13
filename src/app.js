@@ -30,6 +30,7 @@ var tp = new Vue({
             edges: [[], []],
             extrEdges: [[], []],
         },
+        opLock: false,  // Operation Lock
         locks: {    // TODO : seperate trvlLock and searchLock. this can wait.
             trvlLock: false,
             rotateLock: false,
@@ -76,6 +77,7 @@ var tp = new Vue({
             this.alertAsync("Reset", 150, false);
             this.isDragging = false;
             for (let lock in this.locks) this.locks[lock] = false;
+            this.opLock = false;
             this.update();
         },
         // Update, update tree structure ONLY! Then save to LocalStorage. Please Always call explicitly!!!
@@ -116,54 +118,63 @@ var tp = new Vue({
             } else setTimeout(() => { this.showMessage(message, time, false) }, 100);
         },
         // Traversal and Display in Async way.
-        traversal(method) {
+        async traversal(method) {
             if (this.isAnyLocked()) return false;
             this.update();
-            this.locks.trvlLock = true;
             let sequence;
-            if (method === 0)
-                sequence = BinTree.preorderTraversal(this.tree.root());
-            else if (method == 1)
-                sequence = BinTree.inorderTraversal(this.tree.root());
-            else if (method == 2)
-                sequence = BinTree.postorderTraversal(this.tree.root());
-            else if (method == 3)
-                sequence = BinTree.levelTraversal(this.tree.root());
-            // display traversal sequence
+            switch (method) {
+                case 0: sequence = BinTree.preorderTraversal(this.tree.root()); break;
+                case 1: sequence = BinTree.inorderTraversal(this.tree.root()); break;
+                case 2: sequence = BinTree.postorderTraversal(this.tree.root()); break;
+                case 3: sequence = BinTree.levelTraversal(this.tree.root()); break;
+            }
+            // Display traversal sequence
             this.topSequence = [];
             this.messages.left = method == 0 ? "先序遍历" : (method == 1 ? "中序遍历" :
                 (method == 2 ? "后续遍历" : (method == 3 ? "层次遍历" : "")));
-            this._printSequenceAsyc(sequence, () => { this.locks.trvlLock = false; this.messages.left = "" });
+            this.opLock = true;
+            await this.printSequenceAsyc(sequence).catch(() => { this.update(); });
+            this.opLock = false;
+            this.messages.left = "";
         },
         // Print sequence Async & Recur, and push to `topSequence`
-        _printSequenceAsyc(sequence, callback) {
-            if (sequence.length == 0) {
-                setTimeout(() => {
-                    this.update();
-                }, 2 * this.commonParams.interval);
-                if (typeof callback === "function") callback();
-                return;
-            }
-            if (!this.locks.trvlLock) return false;
-            let x = sequence.shift();
-            this.topSequence.push(x.data);
-            x.status = NStatus.active;
-            setTimeout(() => {
-                x.status = NStatus.visited;
-                this._printSequenceAsyc(sequence, callback);
-            }, this.commonParams.interval);
+        async printSequenceAsyc(sequence) {
+            return new Promise(async (resolve, reject) => {
+                if (!this.opLock) { reject(); return false; }
+                // Push data in `sequence` to `topSequence` one by one
+                // Set color of node in the meantime
+                while (sequence.length > 0) {
+                    if (!this.opLock) { reject(); return false; }
+                    let node = sequence.shift();
+                    this.topSequence.push(node.data);
+                    node.status = NStatus.active;
+                    await new Promise((res) => {
+                        setTimeout(() => {
+                            node.status = NStatus.visited; res();
+                        }, this.commonParams.interval);
+                    })
+                }
+                // Call `this.update()` to reset color
+                await new Promise((res) => {
+                    setTimeout(() => {
+                        this.update(); res();
+                    }, 2 * this.commonParams.interval);
+                })
+                if (!this.opLock) { reject(); return false; }
+                this.opLock = false;
+                resolve();
+            });
         },
 
         /****************************************/
         /*           Events Handlers            */
         /****************************************/
 
-        // Internal node requests for value update
+        // Internal node requests for value update.  See `binnode.vue`.
         onIntrUpdate(args) {
-            if (this.isAnyLocked()) return false;
-            this.update();
-            let node = args[0];
-            let updation = args[1];
+            if (this.opLock) return false;
+            let [node, updation] = args;
+
             let successMessage = `Change ${node.data} to ${updation}`;
             if (this.curTreeType !== "BinTree") {
                 if (this.tree.staticSearch(updation)) {
@@ -174,15 +185,13 @@ var tp = new Vue({
             }
             node.data = updation;
             this.update();
-            this.messages.left = successMessage;
+            this.showMessage(successMessage);
             node.status = NStatus.active;   // Caution: Mark recent active
         },
-        // External node requests for value insertion
+        // External node requests for value insertion. See `extr-binnode.vue`.
         onExtrInsert(args) {
             this.update();
-            let node = args[0];
-            let insertion = args[1];
-            let callback = args[2];
+            let [node, insertion, callback] = args;
             let curTreeType = this.curTreeType;
 
             if (curTreeType === "Splay") {
@@ -228,7 +237,7 @@ var tp = new Vue({
             this.showMessage(`Remove Below ${node.data}`);
         },
         // Remove one node
-        onRemoveOne(node) {
+        async onRemoveOne(node) {
             if (this.isAnyLocked()) return false;
             this.showMessage(`Remove ${node.data}`);
             if ("RedBlack" === this.curTreeType) {  // TODO: No Vigor to write async version anymore using callback
@@ -254,8 +263,13 @@ var tp = new Vue({
                             this.update();
                         } else {  // Splay RM Step 2b
                             node.status = NStatus.deprecated;
-                            this.locks.trvlLock = true;
+
                             this.alertAsync(`Step 2: Elevate Succ of ${node.data}`, -1);
+
+                            this.locks.trvlLock = true;
+                            // this.locks.srchLock = true;
+                            // let srchRes = await 
+
                             this._searchAsync(v.rc, v.data, (_, hot) => {
                                 this.locks.rotateLock = true;
                                 this._splayAsync(hot, (newRoot) => {
@@ -365,7 +379,7 @@ var tp = new Vue({
             this.insertSequnceAsync();
         },
         // Insert `topSequence` Async & Recur
-        insertSequnceAsync() {
+        async insertSequnceAsync() {
             while (this.topSequence.length > 0 && this.topSequence[0] === null) this.topSequence.shift();
             if (this.topSequence.length === 0) { this.locks.trvlLock = false; return false; }
             let num = this.topSequence.shift();
@@ -421,25 +435,30 @@ var tp = new Vue({
             })
         },
         // Search value
-        onTopSearch(num) {
-            if (this.isAnyLocked()) return false;
+        async onTopSearch(num) {
+            if (this.opLock) return false;
             this.update();
-            this.locks.trvlLock = true;
             this.messages.left = `Search ${num}`;
 
-            this.tree._hot = null;  // Important: reset _hot before search
-            this._searchAsync(this.tree.root(), num, (res, nodeOrHot) => {
-                if (res) this.alertAsync(`${num} Found`);
-                else Math.random() < 0.5 ? this.alertAsync(`${num} Not Found`) : this.alertAsync(`${num} 404`);
-                if (this.curTreeType === "Splay") {  // Exception & Important : Splay
+            this.opLock = true;
+            let srchRes = await this.tree.searchAsync(num, this).
+                catch(() => { this.update(); });
+            this.opLock = false;
+            if (!srchRes) return false;
+
+            let [found, nodeOrHot] = srchRes;
+            if (found) this.alertAsync(`${num} Found`);
+            else Math.random() < 0.5 ? this.alertAsync(`${num} Not Found`) : this.alertAsync(`${num} 404`);
+
+            if (this.curTreeType === "Splay") {  // Exception & Important : Splay
+                setTimeout(() => {
                     this.alertAsync(nodeOrHot ? `Splay at ${nodeOrHot.data}` : "", 2000);
-                    setTimeout(() => {
-                        this.locks.rotateLock = true;
-                        this._splayAsync(nodeOrHot);
-                    }, this.commonParams.interval);
-                }
-            });
+                    this.opLock = true;
+                    this.tree.splayAsync(nodeOrHot, this).catch(() => { this.update(); });
+                }, this.commonParams.interval);
+            }
         },
+
         // Search Async & Recur. Callback: (true, target) if found else (false, _hot)
         _searchAsync(node, num, callback) { // Important: SET LOCK BEFORE START! 
             if (!this.locks.trvlLock || !node) {
@@ -574,7 +593,7 @@ var tp = new Vue({
             for (let lock in this.locks) {
                 if (this.locks[lock]) { alert("In Operation! Dont do this again!"); return true; }
             }
-            return false;
+            return this.opLock;
         },
         checkNodeOrder(node, newV) {
             let pred, succ;

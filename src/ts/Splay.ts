@@ -1,4 +1,4 @@
-import { BinNode } from "./BinNode";
+import { BinNode, NStatus } from "./BinNode";
 import { BST } from "./BST";
 
 export class Splay<T> extends BST<T> {
@@ -14,6 +14,44 @@ export class Splay<T> extends BST<T> {
         }
         v.parent = null;
         return v;
+    }
+
+    protected splayAsync(v: BinNode<T>, tp: any): Promise<any> {
+        return new Promise(async (resolve, reject) => {
+            if (!tp.opLock) { reject(); return false; }  // check lock
+            if (!v) { tp.opLock = false; resolve(null); return false; }
+            tp.update();
+            let p: BinNode<T>, g: BinNode<T>;
+            while ((p = v.parent) && (g = p.parent)) {
+                v.status = NStatus.active;
+                if (!tp.opLock) { reject(); return false; }
+                await new Promise((res) => {
+                    setTimeout(() => {
+                        this.splayDoubleLayer(v, p, g);
+                        res();
+                    }, tp.commonParams.interval);
+                })
+                tp.update();
+            }
+            if (!tp.opLock) { reject(); return false; }
+            if (p = v.parent) {
+                v.status = NStatus.active;
+                await new Promise((res) => {
+                    setTimeout(() => {
+                        this.splaySingleLayer(v, p);
+                        res();
+                    }, tp.commonParams.interval);
+                })
+            }
+            v.parent = null;
+            this._root = v;
+            tp.update();
+            v.status = NStatus.active;
+            if (!tp.opLock) { reject(); return false; }
+            tp.opLock = false;
+            resolve(v);
+            return true;
+        })
     }
 
     public splayDoubleLayer(v: BinNode<T>, p: BinNode<T>, g: BinNode<T>): BinNode<T> {

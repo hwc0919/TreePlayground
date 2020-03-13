@@ -1,5 +1,14 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { BinTree } from "./BinTree";
-import { BinNode, TreeUtil } from "./BinNode";
+import { NStatus, TreeUtil, BinNode } from "./BinNode";
 export class BST extends BinTree {
     // 3 + 4 Reconstruction of BBST
     connect34(a, b, c, t0, t1, t2, t3) {
@@ -56,33 +65,41 @@ export class BST extends BinTree {
         this._hot = null;
         return this.searchIn(this._root, e);
     }
-    // public searchAsync(e: T, tp: any): Promise<any> {
-    //     return new Promise((resolve, reject) => {
-    //         this._hot = null;
-    //         let node = this._root;
-    //         if (!tp.locks.srchLock || !node) {
-    //             tp.locks.srchLock = false;
-    //             resolve([false, this._hot]);
-    //             return false;
-    //         }
-    //         node.status = "active";
-    //         if (num === node.data) {
-    //             this.locks.trvlLock = false; {
-    //                 if (typeof callback === "function") callback(true, node);
-    //                 return true;
-    //             }
-    //         } else {
-    //             this.tree._hot = node;  // Important: set _hot
-    //             setTimeout(() => {
-    //                 node.active = false;
-    //                 node.visited = true;
-    //                 if (num < node.data) node = node.lc;
-    //                 else node = node.rc;
-    //                 this._searchAsync(node, num, callback);
-    //             }, this.commonParams.interval);
-    //         }
-    //     })
-    // }
+    searchAsync(e, tp) {
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            if (!tp.opLock) {
+                reject();
+                return false;
+            }
+            this._hot = null;
+            let node = this._root;
+            while (node && e != node.data) {
+                if (!tp.opLock) {
+                    reject();
+                    return false;
+                }
+                node.status = NStatus.active;
+                this._hot = node;
+                node = yield new Promise((res) => {
+                    setTimeout(() => {
+                        node.status = NStatus.visited;
+                        res(e < node.data ? node.lc : node.rc);
+                    }, tp.commonParams.interval);
+                });
+            }
+            if (!tp.opLock) {
+                reject();
+                return false;
+            }
+            if (node) {
+                node.status = NStatus.active;
+                resolve([true, node]);
+            }
+            else
+                resolve([false, this._hot]);
+            return true;
+        }));
+    }
     insert(e) {
         let v = this.search(e);
         if (v)
@@ -95,6 +112,36 @@ export class BST extends BinTree {
             (e < this._hot.data) ? this._hot.lc = v : this._hot.rc = v;
         this.updateHeightAbove(v);
         return v;
+    }
+    insertAsync(e, tp) {
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            if (!tp.opLock) {
+                reject();
+                return false;
+            }
+            let srchRes = yield this.searchAsync(e, tp).catch(() => { });
+            if (!tp.opLock) {
+                reject();
+                return false;
+            }
+            if (!srchRes) {
+                reject();
+                return false;
+            }
+            let [found, nodeOrHot] = srchRes;
+            if (found) {
+                resolve([false, nodeOrHot]);
+                return false;
+            }
+            let v = new BinNode(e, this._hot);
+            this._size++;
+            if (!this._root)
+                this._root = v;
+            else
+                (e < this._hot.data) ? this._hot.lc = v : this._hot.rc = v;
+            this.updateHeightAbove(v);
+            resolve([true, v]);
+        }));
     }
     removeAt(x) {
         let w = x;
