@@ -54,6 +54,14 @@
                 return `height: ${this.node.height}\nsize: ${this.node.size()}`
                 // return `npl:${this.node.npl}\nsize: ${this.node.size()}`
             },
+            statusClass() {
+                switch (this.node.status) {
+                    case NStatus.active: return "active-node";
+                    case NStatus.visited: return "visited-node";
+                    case NStatus.deprecated: return "deprecated-node";
+                    default: return null;
+                }
+            },
             /* **************************************** */
             /* ************ Remove Buttons ************ */
             /* **************************************** */
@@ -63,14 +71,6 @@
             },
             showRemoveOne() { // Except BinTree and Splay!
                 return this.$parent.curTreeType !== "BinTree";
-            },
-            statusClass() {
-                switch (this.node.status) {
-                    case NStatus.active: return "active-node";
-                    case NStatus.visited: return "visited-node";
-                    case NStatus.deprecated: return "deprecated-node";
-                    default: return null;
-                }
             }
         }
     }
