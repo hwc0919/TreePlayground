@@ -1,10 +1,18 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { BST } from "./BST";
-import { BinNode, TreeUtil } from "./BinNode";
+import { BinNode, TreeUtil, NStatus } from "./BinNode";
 export class AVL extends BST {
-    static avlBalanced(x) {
-        let balFac = TreeUtil.stature(x.lc) - TreeUtil.stature(x.rc);
-        return -2 < balFac && balFac < 2;
-    }
+    /* **************************************** */
+    /*           Synchronous Methods            */
+    /* **************************************** */
     insert(e) {
         if (!this._root) {
             this._size++;
@@ -23,7 +31,7 @@ export class AVL extends BST {
     }
     solveInsertUnbalance() {
         for (let g = this._hot; g; g = g.parent) {
-            if (!AVL.avlBalanced(g)) {
+            if (!TreeUtil.avlBalanced(g)) {
                 this.rotateAt(TreeUtil.tallerChild(TreeUtil.tallerChild(g)));
                 break;
             }
@@ -43,11 +51,37 @@ export class AVL extends BST {
     }
     solveRemoveUnbalance() {
         for (let g = this._hot; g; g = g.parent) {
-            if (!AVL.avlBalanced(g))
+            if (!TreeUtil.avlBalanced(g))
                 this.rotateAt(TreeUtil.tallerChild(TreeUtil.tallerChild(g)));
             this.updateHeight(g);
         }
     }
+    /* **************************************** */
+    /*          Asynchronous Methods            */
+    /* **************************************** */
+    solveRemoveUnbalanceAsync(tp) {
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            for (let g = this._hot; g; g = g.parent) {
+                if (!tp.opLock)
+                    return reject();
+                g.status = NStatus.active;
+                if (!TreeUtil.avlBalanced(g)) {
+                    this.rotateAt(TreeUtil.tallerChild(TreeUtil.tallerChild(g)));
+                    tp.update();
+                    g.status = NStatus.active;
+                }
+                yield tp.waitAsync();
+                if (!tp.opLock)
+                    return reject();
+                g.status = NStatus.normal;
+                this.updateHeight(g);
+            }
+            return resolve(true);
+        }));
+    }
+    /* **************************************** */
+    /*             Static Methods               */
+    /* **************************************** */
     static genSampleTree() {
         let tree = new AVL();
         let N = 5 + (Math.random() < 0.5 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 15));
@@ -63,7 +97,7 @@ export class AVL extends BST {
         let sequence = this.inorderTraversal(tree.root());
         let mis = null;
         for (let i = 0; i < sequence.length; i++)
-            if (!this.avlBalanced(sequence[i])) {
+            if (!TreeUtil.avlBalanced(sequence[i])) {
                 status = false;
                 mis = sequence[i];
                 break;

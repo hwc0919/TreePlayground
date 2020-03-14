@@ -1,6 +1,18 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { BinTree } from "./BinTree";
-import { BinNode, TreeUtil } from "./BinNode";
+import { NStatus, TreeUtil, BinNode } from "./BinNode";
 export class BST extends BinTree {
+    /* **************************************** */
+    /*           Synchronous Methods            */
+    /* **************************************** */
     // 3 + 4 Reconstruction of BBST
     connect34(a, b, c, t0, t1, t2, t3) {
         this.reAttachAsLC(a, t0);
@@ -60,7 +72,11 @@ export class BST extends BinTree {
         let v = this.search(e);
         if (v)
             return v;
-        v = new BinNode(e, this._hot);
+        return this.insertAfterSearch(e);
+    }
+    // After search!
+    insertAfterSearch(e) {
+        let v = new BinNode(e, this._hot);
         this._size++;
         if (!this._root)
             this._root = v;
@@ -101,6 +117,39 @@ export class BST extends BinTree {
         this.updateHeightAbove(this._hot);
         return true;
     }
+    /* **************************************** */
+    /*          Asynchronous Methods            */
+    /* **************************************** */
+    searchAsync(e, tp) {
+        return this.searchInAsync(this._root, e, tp);
+    }
+    searchInAsync(node, e, tp) {
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            if (!tp.opLock)
+                return reject();
+            this._hot = null;
+            while (node && e != node.data) {
+                if (!tp.opLock)
+                    return reject();
+                node.status = NStatus.active;
+                this._hot = node;
+                yield tp.waitAsync();
+                node.status = NStatus.visited;
+                node = (e < node.data ? node.lc : node.rc);
+            }
+            if (!tp.opLock)
+                return reject();
+            if (node) {
+                node.status = NStatus.active;
+                resolve([true, node]);
+            }
+            else
+                resolve([false, this._hot]);
+        }));
+    }
+    /* **************************************** */
+    /*             Static Methods               */
+    /* **************************************** */
     // A sample binary search tree, Maybe called by derived class! Use new this()
     static genSampleTree() {
         let N = Math.random() < 0.5 ? Math.ceil(Math.random() * 8) : Math.ceil(Math.random() * 30);

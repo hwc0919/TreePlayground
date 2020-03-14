@@ -1,7 +1,6 @@
 <!-- Internal BinNode -->
 <template>
-    <div class="binnode intr-binnode" :style="{'left': node.x + 'px', 'top': node.y + 'px'}"
-        :class="{'active-node': node.active, 'visited-node': node.visited, 'deprecated-node': node.deprecated}"
+    <div class="binnode intr-binnode" :style="{'left': node.x + 'px', 'top': node.y + 'px'}" :class="statusClass"
         @click="divOnClick">
         <span v-show="!showInput" :title="title"
             style="display: inline-block; width: 100%; height: 100%;">{{ node.data }}</span>
@@ -17,6 +16,7 @@
 
 <script>
     import BinnodeInput from "./binnode-input.vue";
+    import { NStatus } from "../js/BinNode";
     export default {
         props: ['node'],
         data() {
@@ -37,7 +37,7 @@
                 if (this.showInput === true) return false;
                 this.updation = this.node.data;
                 this.showInput = true;
-                console.log(this.$refs)
+
                 process.nextTick(() => {
                     this.$refs.input.forceFocus();
                 })
@@ -53,6 +53,14 @@
                     return `blackH: ${this.node.height + 1}\nsize: ${this.node.size()}`
                 return `height: ${this.node.height}\nsize: ${this.node.size()}`
                 // return `npl:${this.node.npl}\nsize: ${this.node.size()}`
+            },
+            statusClass() {
+                switch (this.node.status) {
+                    case NStatus.active: return "active-node";
+                    case NStatus.visited: return "visited-node";
+                    case NStatus.deprecated: return "deprecated-node";
+                    default: return null;
+                }
             },
             /* **************************************** */
             /* ************ Remove Buttons ************ */

@@ -1,6 +1,18 @@
-import { BinNode } from "./BinNode";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+import { BinNode, NStatus } from "./BinNode";
 import { BST } from "./BST";
 export class Splay extends BST {
+    /* **************************************** */
+    /*           Synchronous Methods            */
+    /* **************************************** */
     splay(v) {
         if (!v)
             return null;
@@ -64,7 +76,6 @@ export class Splay extends BST {
         let v = this.searchIn(this._root, e);
         return this._root = this.splay(v ? v : this._hot);
     }
-    // NEVER USED. Not sure about correctness!!!
     insert(e) {
         if (!this._root) {
             this._size++;
@@ -112,6 +123,46 @@ export class Splay extends BST {
         if (this._root)
             this.updateHeight(this._root);
         return true;
+    }
+    /* **************************************** */
+    /*          Asynchronous Methods            */
+    /* **************************************** */
+    splayAsync(v, tp) {
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            if (!tp.opLock) {
+                return reject();
+            } // check lock
+            if (!v) {
+                return resolve(null);
+            }
+            tp.update();
+            let p, g;
+            while ((p = v.parent) && (g = p.parent)) {
+                v.status = NStatus.active;
+                yield tp.waitAsync();
+                if (!tp.opLock) {
+                    return reject();
+                }
+                this.splayDoubleLayer(v, p, g);
+                tp.update();
+            }
+            if (p = v.parent) {
+                v.status = NStatus.active;
+                yield tp.waitAsync();
+                if (!tp.opLock) {
+                    return reject();
+                }
+                this.splaySingleLayer(v, p);
+            }
+            v.parent = null;
+            this._root = v;
+            tp.update();
+            v.status = NStatus.active;
+            if (!tp.opLock) {
+                return reject();
+            }
+            return resolve(v);
+        }));
     }
 }
 window['Splay'] = Splay;

@@ -1,7 +1,14 @@
 export enum RBColor { Red, Black };
+window['RBColor'] = RBColor;
 
+export enum NStatus { normal, active, visited, deprecated };
+window['NStatus'] = NStatus;
+
+
+/* **************************************** */
+/*            TreeUtil Macros               */
+/* **************************************** */
 export class TreeUtil<T> {
-
     static isRoot<T>(x: BinNode<T>): boolean {
         return !x.parent;
     }
@@ -40,7 +47,18 @@ export class TreeUtil<T> {
         return this.stature(x.lc) == this.stature(x.rc) &&
             this.stature(x) == (this.isBlack(x) ? this.stature(x.lc) + 1 : this.stature(x.lc));
     }
+
+    static avlBalanced<T>(x: BinNode<T>): boolean {
+        let balFac: number = this.stature(x.lc) - this.stature(x.rc);
+        return -2 < balFac && balFac < 2;
+    }
 }
+
+window['TreeUtil'] = TreeUtil;
+
+/* **************************************** */
+/*              BinNode Class               */
+/* **************************************** */
 
 export class BinNode<T> {
     data: T;
@@ -53,8 +71,7 @@ export class BinNode<T> {
     nid: number;
     x: number = 0;
     y: number = 0;
-    active: boolean = false;
-    visited: boolean = false;
+    status: NStatus = NStatus.normal;
 
     static N: number = 0;
 

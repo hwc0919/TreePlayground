@@ -1,8 +1,13 @@
-import { BinNode } from "./BinNode";
+import { BinNode, NStatus } from "./BinNode";
 import { BST } from "./BST";
 
 export class Splay<T> extends BST<T> {
-    protected splay(v: BinNode<T>): BinNode<T> {
+
+    /* **************************************** */
+    /*           Synchronous Methods            */
+    /* **************************************** */
+
+    protected splay(v: BinNode<T>): BinNode<T> {  // NEVER USED.
         if (!v) return null;
         let p: BinNode<T>, g: BinNode<T>;
         while ((p = v.parent) && (g = p.parent)) {
@@ -52,19 +57,17 @@ export class Splay<T> extends BST<T> {
         return v;
     }
 
-    public search(e: T): BinNode<T> {
+    public search(e: T): BinNode<T> {  // NEVER USED.
         let v: BinNode<T> = this.searchIn(this._root, e);
         return this._root = this.splay(v ? v : this._hot);
     }
 
-    // NEVER USED. Not sure about correctness!!!
-    public insert(e: T): BinNode<T> {
+    public insert(e: T): BinNode<T> {  // NEVER USED.
         if (!this._root) {
             this._size++;
             return this._root = new BinNode<T>(e);
         }
         if (e == this.search(e).data) return this._root;
-
         return this.insertSplitRoot(e);
     }
 
@@ -102,6 +105,38 @@ export class Splay<T> extends BST<T> {
         this._size--;
         if (this._root) this.updateHeight(this._root);
         return true;
+    }
+
+    /* **************************************** */
+    /*          Asynchronous Methods            */
+    /* **************************************** */
+
+    public splayAsync(v: BinNode<T>, tp: any): Promise<any> {
+        return new Promise(async (resolve, reject) => {
+            if (!tp.opLock) { return reject(); }  // check lock
+            if (!v) { return resolve(null); }
+            tp.update();
+            let p: BinNode<T>, g: BinNode<T>;
+            while ((p = v.parent) && (g = p.parent)) {
+                v.status = NStatus.active;
+                await tp.waitAsync();
+                if (!tp.opLock) { return reject(); }
+                this.splayDoubleLayer(v, p, g);
+                tp.update();
+            }
+            if (p = v.parent) {
+                v.status = NStatus.active;
+                await tp.waitAsync();
+                if (!tp.opLock) { return reject(); }
+                this.splaySingleLayer(v, p);
+            }
+            v.parent = null;
+            this._root = v;
+            tp.update();
+            v.status = NStatus.active;
+            if (!tp.opLock) { return reject(); }
+            return resolve(v);
+        })
     }
 
 

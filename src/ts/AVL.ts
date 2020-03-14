@@ -1,12 +1,11 @@
 import { BST } from "./BST"
-import { BinNode, TreeUtil } from "./BinNode"
+import { BinNode, TreeUtil, NStatus } from "./BinNode"
 
 export class AVL<T> extends BST<T> {
 
-    static avlBalanced<T>(x: BinNode<T>): boolean {
-        let balFac: number = TreeUtil.stature(x.lc) - TreeUtil.stature(x.rc);
-        return -2 < balFac && balFac < 2;
-    }
+    /* **************************************** */
+    /*           Synchronous Methods            */
+    /* **************************************** */
 
     public insert(e: T): BinNode<T> {
         if (!this._root) {
@@ -28,7 +27,7 @@ export class AVL<T> extends BST<T> {
 
     public solveInsertUnbalance(): void {
         for (let g: BinNode<T> = this._hot; g; g = g.parent) {
-            if (!AVL.avlBalanced(g)) {
+            if (!TreeUtil.avlBalanced(g)) {
                 this.rotateAt(TreeUtil.tallerChild(TreeUtil.tallerChild(g)));
                 break;
             } else this.updateHeight(g);
@@ -48,10 +47,37 @@ export class AVL<T> extends BST<T> {
 
     public solveRemoveUnbalance(): void {
         for (let g: BinNode<T> = this._hot; g; g = g.parent) {
-            if (!AVL.avlBalanced(g)) this.rotateAt(TreeUtil.tallerChild(TreeUtil.tallerChild(g)));
+            if (!TreeUtil.avlBalanced(g)) this.rotateAt(TreeUtil.tallerChild(TreeUtil.tallerChild(g)));
             this.updateHeight(g);
         }
     }
+
+    /* **************************************** */
+    /*          Asynchronous Methods            */
+    /* **************************************** */
+
+    public solveRemoveUnbalanceAsync(tp: any): Promise<any> {
+        return new Promise(async (resolve, reject) => {
+            for (let g: BinNode<T> = this._hot; g; g = g.parent) {
+                if (!tp.opLock) return reject();
+                g.status = NStatus.active;
+                if (!TreeUtil.avlBalanced(g)) {
+                    this.rotateAt(TreeUtil.tallerChild(TreeUtil.tallerChild(g)));
+                    tp.update();
+                    g.status = NStatus.active;
+                }
+                await tp.waitAsync();
+                if (!tp.opLock) return reject();
+                g.status = NStatus.normal;
+                this.updateHeight(g);
+            }
+            return resolve(true);
+        })
+    }
+
+    /* **************************************** */
+    /*             Static Methods               */
+    /* **************************************** */
 
     static genSampleTree(): AVL<number> {
         let tree: AVL<number> = new AVL();
@@ -68,7 +94,7 @@ export class AVL<T> extends BST<T> {
         let sequence: Array<BinNode<T>> = this.inorderTraversal(tree.root());
         let mis: BinNode<T> = null;
         for (let i = 0; i < sequence.length; i++)
-            if (!this.avlBalanced(sequence[i])) { status = false; mis = sequence[i]; break; }
+            if (!TreeUtil.avlBalanced(sequence[i])) { status = false; mis = sequence[i]; break; }
 
         let message: string = (mis === null) ? "" : `节点${mis.data}处不满足AVL平衡!`;
         return [status, message];

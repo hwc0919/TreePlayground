@@ -3,7 +3,7 @@ import Vue from "../node_modules/vue/dist/vue.min"
 import IntrBinnode from "./components/binnode.vue"
 import ExtrBinnode from "./components/extr-binnode.vue"
 import TopBinnode from "./components/top-binnode.vue"
-import { BinNode, RBColor, TreeUtil } from "./js/BinNode"
+import { RBColor, NStatus, TreeUtil, BinNode } from "./js/BinNode"
 import { BinTree } from "./js/BinTree"
 import { BST } from "./js/BST"
 import { AVL } from "./js/AVL"
@@ -30,10 +30,7 @@ var tp = new Vue({
             edges: [[], []],
             extrEdges: [[], []],
         },
-        locks: {    // TODO : seperate trvlLock and searchLock. this can wait.
-            trvlLock: false,
-            rotateLock: false
-        },
+        opLock: false,  // Operation Lock
         topSequence: [],
         BSTParams: {
             allowExtrInsert: false,
@@ -74,12 +71,13 @@ var tp = new Vue({
             }
             this.alertAsync("Reset", 150, false);
             this.isDragging = false;
-            for (let lock in this.locks) this.locks[lock] = false;
+            this.opLock = false;
             this.update();
+            this.structInfo.nodes.forEach((node) => { node.status = NStatus.normal; });
         },
         // Update, update tree structure ONLY! Then save to LocalStorage. Please Always call explicitly!!!
         update() {
-            console.log("Update");
+            // console.log("Update");
             this.structInfo = this.tree.calStructInfo();
             // Save to localStorage
             localStorage["temp" + this.curTreeType] = JSON.stringify(JSON.decycle(this.tree));
@@ -114,56 +112,68 @@ var tp = new Vue({
                 }
             } else setTimeout(() => { this.showMessage(message, time, false) }, 100);
         },
+        waitAsync(time) {
+            let interval = time ? time : this.commonParams.interval;
+            return new Promise(async (resolve) => {
+                setTimeout(() => { resolve(); }, interval);
+            })
+        },
         // Traversal and Display in Async way.
-        traversal(method) {
-            if (this.isAnyLocked()) return false;
+        async traversal(method) {
+            if (this.isLocked()) return false;
+
             this.update();
-            this.locks.trvlLock = true;
             let sequence;
-            if (method === 0)
-                sequence = BinTree.preorderTraversal(this.tree.root());
-            else if (method == 1)
-                sequence = BinTree.inorderTraversal(this.tree.root());
-            else if (method == 2)
-                sequence = BinTree.postorderTraversal(this.tree.root());
-            else if (method == 3)
-                sequence = BinTree.levelTraversal(this.tree.root());
-            // display traversal sequence
+            switch (method) {
+                case 0: sequence = BinTree.preorderTraversal(this.tree.root()); break;
+                case 1: sequence = BinTree.inorderTraversal(this.tree.root()); break;
+                case 2: sequence = BinTree.postorderTraversal(this.tree.root()); break;
+                case 3: sequence = BinTree.levelTraversal(this.tree.root()); break;
+            }
+            // Display traversal sequence
             this.topSequence = [];
             this.messages.left = method == 0 ? "先序遍历" : (method == 1 ? "中序遍历" :
                 (method == 2 ? "后续遍历" : (method == 3 ? "层次遍历" : "")));
-            this._printSequenceAsyc(sequence, () => { this.locks.trvlLock = false; this.messages.left = "" });
+            this.opLock = true;
+            await this._printSequenceAsyc(sequence).catch(() => { this.update(); });
+            this.opLock = false;
+            this.messages.left = "";
         },
         // Print sequence Async & Recur, and push to `topSequence`
-        _printSequenceAsyc(sequence, callback) {
-            if (sequence.length == 0) {
-                setTimeout(() => {
-                    this.update();
-                }, 2 * this.commonParams.interval);
-                if (typeof callback === "function") callback();
-                return;
-            }
-            if (!this.locks.trvlLock) return false;
-            let x = sequence.shift();
-            this.topSequence.push(x.data);
-            x.active = true;
-            setTimeout(() => {
-                x.active = false;
-                if (this.locks.trvlLock) x.visited = true;
-                this._printSequenceAsyc(sequence, callback);
-            }, this.commonParams.interval);
+        _printSequenceAsyc(sequence) {
+            return new Promise(async (resolve, reject) => {
+                if (!this.opLock) { reject(); return false; }
+                // Push data in `sequence` to `topSequence` one by one
+                // Set color of node in the meantime
+                while (sequence.length > 0) {
+                    if (!this.opLock) { reject(); return false; }
+                    let node = sequence.shift();
+                    this.topSequence.push(node.data);
+                    node.status = NStatus.active;
+
+                    await this.waitAsync();
+                    if (!this.opLock) { reject(); return false; }
+                    node.status = NStatus.visited;
+                }
+                // Call `this.update()` to reset color
+                await this.waitAsync(2 * this.commonParams.interval);
+                this.update();
+
+                if (!this.opLock) { reject(); return false; }
+                this.opLock = false;
+                resolve();
+            });
         },
 
         /****************************************/
         /*           Events Handlers            */
         /****************************************/
 
-        // Internal node requests for value update
+        // Internal node requests for value update.  See `binnode.vue`.
         onIntrUpdate(args) {
-            if (this.isAnyLocked()) return false;
-            this.update();
-            let node = args[0];
-            let updation = args[1];
+            if (this.opLock) return false;
+            let [node, updation] = args;
+
             let successMessage = `Change ${node.data} to ${updation}`;
             if (this.curTreeType !== "BinTree") {
                 if (this.tree.staticSearch(updation)) {
@@ -174,15 +184,14 @@ var tp = new Vue({
             }
             node.data = updation;
             this.update();
-            this.messages.left = successMessage;
-            node.active = true;   // Caution: Mark recent active
+            this.showMessage(successMessage);
+            node.status = NStatus.active;   // Caution: Mark recent active
         },
-        // External node requests for value insertion
+
+        // External node requests for value insertion. See `extr-binnode.vue`.
         onExtrInsert(args) {
             this.update();
-            let node = args[0];
-            let insertion = args[1];
-            let callback = args[2];
+            let [node, insertion, callback] = args;
             let curTreeType = this.curTreeType;
 
             if (curTreeType === "Splay") {
@@ -216,291 +225,254 @@ var tp = new Vue({
                 this.tree.solveDoubleRed(retNode);
             }
             this.update();
-            retNode.active = true;  // Caution: Mark recent active
-            this.messages.left = `Insert ${insertion}`;
+            retNode.status = NStatus.active;  // Caution: Mark recent active
+            this.showMessage(`Insert ${insertion}`);
             if (typeof callback === "function") callback(true);
         },
+
         // Remove whole subtree
         onRemoveBelow(node) {
-            if (this.isAnyLocked()) return false;
+            if (this.isLocked()) return false;
             this.tree.removeBelow(node);
             this.update();
             this.showMessage(`Remove Below ${node.data}`);
         },
+
         // Remove one node
-        onRemoveOne(node) {
-            if (this.isAnyLocked()) return false;
-            this.showMessage(`Remove ${node.data}`);
-            if ("RedBlack" === this.curTreeType) {  // TODO: No Vigor to write async version anymore using callback
-                this.tree.remove(node.data);        // Maybe change everything to await promise in the future.
+        async onRemoveOne(node) {
+            if (this.isLocked()) return false;
+
+            this.update(); this.opLock = true;
+            let rmData = node.data;
+
+            this.showMessage(`Remove ${rmData}`);
+            if ("RedBlack" === this.curTreeType) {
+                this.tree.remove(rmData);  // TODO: change to async
                 this.update();
-            }
-            else if ("Splay" === this.curTreeType) {  // Exception : Deal with Splay
-                this.alertAsync(`Step 1: Splay ${node.data}`, -1);
-                node.active = true;
-                setTimeout(() => {
-                    // Splay RM Step 1
-                    this.locks.rotateLock = true;
-                    this._splayAsync(node, (rootOrNull) => {
-                        if (rootOrNull === undefined) return false;
-                        if (rootOrNull === null) throw "Error in RemoveOne";
-                        let v = rootOrNull;
-                        let tree = this.tree;
-                        tree._size--;
-                        if (!v.rc || !v.rc) {  // Splay RM Step 2a
-                            if (!v.rc) { if (tree._root = v.lc) tree._root.parent = null; }
-                            else { if (tree._root = v.rc) tree._root.parent = null; }
-                            this.alertAsync(`Final: remove ${node.data}`, 2500);
-                            this.update();
-                        } else {  // Splay RM Step 2b
-                            node.active = false; node.deprecated = true;
-                            this.locks.trvlLock = true;
-                            this.alertAsync(`Step 2: Elevate Succ of ${node.data}`, -1);
-                            this._searchAsync(v.rc, v.data, (_, hot) => {
-                                this.locks.rotateLock = true;
-                                this._splayAsync(hot, (newRoot) => {
-                                    // Splay RM Step 3
-                                    this.alertAsync(`Step 3: Finally remove ${node.data}`, 2500);
-                                    tree.reAttachAsLC(newRoot, v.lc);
-                                    this.update();
-                                })
-                            })
-                        }
-                    })
-                }, this.commonParams.interval);
+            } else if ("Splay" === this.curTreeType) {
+                // Splay RM Step 1: Search and Splay
+                this.alertAsync(`Step 1: Splay ${rmData}`, -1);
+                node.status = NStatus.active;
+                await this.waitAsync();
+
+                let rt = await this.tree.splayAsync(node, this)
+                    .catch(() => { this.alertAsync("Cancelled"); this.update(); })
+                if (!rt || !this.opLock) { return this.opLock = false; }
+
+                if (!rt.rc || !rt.rc) {  // Splay RM Step 2a
+                    this.tree.removeAt(rt); this.tree._size--;
+                    this.tree._size--;
+                    this.alertAsync(`Final: remove ${rmData}`, 2500);
+                    this.update();
+                } else {
+                    // Splay RM Step 2b: Search succ() and Splay
+                    rt.status = NStatus.deprecated;
+                    this.alertAsync(`Step 2: Elevate Succ of ${rmData}`, -1);
+                    await this.waitAsync();
+                    if (!this.opLock) { this.alertAsync("Cancelled"); return this.update(); }
+
+                    let srchRes = await this.tree.searchInAsync(node.rc, rmData, this).
+                        catch(() => { this.alertAsync("Cancelled"); this.update(); })
+                    if (!srchRes || !this.opLock) { return this.opLock = false; }
+                    let splayRes = await this.tree.splayAsync(srchRes[1], this).
+                        catch(() => { this.alertAsync("Cancelled"); this.update(); });
+                    if (!splayRes || !this.opLock) { return this.opLock = false; }
+
+                    // Splay RM Step 3
+                    this.alertAsync(`Final: remove ${rmData}`, 2500);
+                    await this.waitAsync();
+                    if (!this.opLock) { this.alertAsync("Cancelled"); return this.update(); };
+
+                    this.tree.reAttachAsLC(this.tree.root(), rt.lc);
+                    this.tree._size--;
+                    this.update();
+                }
             } else {  // Deal with other trees
                 if (!node.lc || !node.rc) { // Other Trees: Simple Situation
                     this.tree.removeAt(node); this.tree._size--;
-                    this.alertAsync(`${node.data} Removed.`, 2500);
                     this.update();
-                    if ("AVL" === this.curTreeType) {
-                        this.alertAsync(`${node.data} Removed, solve AVL Unbalance`, -1);
-                        setTimeout(() => {
-                            this.locks.rotateLock = true;
-                            this.avlRmRotateAsync(this.tree._hot, () => {
-                                this.alertAsync(`AVL Balanced again.`);
-                                this.update();
-                            });
-                        }, this.commonParams.interval);
-                    }
                 } else { // Other Trees: Complex situation
                     // RM Step 1: Find Succ
                     this.alertAsync(`Step 1: Find Succ`, -1);
                     let succ = node.succ();
-                    node.deprecated = true;
-                    this.locks.trvlLock = true; // TODO : change to srchLock
-                    this._searchAsync(node, succ.data, () => { // assert res === true
-                        // RM Step 2: Swap with Succ
-                        this.alertAsync(`Step 2: Swap with Succ`, -1);
-                        this.update();
-                        node.deprecated = true; succ.active = true;
-                        setTimeout(() => {
-                            let t = node.data; node.data = succ.data; succ.data = t;
-                            node.deprecated = false; succ.active = false;
-                            node.active = true; succ.deprecated = true;
-                            // RM Step 3: Remove
-                            this.alertAsync(`Step 3: Remove ${t}`, 2500);
-                            setTimeout(() => {
-                                this.tree.removeAt(succ);
-                                this.update();
-                                // RM Step 4 : AVL reBalance
-                                if ("AVL" === this.curTreeType) {
-                                    this.alertAsync(`Step 4: AVL reBalance`, -1);
-                                    if (this.tree._hot) this.tree._hot.active = true;
-                                    setTimeout(() => {
-                                        this.locks.rotateLock = true;
-                                        this.avlRmRotateAsync(this.tree._hot, () => {
-                                            this.alertAsync(`AVL Balanced again.`);
-                                            this.update();
-                                        });
-                                    }, this.commonParams.interval);
-                                }
-                            }, this.commonParams.interval);
-                        }, this.commonParams.interval);
-                    })
+                    node.status = NStatus.deprecated;
+                    let srchRes = await this.tree.searchInAsync(node, succ.data, this).
+                        catch(() => { this.alertAsync("Cancelled") });
+                    if (!srchRes || !this.opLock) { return this.opLock = false; }
+
+                    // RM Step 2: Swap with Succ
+                    this.alertAsync(`Step 2: Swap with Succ`, -1);
+                    this.update();
+                    node.status = NStatus.deprecated;
+                    succ.status = NStatus.active;
+                    // Wait for interval and Swap
+                    await this.waitAsync();
+                    if (!this.opLock) { this.alertAsync("Cancelled"); return false; }
+                    let t = node.data; node.data = succ.data; succ.data = t;
+                    node.status = NStatus.active;
+                    succ.status = NStatus.deprecated;
+
+                    // RM Step 3: Remove
+                    this.alertAsync(`Step 3: Remove ${t}`, 2500);
+                    await this.waitAsync();
+                    if (!this.opLock) { this.alertAsync("Cancelled"); return false; }
+                    this.tree.removeAt(succ);
+                    this.update();
                 }
+
+                // RM Final Step: solve AVL unbalance
+                if ("AVL" == this.curTreeType) {
+                    if (this.tree._hot) this.tree._hot.status = NStatus.active;
+                    else return this.opLock = false;
+
+                    this.alertAsync(`${rmData} Removed. AVL Rebalance`, -1);
+                    await this.waitAsync();
+                    if (!this.opLock) { return this.alertAsync("Cancelled"); }
+
+                    let rebncRes = await this.tree.solveRemoveUnbalanceAsync(this).
+                        catch(() => { this.alertAsync("Cancelled"); })
+                    if (!rebncRes) return this.opLock = false;
+
+                    this.alertAsync(`AVL Balanced Again.`);
+                    this.update();
+                }
+
             }
+            this.opLock = false;
         },
-        // Async version of AVL.solveRemoveUnbalance
-        avlRmRotateAsync(node, callback) { // Important: SET rotateLock BEFORE START
-            if (!node || !this.locks.rotateLock || "AVL" !== this.curTreeType) {
-                this.locks.rotateLock = false;
-                if (typeof callback == "function") callback();
-                return;
-            }
-            node.active = true;
-            setTimeout(() => {
-                let interval = this.commonParams.interval;
-                if (!AVL.avlBalanced(node))
-                    this.tree.rotateAt(TreeUtil.tallerChild(TreeUtil.tallerChild(node)));
-                else interval = 0;
-                this.tree.updateHeight(node);
-                this.update();
-                node.active = true;
-                setTimeout(() => {
-                    node.active = false;
-                    this.avlRmRotateAsync(node.parent, callback);
-                }, interval);
-            }, this.commonParams.interval)
-        },
-        // Proper Rebuild
+
+        // Rebuild with proper traversal sequence
         onTopBuild(sequence) {
             if (this.curTreeType !== "BinTree")
                 this.alertAsync("请自行保证合法性, 不合法的树会造成操作异常.", 2500);
             this.tree.buildFromBinSequence(sequence);
             this.update();
-            this.messages.left = "真二叉树层次序列构建";
+            this.showMessage("真二叉树层次序列构建");
             let res = this.curTreeClass.checkValidity(this.tree);
             if (!res[0]) this.alertAsync(res[1], 2500);
         },
-        // Insert `topSequence` by calling async
-        onTopInsert(sequence) {
-            if (this.isAnyLocked()) return false;
-            // if (this.isAnyLocked) return false;
+
+        // Insert `topSequence` by calling `insertSequnceAsync()`
+        async onTopInsert(sequence) {
+            if (this.isLocked()) return false;
+
             if ("BinTree" === this.curTreeType) { this.alertAsync("BinTree can't insert."); return false; }
-            console.log("Insert by sequence");
             this.update();
             this.topSequence = sequence;
-            this.insertSequnceAsync();
+            this.opLock = true;
+            await this._insertSequnceAsync().catch(() => { this.alertAsync("Cancelled"); });
+            this.opLock = false;
         },
-        // Insert `topSequence` Async & Recur
-        insertSequnceAsync() {
-            while (this.topSequence.length > 0 && this.topSequence[0] === null) this.topSequence.shift();
-            if (this.topSequence.length === 0) { this.locks.trvlLock = false; return false; }
-            let num = this.topSequence.shift();
-            this.messages.left = `Insert ${num}`;
-            this.alertAsync(`Step 1: Search ${num}`, -1);
-            this.locks.trvlLock = true;
-            this.tree._hot = null; // Important: reset _hot before search
-            this._searchAsync(this.tree.root(), num, (res, nodeOrHot) => {
-                let recentNode = null;
-                // Exception : Deal with Splay
-                if ("Splay" === this.curTreeType) { // Caution & Important & TODO : May need change
-                    this.alertAsync(nodeOrHot ? `Step 2: Splay at ${nodeOrHot.data}` : "", -1);
-                    // Wait & Splay & Insert in callback
-                    setTimeout(() => {
-                        this.locks.rotateLock = true;
-                        this._splayAsync(nodeOrHot, (rootOrNull) => {
-                            if (!res) {
-                                if (rootOrNull === undefined) return false; // `rotateLock` has been reset.
-                                this.alertAsync(`Final: ${num} Inserted`, 2500);
-                                if (rootOrNull === null) recentNode = this.tree.insertAsRoot(num);
-                                else recentNode = this.tree.insertSplitRoot(num);  // Splay ONLY!!!
-                            }
-                            else { this.alertAsync(`${num} Exists`); recentNode = nodeOrHot; }
-                            /* ----------------------------------- SAME BLOCK 0000 ------------------------------------------------- */
-                            setTimeout(() => {
-                                this.update();
-                                if (this.topSequence.length === 0) {
-                                    recentNode.active = true;  // Caution: Mark recent active
-                                    this.locks.trvlLock = false; return false;
-                                } else this.insertSequnceAsync();
-                            }, this.commonParams.interval);
-                            /* ----------------------------------------------------------------------------------------------------- */
-                        });
-                    }, this.commonParams.interval);
+
+        // Insert one number from the top down.
+        _insertOneAsync(num) {
+            return new Promise(async (resolve, reject) => {
+                if (!this.opLock) { reject(); return false; }
+
+                if (!this.tree.root()) {  // Insert to Empty Tree
+                    this.tree.insertAsRoot(num);
+                    this.update(); return resolve(true);
                 }
-                // Deal with Other trees
-                else {
-                    if (res) { this.alertAsync(`${num} Exists`); recentNode = nodeOrHot; }
+                this.update();
+
+                // Insert Step 1: Search
+                this.alertAsync(`Step 1: Search ${num}`, -1);
+                await this.waitAsync();
+                if (!tp.opLock) { return reject(); }
+
+                let srchRes = await this.tree.searchAsync(num, this).
+                    catch(() => { this.alertAsync("Cancelled"); });
+                if (srchRes === undefined) return reject();
+                let [found, nodeOrHot] = srchRes;
+                nodeOrHot.status = NStatus.active;
+
+                // Insert to Splay Tree
+                if ("Splay" === this.curTreeType) {
+                    this.alertAsync(`Step 2: Splay at ${nodeOrHot.data}`, -1);
+                    await this.waitAsync();
+                    if (!tp.opLock) { return reject(); }
+
+                    let splayRes = await this.tree.splayAsync(nodeOrHot, this).catch(() => { });
+                    if (!splayRes) return reject();
+
+                    if (found) this.alertAsync(`${num} Exists`);
                     else {
-                        recentNode = this.tree.insert(num);
-                        this.alertAsync(`Final: ${num} Inserted`, 2500);
+                        this.alertAsync(`Step 3: Insert ${num}`, 2500);
+                        await this.waitAsync();
+                        if (!tp.opLock) { return reject(); }
+
+                        nodeOrHot = this.tree.insertSplitRoot(num);
                     }
-                    /* ------------------------------------- SAME BLOCK 0000 ----------------------------------------------- */
-                    setTimeout(() => {
-                        this.update();
-                        if (this.topSequence.length === 0) {
-                            recentNode.active = true;  // Caution: Mark recent active
-                            this.locks.trvlLock = false; return true;
-                        } else this.insertSequnceAsync();
-                    }, this.commonParams.interval);
-                    /* ----------------------------------------------------------------------------------------------------- */
+                } else {  // Insert to Other Tree
+                    if (found) this.alertAsync(`${num} Exists`);
+                    else {
+                        this.alertAsync(`Step 2: Insert ${num}`, 2500);
+                        await this.waitAsync();
+                        if (!tp.opLock) { return reject(); }
+
+                        nodeOrHot = this.tree.insertAfterSearch(num);
+                        if ("AVL" == this.curTreeType)
+                            this.tree.solveInsertUnbalance();
+                        else if ("RedBlack" == this.curTreeType)
+                            this.tree.solveDoubleRed(nodeOrHot);
+                    }
                 }
+
+                this.update();
+                nodeOrHot.status = NStatus.active;
+                return resolve(true);
             })
         },
-        // Search value
-        onTopSearch(num) {
-            if (this.isAnyLocked()) return false;
+
+        // Insert `topSequence` one by one
+        _insertSequnceAsync() {
+            return new Promise(async (resolve, reject) => {
+                while (this.topSequence.length > 0) {
+                    if (!this.opLock) { this.alertAsync("Cancelled!"); return reject(); }
+                    while (this.topSequence.length > 0 && this.topSequence[0] === null) this.topSequence.shift();
+                    if (this.topSequence.length === 0) break;
+                    let num = this.topSequence.shift();
+                    this.showMessage(`Insert ${num}`);
+
+                    let insrtRes;
+                    await this._insertOneAsync(num).then(() => { insrtRes = true; }).
+                        catch(() => { this.alertAsync("Insert Failed"); insrtRes = false; })
+                    if (!insrtRes) { reject(); return false; }
+                    await this.waitAsync();
+                }
+                resolve();
+            })
+        },
+
+        // Search one number from top down
+        async onTopSearch(num) {
+            if (this.opLock) return false;
+            this.opLock = true;
             this.update();
-            this.locks.trvlLock = true;
             this.messages.left = `Search ${num}`;
 
-            this.tree._hot = null;  // Important: reset _hot before search
-            this._searchAsync(this.tree.root(), num, (res, nodeOrHot) => {
-                if (res) this.alertAsync(`${num} Found`);
-                else Math.random() < 0.5 ? this.alertAsync(`${num} Not Found`) : this.alertAsync(`${num} 404`);
-                if (this.curTreeType === "Splay") {  // Exception & Important : Splay
-                    this.alertAsync(nodeOrHot ? `Splay at ${nodeOrHot.data}` : "", 2000);
-                    setTimeout(() => {
-                        this.locks.rotateLock = true;
-                        this._splayAsync(nodeOrHot);
-                    }, this.commonParams.interval);
-                }
-            });
+            let srchRes = await this.tree.searchAsync(num, this).
+                catch(() => { this.update(); });
+            if (!srchRes) { this.opLock = false; return false; }
+
+            let [found, nodeOrHot] = srchRes;
+            if (found) this.alertAsync(`${num} Found`);
+            else Math.random() < 0.5 ? this.alertAsync(`${num} Not Found`) : this.alertAsync(`${num} 404`);
+
+            if (this.curTreeType === "Splay") {  // Exception & Important : Splay
+                await this.waitAsync();
+                this.alertAsync(nodeOrHot ? `Splay at ${nodeOrHot.data}` : "", 2000);
+                await this.tree.splayAsync(nodeOrHot, this).
+                    catch(() => { this.alertAsync("Cancelled"); this.update(); });
+            }
+            this.opLock = false;
         },
-        // Search Async & Recur. Callback: (true, target) if found else (false, _hot)
-        _searchAsync(node, num, callback) { // Important: SET LOCK BEFORE START! 
-            if (!this.locks.trvlLock || !node) {
-                this.locks.trvlLock = false;
-                if (typeof callback === "function") callback(false, this.tree._hot);
-                return false;
-            }
-            node.active = true;
-            if (num === node.data) {
-                this.locks.trvlLock = false; {
-                    if (typeof callback === "function") callback(true, node);
-                    return true;
-                }
-            } else {
-                this.tree._hot = node;  // Important: set _hot
-                setTimeout(() => {
-                    node.active = false;
-                    node.visited = true;
-                    if (num < node.data) node = node.lc;
-                    else node = node.rc;
-                    this._searchAsync(node, num, callback);
-                }, this.commonParams.interval);
-            }
-        },
-        // Splay Async & Recur. Callback: (null) if !v, (undefined) if locked, (_root) if success
-        _splayAsync(v, callback) { // Important: SET `rotateLock` BEFORE START! 
-            if (!v) {
-                this.locks.rotateLock = false;
-                if (typeof callback === "function") callback(null);
-                return false;
-            }
-            if (!this.locks.rotateLock) {
-                if (typeof callback === "function") callback(undefined);
-                return false;
-            }
-            let p, g;
-            if ((p = v.parent) && (g = p.parent)) {
-                this.tree.splayDoubleLayer(v, p, g);
-            } else if (p = v.parent) {
-                this.tree.splaySingleLayer(v, p);
-                v.parent = null; // Important!!! Missing will cause dead loop.
-            }
-            if (!v.parent) {
-                this.tree._root = v;
-                this.update();
-                v.active = true;
-                this.locks.rotateLock = false;
-                setTimeout(() => {
-                    if (typeof callback === "function") callback(v);
-                }, this.commonParams.interval);
-            } else {
-                this.update();
-                v.active = true;
-                setTimeout(() => {
-                    this._splayAsync(v, callback);
-                }, this.commonParams.interval);
-            }
-        },
+
         // Show help message.
         onTopHelp(message) {
             this.alertAsync(message, 5000);
         },
+
         // Proper Binary Tree Sequence
         onTopProper() {
             let sequence = BinTree.properTraversal(this.tree.root());
@@ -510,6 +482,7 @@ var tp = new Vue({
             sequence.splice(last + 1);
             this.topSequence = sequence;
         },
+
         /****************************************/
         /*               Dragger                */
         /****************************************/
@@ -517,7 +490,7 @@ var tp = new Vue({
             if (event.button !== 0 && event.type !== "touchstart") {
                 this.isDragging = false; return false;
             }
-            console.log("Start dragging")
+            // console.log("Start dragging")
             this.treeXY = [this.$refs.tree.offsetLeft, this.$refs.tree.offsetTop];
             switch (event.type) {
                 case "mousedown": this.mouseXY = [event.clientX, event.clientY]; break;
@@ -544,7 +517,7 @@ var tp = new Vue({
         },
         onTPMouseUp(e) {
             if (this.isDragging) {
-                console.log("End dragging")
+                // console.log("End dragging")
                 this.isDragging = false;
             }
         },
@@ -552,6 +525,7 @@ var tp = new Vue({
         /****************************************/
         /*              Validators              */
         /****************************************/
+        // Assert input to be Number, else null
         assertNumber(x) {
             if (typeof x === "string") x = x.trim();
             if (x === "") return null;
@@ -561,6 +535,7 @@ var tp = new Vue({
             if (x < -52013141516) return -52013141516;
             return x;
         },
+        // Turn input string to Array<number>, seperated by comma
         strToArr(str) {
             str = str.trim();
             if (str === "") return null;
@@ -570,12 +545,12 @@ var tp = new Vue({
             }
             return arr;
         },
-        isAnyLocked() {
-            for (let lock in this.locks) {
-                if (this.locks[lock]) { alert("In Operation! Dont do this again!"); return true; }
-            }
+        // Check for Operation Lock, give alert
+        isLocked() {
+            if (this.opLock) { alert("In Operation! Dont do this again!"); return true; }
             return false;
         },
+        // Check BST order if extrInsert or intrUpdate
         checkNodeOrder(node, newV) {
             let pred, succ;
             let isLC = node.isLC || TreeUtil.isLC(node);
@@ -629,12 +604,6 @@ var tp = new Vue({
         },
     },
     watch: {
-        // tree: {
-        //     handler() {
-        //         console.log("Detect Change in tree.");
-        //     },
-        //     deep: true,
-        // },
         commonParams: {
             handler() {
                 localStorage.commonParams = JSON.stringify(this.commonParams);

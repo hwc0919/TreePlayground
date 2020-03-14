@@ -20,8 +20,7 @@
             emitExtrInsert() {
                 let insertion = this.$parent.assertNumber(this.insertion);
                 if (insertion == null) return false;
-                this.$emit('extr-insert', [this.node, insertion,
-                (res) => {
+                this.$emit('extr-insert', [this.node, insertion, (res) => {
                     if (res) this.insertion = "";
                 }]);
             },
