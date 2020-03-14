@@ -37,7 +37,7 @@
                 if (this.showInput === true) return false;
                 this.updation = this.node.data;
                 this.showInput = true;
-                console.log(this.$refs)
+
                 process.nextTick(() => {
                     this.$refs.input.forceFocus();
                 })

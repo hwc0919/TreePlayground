@@ -10,6 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { BinNode, NStatus } from "./BinNode";
 import { BST } from "./BST";
 export class Splay extends BST {
+    /* **************************************** */
+    /*           Synchronous Methods            */
+    /* **************************************** */
     splay(v) {
         if (!v)
             return null;
@@ -23,59 +26,6 @@ export class Splay extends BST {
         }
         v.parent = null;
         return v;
-    }
-    splayAsync(v, tp) {
-        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            if (!tp.opLock) {
-                reject();
-                return false;
-            } // check lock
-            if (!v) {
-                tp.opLock = false;
-                resolve(null);
-                return false;
-            }
-            tp.update();
-            let p, g;
-            while ((p = v.parent) && (g = p.parent)) {
-                v.status = NStatus.active;
-                if (!tp.opLock) {
-                    reject();
-                    return false;
-                }
-                yield new Promise((res) => {
-                    setTimeout(() => {
-                        this.splayDoubleLayer(v, p, g);
-                        res();
-                    }, tp.commonParams.interval);
-                });
-                tp.update();
-            }
-            if (!tp.opLock) {
-                reject();
-                return false;
-            }
-            if (p = v.parent) {
-                v.status = NStatus.active;
-                yield new Promise((res) => {
-                    setTimeout(() => {
-                        this.splaySingleLayer(v, p);
-                        res();
-                    }, tp.commonParams.interval);
-                });
-            }
-            v.parent = null;
-            this._root = v;
-            tp.update();
-            v.status = NStatus.active;
-            if (!tp.opLock) {
-                reject();
-                return false;
-            }
-            tp.opLock = false;
-            resolve(v);
-            return true;
-        }));
     }
     splayDoubleLayer(v, p, g) {
         let gg = g.parent;
@@ -126,7 +76,6 @@ export class Splay extends BST {
         let v = this.searchIn(this._root, e);
         return this._root = this.splay(v ? v : this._hot);
     }
-    // NEVER USED. Not sure about correctness!!!
     insert(e) {
         if (!this._root) {
             this._size++;
@@ -174,6 +123,46 @@ export class Splay extends BST {
         if (this._root)
             this.updateHeight(this._root);
         return true;
+    }
+    /* **************************************** */
+    /*          Asynchronous Methods            */
+    /* **************************************** */
+    splayAsync(v, tp) {
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            if (!tp.opLock) {
+                return reject();
+            } // check lock
+            if (!v) {
+                return resolve(null);
+            }
+            tp.update();
+            let p, g;
+            while ((p = v.parent) && (g = p.parent)) {
+                v.status = NStatus.active;
+                yield tp.waitAsync();
+                if (!tp.opLock) {
+                    return reject();
+                }
+                this.splayDoubleLayer(v, p, g);
+                tp.update();
+            }
+            if (p = v.parent) {
+                v.status = NStatus.active;
+                yield tp.waitAsync();
+                if (!tp.opLock) {
+                    return reject();
+                }
+                this.splaySingleLayer(v, p);
+            }
+            v.parent = null;
+            this._root = v;
+            tp.update();
+            v.status = NStatus.active;
+            if (!tp.opLock) {
+                return reject();
+            }
+            return resolve(v);
+        }));
     }
 }
 window['Splay'] = Splay;

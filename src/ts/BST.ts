@@ -2,9 +2,12 @@ import { BinTree } from "./BinTree"
 import { NStatus, TreeUtil, BinNode } from "./BinNode"
 
 
-
 export class BST<T> extends BinTree<T> {
     protected _hot: BinNode<T>;
+
+    /* **************************************** */
+    /*           Synchronous Methods            */
+    /* **************************************** */
 
     // 3 + 4 Reconstruction of BBST
     protected connect34(a: BinNode<T>, b: BinNode<T>, c: BinNode<T>,
@@ -63,59 +66,21 @@ export class BST<T> extends BinTree<T> {
         return this.searchIn(this._root, e);
     }
 
-    public searchAsync(e: T, tp: any): Promise<any> {
-        return new Promise(async (resolve, reject) => {
-            if (!tp.opLock) { reject(); return false; }
-            this._hot = null;
-            let node = this._root;
-
-            while (node && e != node.data) {
-                if (!tp.opLock) { reject(); return false; }
-                node.status = NStatus.active;
-                this._hot = node;
-                node = await new Promise((res) => {
-                    setTimeout(() => {
-                        node.status = NStatus.visited;
-                        res(e < node.data ? node.lc : node.rc);
-                    }, tp.commonParams.interval);
-                })
-            }
-            if (!tp.opLock) { reject(); return false; }
-            if (node) { node.status = NStatus.active; resolve([true, node]); }
-            else resolve([false, this._hot]);
-            return true;
-        })
-    }
-
     public insert(e: T): BinNode<T> {
         let v: BinNode<T> = this.search(e);
         if (v) return v;
-        v = new BinNode<T>(e, this._hot);
+        return this.insertAfterSearch(e);
+    }
+
+    // After search!
+    public insertAfterSearch(e: T): BinNode<T> {
+        let v = new BinNode<T>(e, this._hot);
         this._size++;
         if (!this._root) this._root = v;
         else (e < this._hot.data) ? this._hot.lc = v : this._hot.rc = v;
 
         this.updateHeightAbove(v);
         return v;
-    }
-
-    public insertAsync(e: T, tp: any): Promise<any> {
-        return new Promise(async (resolve, reject) => {
-            if (!tp.opLock) { reject(); return false; }
-            let srchRes = await this.searchAsync(e, tp).catch(() => { });
-
-            if (!tp.opLock) { reject(); return false; }
-            if (!srchRes) { reject(); return false; }
-            let [found, nodeOrHot] = srchRes;
-            if (found) { resolve([false, nodeOrHot]); return false; }
-            let v = new BinNode<T>(e, this._hot);
-            this._size++;
-            if (!this._root) this._root = v;
-            else (e < this._hot.data) ? this._hot.lc = v : this._hot.rc = v;
-
-            this.updateHeightAbove(v);
-            resolve([true, v]);
-        })
     }
 
     public removeAt(x: BinNode<T>): BinNode<T> {
@@ -145,6 +110,37 @@ export class BST<T> extends BinTree<T> {
         this.updateHeightAbove(this._hot);
         return true;
     }
+
+    /* **************************************** */
+    /*          Asynchronous Methods            */
+    /* **************************************** */
+
+    public searchAsync(e: T, tp: any): Promise<any> {
+        return this.searchInAsync(this._root, e, tp);
+    }
+
+    public searchInAsync(node: BinNode<T>, e: T, tp: any): Promise<any> {
+        return new Promise(async (resolve, reject) => {
+            if (!tp.opLock) return reject();
+            this._hot = null;
+
+            while (node && e != node.data) {
+                if (!tp.opLock) return reject();
+                node.status = NStatus.active;
+                this._hot = node;
+                await tp.waitAsync();
+                node.status = NStatus.visited;
+                node = (e < node.data ? node.lc : node.rc);
+            }
+            if (!tp.opLock) return reject();
+            if (node) { node.status = NStatus.active; resolve([true, node]); }
+            else resolve([false, this._hot]);
+        })
+    }
+
+    /* **************************************** */
+    /*             Static Methods               */
+    /* **************************************** */
 
     // A sample binary search tree, Maybe called by derived class! Use new this()
     static genSampleTree(): BST<number> {

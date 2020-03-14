@@ -14,6 +14,9 @@ export var NStatus;
 })(NStatus || (NStatus = {}));
 ;
 window['NStatus'] = NStatus;
+/* **************************************** */
+/*            TreeUtil Macros               */
+/* **************************************** */
 export class TreeUtil {
     static isRoot(x) {
         return !x.parent;
@@ -51,7 +54,15 @@ export class TreeUtil {
         return this.stature(x.lc) == this.stature(x.rc) &&
             this.stature(x) == (this.isBlack(x) ? this.stature(x.lc) + 1 : this.stature(x.lc));
     }
+    static avlBalanced(x) {
+        let balFac = this.stature(x.lc) - this.stature(x.rc);
+        return -2 < balFac && balFac < 2;
+    }
 }
+window['TreeUtil'] = TreeUtil;
+/* **************************************** */
+/*              BinNode Class               */
+/* **************************************** */
 export class BinNode {
     constructor(e = null, p = null, lc = null, rc = null, height = 0, npl = 0, c = RBColor.Red) {
         this.x = 0;

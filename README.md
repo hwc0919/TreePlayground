@@ -1,18 +1,17 @@
 # TreePlayground
 #### Tree Visualization Tool for Learning Data Structure and Algorithm.
 
-## Start | 开始使用
+
+## Start
 Just visit https://hwc0919.github.io/TreePlayground/ , or download contents in folder 'docs' to run offline.
 
 Program can run perfectly on Chrome and Firefox. Windows Edge is only functional when exploring online.
 
-V1.4.4 made adaption for mobile devices, but mobile use still not recommended.
 
+## 开始使用
 可直接访问 https://hwc0919.github.io/TreePlayground/ , 也可以下载文件夹"docs"中的内容本地运行.
 
 Chorme和Firefox浏览器可以正常运行. Edge浏览器可以在线运行.
-
-V1.4.4适配了移动端页面, 但仍不推荐在手机上运行.
 
 
 感谢
@@ -22,11 +21,14 @@ V1.4.4适配了移动端页面, 但仍不推荐在手机上运行.
 [@baijiangying](https://github.com/baijiangying),
 等同学对调试的帮助和建议
 
+
 ## Overview | 概览
 ![image](https://raw.githubusercontent.com/wiki/hwc0919/TreePlayground/recommend1.png)
 ![image](https://raw.githubusercontent.com/wiki/hwc0919/TreePlayground/recommend2.png)
 ![image](https://raw.githubusercontent.com/wiki/hwc0919/TreePlayground/recommend3.png)
 ![image](https://raw.githubusercontent.com/wiki/hwc0919/TreePlayground/recommend4.png)
+![image](https://raw.githubusercontent.com/wiki/hwc0919/TreePlayground/recommend5.png)
+
 
 ## Objective | 目标
 本项目旨在帮助学习数据结构课程搜索树相关章节的同学(在此强烈推荐清华大学邓俊辉老师的数据结构课, 可在[学堂在线](https://next.xuetangx.com/)免费学习).
@@ -43,13 +45,11 @@ V1.4.4适配了移动端页面, 但仍不推荐在手机上运行.
 
 为实现动态性, 使用了很多异步代码, 代码的可读性收到一些影响.
 
-红黑树将不实现异步接口, 因为染色操作可视化效果不明显, 而且在回调模式下增加内容太繁杂, 实在没有精力.
+红黑树暂未实现步骤可视化.
 
 如果你发现了bug, 请在Issue里提出, 十分感谢.
 
-如果你想帮助我提升前端兼容性, 欢迎随时联系我!
-
-别忘了给Star哟
+喜欢的话别忘了给Star哟
 
 
 ## Interesting Samples | 有趣的例子

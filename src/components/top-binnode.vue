@@ -24,7 +24,7 @@
             return {
                 sequence: this.data.toString(), showInput: false, helpInd: -1,
                 helpMessages: ["B: 真二叉树构建, 逗号分隔. 例如 1,,2,,3 对应 {1: [null, 2: [null, 3]]}",
-                    "I: (回车)输入序列依次插入, 逗号分隔. 上限为666..666(具体几个不告诉你)",
+                    "I: (回车)输入序列依次插入, 逗号分隔. 数值有上下限",
                     "S: 输入单个数值进行搜索",
                     "P: 生成真二叉树层次遍历序列(复制下来就可以随时重建啦)"]
             };
@@ -74,7 +74,7 @@
         }, computed: {
             showTopSearch() { return this.$parent.curTreeType !== "BinTree"; }, showTopInsert() {
                 return this.$parent.curTreeType !== "BinTree";
-            }, 
+            },
             showTopBuild() { return this.$parent.curTreeType !== "RedBlack"; }
         },
         watch: {

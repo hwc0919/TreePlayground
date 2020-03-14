@@ -80,6 +80,7 @@ export class BinTree<T> {
 
     public insertAsRoot(e: T): BinNode<T> {
         this._root = new BinNode<T>(e);
+        this._root.color = RBColor.Black;
         this._size = 1;
         return this._root;
     }
@@ -141,7 +142,8 @@ export class BinTree<T> {
                     levels[i + 1].push({ x: node.x, y: levelY, parent: node });
                     continue;
                 }
-                node.status = NStatus.normal;
+                // Reset node status
+                if (node.status !== NStatus.deprecated) node.status = NStatus.normal;
 
                 let deltaX = Math.max(0, node.data.toString().length - 2) * 6;
                 // 为内部节点添加两个孩子
@@ -220,10 +222,10 @@ export class BinTree<T> {
                 // 仅当父亲是内部节点时添加边
                 let jParent: BinNode<T> = curLevel[j].parent;
                 if (j < curLevel.length - 1 && jParent == curLevel[j + 1].parent) {
-                    let leftEdge: Array<number> = [curLevel[j].x, jParent.y, jParent.x - curLevel[j].x, spacingY - 29];
+                    let leftEdge: Array<number> = [curLevel[j].x, jParent.y, jParent.x - curLevel[j].x - 29, spacingY - 29];
                     if (curLevel[j].lc === undefined) extrEdges[0].push(leftEdge);
                     else edges[0].push(leftEdge);
-                    let rightEdge: Array<number> = [jParent.x, jParent.y, curLevel[j + 1].x - jParent.x, spacingY - 29];
+                    let rightEdge: Array<number> = [jParent.x + 29, jParent.y, curLevel[j + 1].x - jParent.x - 29, spacingY - 29];
                     if (curLevel[j + 1].lc === undefined) extrEdges[1].push(rightEdge);
                     else edges[1].push(rightEdge);
                     j += 2;

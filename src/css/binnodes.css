@@ -60,6 +60,7 @@
 
 .visited-node {
     border-color: var(--visited-color) !important;
+    background: rgba(236, 240, 241, 0.5);
 }
 
 .deprecated-node {
