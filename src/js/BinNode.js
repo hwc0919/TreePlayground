@@ -68,6 +68,7 @@ export class BinNode {
         this.x = 0;
         this.y = 0;
         this.status = NStatus.normal;
+        this.fullSize = 1; // To Calculate Parent Node X Coordinate
         this.data = e;
         this.parent = p;
         this.lc = lc;

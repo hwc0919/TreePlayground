@@ -72,6 +72,7 @@ export class BinNode<T> {
     x: number = 0;
     y: number = 0;
     status: NStatus = NStatus.normal;
+    fullSize: number = 1;   // To Calculate Parent Node X Coordinate
 
     static N: number = 0;
 

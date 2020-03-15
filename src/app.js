@@ -14,26 +14,26 @@ var tp = new Vue({
     el: "#TreePlayground",
     data: {
         availTreeTypes: { "BinTree": true, "BST": true, "AVL": true, "Splay": true, "RedBlack": true },
-        commonParams: {
-            curTreeType: "BST", // Important : Always use as `this.curTreeType`.
-            treeScale: 100, // in %
-            interval: 500   // in ms
-        },
-        messages: {
-            left: "", right: ""
-        },
         treeClassMap: { "BinTree": BinTree, "BST": BST, "AVL": AVL, "Splay": Splay, "RedBlack": RedBlack },
         trees: { "BinTree": null, "BST": null, "AVL": null, "Splay": null, "RedBlack": null },
+        // tree: Computed
+        // curTreeClass: Computed
+        // curTreeType: Computed
         structInfo: {
             nodes: [],
             extrNodes: [],
             edges: [[], []],
             extrEdges: [[], []],
         },
-        opLock: false,  // Operation Lock
         topSequence: [],
-        BSTParams: {
-            allowExtrInsert: false,
+        commonParams: {
+            curTreeType: "BST", // Important : Always use as `this.curTreeType`.
+            treeScale: 100, // in %
+            interval: 500   // in ms
+        },
+        opLock: false,  // Operation Lock
+        messages: {
+            left: "", right: ""
         },
         alertTag: 0,
         messageTag: 0
@@ -345,7 +345,7 @@ var tp = new Vue({
         onTopBuild(sequence) {
             if (this.curTreeType !== "BinTree")
                 this.alertAsync("请自行保证合法性, 不合法的树会造成操作异常.", 2500);
-            this.tree.buildFromBinSequence(sequence);
+            this.tree = this.curTreeClass.properRebuild(sequence);
             this.update();
             this.showMessage("真二叉树层次序列构建");
             let res = this.curTreeClass.checkValidity(this.tree);

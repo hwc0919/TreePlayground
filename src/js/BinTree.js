@@ -1,5 +1,5 @@
 import { Deque } from "./Deque";
-import { NStatus, RBColor, TreeUtil, BinNode } from "./BinNode";
+import { RBColor, NStatus, TreeUtil, BinNode } from "./BinNode";
 let stature = TreeUtil.stature;
 export class BinTree {
     constructor(e = null) {
@@ -80,6 +80,141 @@ export class BinTree {
         if (rc)
             rc.parent = x;
     }
+    /* **************************************** */
+    /*             Static Methods               */
+    /* **************************************** */
+    // preorder Traversal and store sequence in an array.
+    static preorderTraversal(x) {
+        let sequence = [];
+        let stk = [x];
+        while (stk.length > 0) {
+            x = stk.pop();
+            while (x) {
+                sequence.push(x);
+                if (x.rc)
+                    stk.push(x.rc);
+                x = x.lc;
+            }
+        }
+        return sequence;
+    }
+    static inorderTraversal(x) {
+        let sequence = [];
+        let stk = [];
+        while (x || stk.length > 0) {
+            while (x) {
+                stk.push(x);
+                x = x.lc;
+            }
+            x = stk.pop();
+            sequence.push(x);
+            x = x.rc;
+        }
+        return sequence;
+    }
+    static postorderTraversal(x) {
+        let sequence = [];
+        let stk = [x];
+        while (stk.length > 0) {
+            if (x.parent != stk[stk.length - 1]) {
+                x = stk[stk.length - 1];
+                while (x) {
+                    if (x.rc)
+                        stk.push(x.rc);
+                    if (x.lc)
+                        stk.push(x.lc);
+                    x = x.lc ? x.lc : x.rc;
+                }
+            }
+            x = stk.pop();
+            sequence.push(x);
+        }
+        return sequence;
+    }
+    static levelTraversal(x) {
+        let sequence = [];
+        let Q = new Deque([x]);
+        while (!Q.empty()) {
+            x = Q.shift();
+            sequence.push(x);
+            if (x.lc)
+                Q.push(x.lc);
+            if (x.rc)
+                Q.push(x.rc);
+        }
+        return sequence;
+    }
+    static properTraversal(x) {
+        let sequence = [];
+        let Q = new Deque([x]);
+        while (!Q.empty()) {
+            x = Q.shift();
+            sequence.push(x);
+            if (x) {
+                Q.push(x.lc);
+                Q.push(x.rc);
+            }
+        }
+        return sequence;
+    }
+    // Rebuild Tree with Proper Traversal Sequence
+    static properRebuild(sequence) {
+        let tree = new this(sequence[0]);
+        let ind = 1;
+        let Q = new Deque([tree._root]);
+        while (ind < sequence.length && !Q.empty()) {
+            let node = Q.shift();
+            if (sequence[ind] != null)
+                Q.push(tree.insertAsLC(node, sequence[ind]));
+            ind++;
+            if (sequence[ind] != null)
+                Q.push(tree.insertAsRC(node, sequence[ind]));
+            ind++;
+        }
+        return tree;
+    }
+    // Generate a Sample Binary Tree
+    static genSampleTree() {
+        let tree = new BinTree(Math.ceil(Math.random() * 20));
+        let nodes = [tree.root()];
+        let N = Math.random() < 0.5 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 15);
+        for (let i = 0; i < N; i++) {
+            let ind = Math.floor(Math.random() * nodes.length);
+            let node = nodes[ind];
+            if (!node.lc)
+                nodes.push(tree.insertAsLC(node, Math.ceil(Math.random() * 5 * N)));
+            if (!node.rc)
+                nodes.push(tree.insertAsRC(node, Math.ceil(Math.random() * 5 * N)));
+            nodes.splice(ind, 1);
+        }
+        return tree;
+    }
+    static checkValidity(tree) {
+        return [true, ""];
+    }
+    // Build tree from JSON object retracted from LocalStorage. ! Caution: Can not update Black Height!
+    static buildFromTreeJsonObj(treeObj) {
+        if (treeObj._root === null)
+            return new this();
+        let tree = new this(treeObj._root.data);
+        let dataStk = [treeObj._root];
+        let nodeStk = [tree.root()];
+        while (dataStk.length > 0) {
+            let dataNode = dataStk.pop();
+            let node = nodeStk.pop();
+            if (dataNode.lc) {
+                (tree.insertAsLC(node, dataNode.lc.data)).color = dataNode.lc.color;
+                dataStk.push(dataNode.lc);
+                nodeStk.push(node.lc);
+            }
+            if (dataNode.rc) {
+                (tree.insertAsRC(node, dataNode.rc.data)).color = dataNode.rc.color;
+                dataStk.push(dataNode.rc);
+                nodeStk.push(node.rc);
+            }
+        }
+        return tree;
+    }
     // Calculate coordinates of nodes and edges! Core Function! Edit with caution!
     calStructInfo() {
         let nodes = [];
@@ -159,11 +294,11 @@ export class BinTree {
             deltaL = deltaR;
             deltaR = j < lastLevel.length - 1 ? lastLevel[j + 1].x - lastLevel[j].x : 0;
             lastLevel[j].x = lastLevel[j - 1].x + spacingX;
-            // if (lastLevel[j - 1].parent == lastLevel[j].parent) { lastLevel[j].x += deltaL }
             if (deltaL > 0) {
                 lastLevel[j].x += deltaL;
             }
         }
+        lastLevel.forEach(node => { node.fullSize = 1; });
         // 逐层反推横坐标
         for (let i = levels.length - 1; i >= 1; i--) {
             let curLevel = levels[i];
@@ -171,11 +306,16 @@ export class BinTree {
                 // 父亲是内部节点
                 let jParent = curLevel[j].parent;
                 if (j < curLevel.length - 1 && jParent == curLevel[j + 1].parent) {
-                    jParent.x = Math.floor((curLevel[j].x + curLevel[j + 1].x) / 2);
+                    let w1 = 5 + curLevel[j].fullSize;
+                    let w2 = 5 + curLevel[j + 1].fullSize;
+                    let ratio = Math.min(Math.max(w1 / (w1 + w2), 0.4), 0.6);
+                    jParent.x = Math.floor(curLevel[j].x * (1 - ratio) + curLevel[j + 1].x * ratio);
+                    jParent.fullSize = curLevel[j].fullSize + curLevel[j + 1].fullSize + 1;
                     j += 2;
                 }
                 else { // parent is also external node
                     curLevel[j].parent.x = curLevel[j].x;
+                    curLevel[j].parent.fullSize = curLevel[j].fullSize;
                     j++;
                 }
             }
@@ -217,136 +357,6 @@ export class BinTree {
             }
         }
         return structInfo;
-    }
-    // Build tree from JSON object retracted from LocalStorage. ! Caution: Can not update Black Height!
-    static buildFromTreeJsonObj(treeObj) {
-        if (treeObj._root === null)
-            return new this();
-        let tree = new this(treeObj._root.data);
-        let dataStk = [treeObj._root];
-        let nodeStk = [tree.root()];
-        while (dataStk.length > 0) {
-            let dataNode = dataStk.pop();
-            let node = nodeStk.pop();
-            if (dataNode.lc) {
-                (tree.insertAsLC(node, dataNode.lc.data)).color = dataNode.lc.color;
-                dataStk.push(dataNode.lc);
-                nodeStk.push(node.lc);
-            }
-            if (dataNode.rc) {
-                (tree.insertAsRC(node, dataNode.rc.data)).color = dataNode.rc.color;
-                dataStk.push(dataNode.rc);
-                nodeStk.push(node.rc);
-            }
-        }
-        return tree;
-    }
-    buildFromBinSequence(sequence) {
-        this.insertAsRoot(sequence[0]);
-        let ind = 1;
-        let Q = new Deque([this._root]);
-        while (ind < sequence.length && !Q.empty()) {
-            let node = Q.shift();
-            if (sequence[ind] != null)
-                Q.push(this.insertAsLC(node, sequence[ind]));
-            ind++;
-            if (sequence[ind] != null)
-                Q.push(this.insertAsRC(node, sequence[ind]));
-            ind++;
-        }
-    }
-    // preorder Traversal and store sequence in an array.
-    static preorderTraversal(x) {
-        let sequence = [];
-        let stk = [x];
-        while (stk.length > 0) {
-            x = stk.pop();
-            while (x) {
-                sequence.push(x);
-                if (x.rc)
-                    stk.push(x.rc);
-                x = x.lc;
-            }
-        }
-        return sequence;
-    }
-    static inorderTraversal(x) {
-        let sequence = [];
-        let stk = [];
-        while (x || stk.length > 0) {
-            while (x) {
-                stk.push(x);
-                x = x.lc;
-            }
-            x = stk.pop();
-            sequence.push(x);
-            x = x.rc;
-        }
-        return sequence;
-    }
-    static postorderTraversal(x) {
-        let sequence = [];
-        let stk = [x];
-        while (stk.length > 0) {
-            if (x.parent != stk[stk.length - 1]) {
-                x = stk[stk.length - 1];
-                while (x) {
-                    if (x.rc)
-                        stk.push(x.rc);
-                    if (x.lc)
-                        stk.push(x.lc);
-                    x = x.lc ? x.lc : x.rc;
-                }
-            }
-            x = stk.pop();
-            sequence.push(x);
-        }
-        return sequence;
-    }
-    static levelTraversal(x) {
-        let sequence = [];
-        let Q = new Deque([x]);
-        while (!Q.empty()) {
-            x = Q.shift();
-            sequence.push(x);
-            if (x.lc)
-                Q.push(x.lc);
-            if (x.rc)
-                Q.push(x.rc);
-        }
-        return sequence;
-    }
-    static properTraversal(x) {
-        let sequence = [];
-        let Q = new Deque([x]);
-        while (!Q.empty()) {
-            x = Q.shift();
-            sequence.push(x);
-            if (x) {
-                Q.push(x.lc);
-                Q.push(x.rc);
-            }
-        }
-        return sequence;
-    }
-    // A sample binary tree
-    static genSampleTree() {
-        let tree = new BinTree(Math.ceil(Math.random() * 20));
-        let nodes = [tree.root()];
-        let N = Math.random() < 0.5 ? Math.ceil(Math.random() * 4) : Math.ceil(Math.random() * 15);
-        for (let i = 0; i < N; i++) {
-            let ind = Math.floor(Math.random() * nodes.length);
-            let node = nodes[ind];
-            if (!node.lc)
-                nodes.push(tree.insertAsLC(node, Math.ceil(Math.random() * 5 * N)));
-            if (!node.rc)
-                nodes.push(tree.insertAsRC(node, Math.ceil(Math.random() * 5 * N)));
-            nodes.splice(ind, 1);
-        }
-        return tree;
-    }
-    static checkValidity(tree) {
-        return [true, ""];
     }
 }
 window['BinTree'] = BinTree;
