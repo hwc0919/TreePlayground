@@ -4,12 +4,14 @@
 
 ## Start
 Just visit https://hwc0919.github.io/TreePlayground/ , or download contents in folder 'docs' to run offline.
+[Backup Link](http://192.144.210.149/).
 
 Program can run perfectly on Chrome and Firefox. Windows Edge is only functional when exploring online.
 
 
 ## 开始使用
-可直接访问 https://hwc0919.github.io/TreePlayground/ , 也可以下载文件夹"docs"中的内容本地运行.
+可直接访问 https://hwc0919.github.io/TreePlayground/ , 也可以下载文件夹"docs"中的内容本地运行. 
+[备用链接](http://192.144.210.149/).
 
 Chorme和Firefox浏览器可以正常运行. Edge浏览器可以在线运行.
 
@@ -37,7 +39,7 @@ Chorme和Firefox浏览器可以正常运行. Edge浏览器可以在线运行.
 
 在此用户可以随意的构建树形结构, 动态的插入、删除、搜索节点，以及进行节点的遍历.
 
-所有操作都是动态的、实时视觉反馈的.
+所有操作都是动态的、逐步视觉反馈的.
 
 
 ## Some detail | 一些细节
