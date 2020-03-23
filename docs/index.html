@@ -8,7 +8,7 @@
         var ratio = window.devicePixelRatio;
         if (typeof ratio === "number") var scale = 1 / ratio;
         else var scale = 1;
-        document.write(`<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=${scale<1?0.7:1}">`);
+        document.write(`<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=${scale < 1 ? 0.7 : 1}">`);
     </script>
     <meta name="author" content="NitroMelon">
     <meta name="institution" content="Tsinghua University">
@@ -28,10 +28,14 @@
         <div class="top-toolbar">
             <button class="btn btn-primary top-toolbar-item" type="button"
                 @click="loadSampleTree(); update()">Sample</button>
-            <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(0)">先序遍历</button>
-            <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(1)">中序遍历</button>
-            <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(2)">后序遍历</button>
-            <button class="btn btn-primary top-toolbar-item" type="button" @click="traversal(3)">层次遍历</button>
+            <button class="btn btn-primary top-toolbar-item" type="button" title="Preorder Traversal"
+                @click="traversal(0)">先序遍历</button>
+            <button class="btn btn-primary top-toolbar-item" type="button" title="Inorder Traversal"
+                @click="traversal(1)">中序遍历</button>
+            <button class="btn btn-primary top-toolbar-item" type="button" title="Postorder Traversal"
+                @click="traversal(2)">后序遍历</button>
+            <button class="btn btn-primary top-toolbar-item" type="button" title="Levelorder Traversal"
+                @click="traversal(3)">层次遍历</button>
             <span id="interval-ranger" class="top-toolbar-item">
                 <span style="margin: 5px">间隔: <label v-text="commonParams.interval + 'ms'">500ms</label></span>
                 <input type="range" min="0" max="1500" value="500" step="100" v-model.number="commonParams.interval">
@@ -56,8 +60,9 @@
             <!-- Top Functional Node -->
             <top-binnode id="top-function-node" :data="topSequence" @top-build="onTopBuild" @top-insert="onTopInsert"
                 @top-search="onTopSearch" @top-help="onTopHelp" @top-proper="onTopProper"></top-binnode>
-            <div class="left-message" v-text="messages.left">加载中...</div>
-            <div class="right-message" v-text="messages.right">Loading...</div>
+            <div class="left-message" v-text="messages.left">
+                <span class="loading" style="display: inline-block; width: 80px;">加载中</span></div>
+            <div class="right-message" v-text="messages.right"><span class="loading">Loading</span></div>
 
             <!-- Internal Tree Nodes -->
             <binnode v-for="node, ind in structInfo.nodes" :node="node" :key="`intrNode${ind}`"

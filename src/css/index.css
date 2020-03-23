@@ -121,6 +121,23 @@ html, body {
     white-space: nowrap;
 }
 
+.loading::after {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    content: "\2026";
+    animation: loading-ellipsis 2s infinite;
+}
+
+@keyframes loading-ellipsis {
+    from {
+        width: 2px;
+    }
+    to {
+        width: 20px;
+    }
+}
+
 #footer {
     font-size: 14px;
     z-index: 1;

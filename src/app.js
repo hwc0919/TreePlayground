@@ -13,16 +13,16 @@ import { RedBlack } from "./js/RedBlack"
 var tp = new Vue({
     el: "#TreePlayground",
     data: {
-        availTreeTypes: { "BinTree": true, "BST": true, "AVL": true, "Splay": true, "RedBlack": true },
+        availTreeTypes: { "BinTree": true, "BST": true, "AVL": true, "Splay": true, "RedBlack": true, "Heap": false },
         treeClassMap: { "BinTree": BinTree, "BST": BST, "AVL": AVL, "Splay": Splay, "RedBlack": RedBlack },
         trees: { "BinTree": null, "BST": null, "AVL": null, "Splay": null, "RedBlack": null },
         // tree: Computed
         // curTreeClass: Computed
         // curTreeType: Computed
         structInfo: {
-            nodes: [],
-            extrNodes: [],
-            edges: [[], []],
+            nodes: [],  // Array<BinNode<T>>
+            extrNodes: [],  // Array of BinNode<T> like Object. Has `x`, `y`, `parent` properties.
+            edges: [[], []],  // Left edges and right edges. Use [Left, Top, Width, Height] to represent an edge.
             extrEdges: [[], []],
         },
         topSequence: [],
@@ -598,6 +598,7 @@ var tp = new Vue({
         curTreeClass() {
             return this.treeClassMap[this.curTreeType];
         },
+        // Tree scale in :style
         adjustScale() {
             let scale = this.treeScale / 100;
             return `transform:scale(${scale})`;
@@ -610,6 +611,8 @@ var tp = new Vue({
             }, deep: true
         },
     },
+
+    // Page first loaded. Recover data from localStorage.
     mounted() {
         try { this.commonParams = JSON.parse(localStorage.commonParams); }
         catch (err) { }
