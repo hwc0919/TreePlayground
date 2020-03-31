@@ -3,14 +3,14 @@
 
 
 ## Start
-Just visit https://hwc0919.github.io/TreePlayground/ , or download contents in folder 'docs' to run offline.
+Just visit https://hwc0919.github.io/tree/ , or download contents in folder 'docs' to run offline.
 [Backup Link](http://192.144.210.149/).
 
 Program can run perfectly on Chrome and Firefox. Windows Edge is only functional when exploring online.
 
 
 ## 开始使用
-可直接访问 https://hwc0919.github.io/TreePlayground/ , 也可以下载文件夹"docs"中的内容本地运行. 
+可直接访问 https://hwc0919.github.io/tree/ , 也可以下载文件夹"docs"中的内容本地运行. 
 [备用链接](http://192.144.210.149/).
 
 Chorme和Firefox浏览器可以正常运行. Edge浏览器可以在线运行.
@@ -55,8 +55,8 @@ Chorme和Firefox浏览器可以正常运行. Edge浏览器可以在线运行.
 
 
 ## Interesting Samples | 有趣的例子
-Copy and use <i>Build</i> button to build the tree.<br/>
-使用 <i>Build</i> 按钮构建树
+Copy and use ***Build*** button to build the tree.<br/>
+使用 ***Build*** 按钮构建树
 
 #### AVL
 21,12,28,7,17,25,31,4,10,15,18,23,27,30,32,2,6,9,11,14,16,17.5,19,22,24,26,,29,,,,1,3,5,,8,,,,13,14.5,15.5,,17.3,,,,21.5,,,,,,,,0,,,,,,,,12.5
